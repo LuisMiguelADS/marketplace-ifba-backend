@@ -1,0 +1,98 @@
+### Insere um usuário
+POST http://localhost:8080/usuarios
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Goku",
+    "email": "goku@gmail.com",
+    "telefone": "123",
+    "senha": "123",
+    "cpf": "11111111111",
+    "dataNascimento": "1985-06-07",
+    "biografia": "01",
+    "fotoPerfilURL": "01",
+    "endereco": "Planeta Terra",
+    "instituicao": "Casa do Kame",
+    "organizacao": "Sayajin"
+}
+
+### Insere um usuário
+POST http://localhost:8080/usuarios
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Vegeta",
+    "email": "vegeta@gmail.com",
+    "telefone": "124",
+    "senha": "123",
+    "cpf": "11111111112",
+    "dataNascimento": "1980-06-08",
+    "biografia": "Graduando",
+    "fotoPerfilURL": "02",
+    "endereco": "Planeta Terra",
+    "instituicao": "Corporação Capsula",
+    "organizacao": "Sayajin"
+}
+
+### Insere um usuário
+POST http://localhost:8080/usuarios
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Gohan",
+    "email": "gohan@gmail.com",
+    "telefone": "125",
+    "senha": "123",
+    "cpf": "11111111113",
+    "dataNascimento": "1998-06-08",
+    "biografia": "Graduando",
+    "fotoPerfilURL": "03",
+    "endereco": "Planeta Terra",
+    "instituicao": "Casa do Kame",
+    "organizacao": "Sayajin"
+}
+
+### Insere um usuário
+POST http://localhost:8080/usuarios
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Trunks",
+    "email": "trunks@gmail.com",
+    "telefone": "126",
+    "senha": "123",
+    "cpf": "11111111114",
+    "dataNascimento": "2007-06-08",
+    "biografia": "Graduando",
+    "fotoPerfilURL": "03",
+    "endereco": "Planeta Terra",
+    "instituicao": "Corporação Capsula",
+    "organizacao": "Sayajin"
+}
+
+### Insere um usuário
+POST http://localhost:8080/usuarios
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Broly",
+    "email": "broly@gmail.com",
+    "telefone": "126",
+    "senha": "123",
+    "cpf": "11111111115",
+    "dataNascimento": "2007-06-08",
+    "biografia": "Graduando",
+    "fotoPerfilURL": "03",
+    "endereco": "Espaço",
+    "instituicao": "...",
+    "organizacao": "Sayajin"
+}
+
+### Lista todos os usuários
+GET http://localhost:8080/usuarios
+
+### Busca usuário por ID
+GET http://localhost:8080/usuarios/
+
+### Deleta usuário
+DELETE http://localhost:8080/usuarios/

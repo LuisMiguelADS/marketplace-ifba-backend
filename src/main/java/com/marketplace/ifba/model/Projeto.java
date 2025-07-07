@@ -12,11 +12,17 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "tag")
-public class Tag {
+@Table(name = "projeto")
+public class Projeto {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID idTag;
-    private String tag;
-
+    private UUID idProjeto;
+    private String titulo;
+    private Organizacao organizacao;
+    private Instituicao instituicao;
+    private Demanda demanda;
+    private SolucaoOferta solucaoOferta;
+    private GrupoPesquisa grupoPesquisa;
+    private Usuario usuario;
+    private Chat chat;
 }*/

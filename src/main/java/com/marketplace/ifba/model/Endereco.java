@@ -12,11 +12,18 @@ import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "tag")
-public class Tag {
+@Table(name = "endereco")
+public class Endereco {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID idTag;
-    private String tag;
+    private UUID idEndereco;
+    private String CEP;
+    private Number numero;
+    private String rua;
+    private String bairro;
+    private String cidade;
+    private String estado;
+    private String pais;
+    private String complemento;
 
 }*/

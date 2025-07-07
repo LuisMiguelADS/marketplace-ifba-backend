@@ -8,15 +8,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "tag")
-public class Tag {
+@Table(name = "conexao")
+public class Conexao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID idTag;
-    private String tag;
-
+    private UUID idConexao;
+    private Usuario usuarioConectado;
+    private LocalDateTime dataConexao;
 }*/

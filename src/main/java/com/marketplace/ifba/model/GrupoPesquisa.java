@@ -8,21 +8,24 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.UUID;
 
 @Entity
 @Data
-@Table(name = "chat")
-public class Chat {
+@Table(name = "grupo_pesquisa")
+public class GrupoPesquisa {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idChat;
-    private Date dataCriacao;
-    private Date dataEncerrado;
-    private HashMap<LocalDateTime, Usuario> usuarioView;
-    private Mensagem mensagem;
+    private UUID idGrupoPesquisa;
+    private String titulo;
+    private Instituicao instituicao;
+    private Date dataRegistro;
+    private ArrayList<Tag> tags;
+    private String descricao;
+    private Number trabalhos;
+    private Double classificacao;
+    private ArrayList<Usuario> usuarios;
 
 }*/
