@@ -13,7 +13,7 @@ import java.util.UUID;
 public class Projeto {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_project", updatable = false, nullable = false)
     private UUID idProjeto;
 

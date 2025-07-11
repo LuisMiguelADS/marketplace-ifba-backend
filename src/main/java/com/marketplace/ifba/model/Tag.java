@@ -17,7 +17,7 @@ import java.util.UUID;
 public class Tag {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_tag", updatable = false, nullable = false)
     private UUID idTag;
 

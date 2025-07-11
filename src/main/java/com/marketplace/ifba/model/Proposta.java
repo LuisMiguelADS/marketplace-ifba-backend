@@ -2,8 +2,6 @@ package com.marketplace.ifba.model;
 
 import com.marketplace.ifba.model.enums.StatusProposta;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -17,7 +15,7 @@ import java.util.UUID;
 public class Proposta {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_proposal", updatable = false, nullable = false)
     private UUID idProposta;
 

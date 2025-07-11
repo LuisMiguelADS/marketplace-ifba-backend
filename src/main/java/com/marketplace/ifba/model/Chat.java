@@ -12,7 +12,7 @@ import java.util.UUID;
 @Table(name = "tb_chats")
 public class Chat {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_chat", updatable = false, nullable = false)
     private UUID idChat;
 

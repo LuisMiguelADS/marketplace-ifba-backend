@@ -12,7 +12,7 @@ import java.util.UUID;
 public class Conexao {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_connection", updatable = false, nullable = false)
     private UUID idConexao;
 

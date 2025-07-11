@@ -1,8 +1,6 @@
 package com.marketplace.ifba.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -16,7 +14,7 @@ import java.util.UUID;
 public class OfertaSolucao {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_offer_solution", updatable = false, nullable = false)
     private UUID idSolucao;
 

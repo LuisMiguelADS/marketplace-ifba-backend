@@ -12,7 +12,7 @@ import java.util.UUID;
 public class ChatUsuario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id_chat_participant", updatable = false, nullable = false)
     private UUID idChatUsuario;
 
