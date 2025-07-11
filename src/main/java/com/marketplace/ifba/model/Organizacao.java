@@ -29,8 +29,8 @@ public class Organizacao {
     private String site;
     private String status;
     private String logoURL;
-    private Usuario admAprovacao;
-    private Usuario admRegistro;
+    private User admAprovacao;
+    private User admRegistro;
     private String descricao;
 
 }*/

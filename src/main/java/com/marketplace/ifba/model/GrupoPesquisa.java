@@ -26,6 +26,6 @@ public class GrupoPesquisa {
     private String descricao;
     private Number trabalhos;
     private Double classificacao;
-    private ArrayList<Usuario> usuarios;
+    private ArrayList<User> usuarios;
 
 }*/

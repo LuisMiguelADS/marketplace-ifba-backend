@@ -28,6 +28,6 @@ public class Demanda {
     private String status;
     private Boolean aprovacaoDemandante;
     private Number vizualizacoes;
-    private Usuario criador;
+    private User criador;
     private Organizacao organizacao;
 }*/

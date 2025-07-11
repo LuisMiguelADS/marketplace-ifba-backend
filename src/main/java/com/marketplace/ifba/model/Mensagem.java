@@ -21,7 +21,7 @@ public class Mensagem {
     private String mensagem;
     private Date dataMensagem;
     private Boolean ativo;
-    private Usuario rementente;
-    private Usuario destinatario;
+    private User rementente;
+    private User destinatario;
 
 }*/

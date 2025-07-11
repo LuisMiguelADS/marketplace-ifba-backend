@@ -1,6 +1,7 @@
 package com.marketplace.ifba.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.marketplace.ifba.model.enums.UserRole;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,10 +12,13 @@ import org.hibernate.validator.constraints.br.CPF;
 import java.time.LocalDate;
 
 @Data
-public class UsuarioRequest {
+public class UserRequest {
 
     @NotBlank(message = "O nome é obrigatório.")
     private String nomeCompleto;
+
+    @NotNull(message = "A função do usuário é obrigatória.")
+    private UserRole role;
 
     @NotBlank(message = "O e-mail é obrigatório.")
     @Email(message = "E-mail inválido")
@@ -24,7 +28,7 @@ public class UsuarioRequest {
     private String telefone;
 
     @NotBlank(message = "A senha é obrigarória")
-    private String senha;
+    private String password;
 
     @NotBlank(message = "O CPF é obrigatório.")
     @CPF

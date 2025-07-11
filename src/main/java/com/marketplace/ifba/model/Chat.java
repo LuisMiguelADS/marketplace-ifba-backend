@@ -22,7 +22,7 @@ public class Chat {
     private Long idChat;
     private Date dataCriacao;
     private Date dataEncerrado;
-    private HashMap<LocalDateTime, Usuario> usuarioView;
+    private HashMap<LocalDateTime, User> usuarioView;
     private Mensagem mensagem;
 
 }*/

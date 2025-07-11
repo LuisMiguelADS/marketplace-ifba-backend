@@ -18,6 +18,6 @@ public class Conexao {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private UUID idConexao;
-    private Usuario usuarioConectado;
+    private User usuarioConectado;
     private LocalDateTime dataConexao;
 }*/

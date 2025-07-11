@@ -23,6 +23,6 @@ public class Projeto {
     private Demanda demanda;
     private SolucaoOferta solucaoOferta;
     private GrupoPesquisa grupoPesquisa;
-    private Usuario usuario;
+    private User usuario;
     private Chat chat;
 }*/
