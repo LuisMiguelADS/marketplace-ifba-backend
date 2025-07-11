@@ -1,28 +1,51 @@
-/*package com.marketplace.ifba.model;
+package com.marketplace.ifba.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
+import com.marketplace.ifba.model.enums.StatusProjeto;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.UUID;
 
-@Entity
 @Data
-@Table(name = "projeto")
+@Entity
+@Table(name = "tb_projects")
 public class Projeto {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id_project", updatable = false, nullable = false)
     private UUID idProjeto;
-    private String titulo;
+
+    @Size(max = 255)
+    @Column(name = "name", nullable = false)
+    private String nome;
+
+    @Size(max = 20)
+    @Column(name = "status", nullable = false)
+    private StatusProjeto status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id")
     private Organizacao organizacao;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id")
     private Instituicao instituicao;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "demand_id")
     private Demanda demanda;
-    private SolucaoOferta solucaoOferta;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "offer_solution_id")
+    private OfertaSolucao solucaoOferta;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "research_group_id")
     private GrupoPesquisa grupoPesquisa;
-    private User usuario;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "chat_id")
     private Chat chat;
-}*/
+}

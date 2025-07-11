@@ -1,28 +1,30 @@
-/*package com.marketplace.ifba.model;
+package com.marketplace.ifba.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
-@Entity
 @Data
-@Table(name = "chat")
+@Entity
+@Table(name = "tb_chats")
 public class Chat {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idChat;
-    private Date dataCriacao;
-    private Date dataEncerrado;
-    private HashMap<LocalDateTime, User> usuarioView;
-    private Mensagem mensagem;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id_chat", updatable = false, nullable = false)
+    private UUID idChat;
 
-}*/
+    @Column(name = "date_created_chat", nullable = false, updatable = false)
+    private LocalDateTime dataCriacao;
+
+    @Column(name = "date_finished_chat")
+    private LocalDateTime dataEncerrado;
+
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<ChatUsuario> chatUsuarios;
+
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Mensagem> mensagens;
+}

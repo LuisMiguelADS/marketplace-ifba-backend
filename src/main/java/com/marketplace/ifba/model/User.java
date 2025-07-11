@@ -19,10 +19,11 @@ import java.util.List;
 import java.util.UUID;
 /*import java.util.List;*/
 
-@Entity(name = "users")
 @Data
-@Table(name = "users")
+@Entity
+@Table(name = "tb_users")
 public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID idUsuario;
@@ -71,6 +72,8 @@ public class User implements UserDetails {
         this.password = password;
         this.role = role;
     }
+
+    public User() {}
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

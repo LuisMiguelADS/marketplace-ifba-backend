@@ -1,23 +1,25 @@
-/*package com.marketplace.ifba.model;
+package com.marketplace.ifba.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity
 @Data
-@Table(name = "conexao")
+@Entity
+@Table(name = "tb_connections")
 public class Conexao {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id_connection", updatable = false, nullable = false)
     private UUID idConexao;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User usuarioConectado;
+
+    @Column(name = "date_connected", nullable = false, updatable = false)
     private LocalDateTime dataConexao;
-}*/
+}

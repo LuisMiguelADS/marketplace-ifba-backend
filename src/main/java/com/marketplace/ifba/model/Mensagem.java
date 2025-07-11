@@ -1,27 +1,37 @@
-/*package com.marketplace.ifba.model;
+package com.marketplace.ifba.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity
 @Data
-@Table(name = "mensagem")
+@Entity
+@Table(name = "tb_messages")
 public class Mensagem {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private UUID idMensagem;
-    private String mensagem;
-    private Date dataMensagem;
-    private Boolean ativo;
-    private User rementente;
-    private User destinatario;
 
-}*/
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id_message", updatable = false, nullable = false)
+    private UUID idMensagem;
+
+    @Size(max = 1000)
+    @Column(name = "message_content", length = 1000, nullable = false)
+    private String mensagem;
+
+    @Column(name = "date_message", nullable = false, updatable = false)
+    private LocalDateTime dataMensagem;
+
+    @Column(name = "is_active", nullable = false)
+    private Boolean ativo;
+
+    @ManyToOne
+    @JoinColumn(name = "chat_id", nullable = false)
+    private Chat chat;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "writing_user_id", nullable = false)
+    private User usuarioEscritor;
+}

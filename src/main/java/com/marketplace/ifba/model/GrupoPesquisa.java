@@ -1,31 +1,70 @@
-/*package com.marketplace.ifba.model;
+package com.marketplace.ifba.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
+import com.marketplace.ifba.model.enums.StatusGrupoPesquisa;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.UUID;
 
-@Entity
 @Data
-@Table(name = "grupo_pesquisa")
+@Entity
+@Table(name = "tb_research_groups")
 public class GrupoPesquisa {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "id_research_group", updatable = false, nullable = false)
     private UUID idGrupoPesquisa;
-    private String titulo;
-    private Instituicao instituicao;
-    private Date dataRegistro;
-    private ArrayList<Tag> tags;
+
+    @Size(max = 50)
+    @Column(name = "name", unique = true, nullable = false)
+    private String nome;
+
+    @Size(max = 2000)
+    @Column(name = "description", length = 2000)
     private String descricao;
-    private Number trabalhos;
+
+    @PositiveOrZero
+    @Column(name = "works_development")
+    private Integer trabalhos;
+
+    @DecimalMin(value = "0.0")
+    @DecimalMax(value = "5.0")
+    @Column(name = "stars_rating")
     private Double classificacao;
+
+    @Size(max = 20)
+    @Column(name = "status", nullable = false)
+    private StatusGrupoPesquisa status;
+
+    @Column(name = "date_platform_registration", nullable = false, updatable = false)
+    private LocalDateTime dataRegistro;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "tb_research_group_users",
+            joinColumns = @JoinColumn(name = "research_group_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
     private ArrayList<User> usuarios;
 
-}*/
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "tb_research_group_tags",
+            joinColumns = @JoinColumn(name = "research_group_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private ArrayList<Tag> tags;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id")
+    private Instituicao instituicao;
+
+
+}
