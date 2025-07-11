@@ -72,11 +72,11 @@ public class Instituicao {
     @Column(name = "date_atualization")
     private LocalDateTime dataAtualizacao;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    /*@ManyToOne(fetch = FetchType.LAZY)*/
     @JoinColumn(name = "adm_aprovation_id")
-    private User admAprovacao;
+    private /*User*/ String admAprovacao;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    /*@ManyToOne(fetch = FetchType.LAZY)*/
     @JoinColumn(name = "user_registration_id", nullable = false)
-    private User usuarioRegistro;
+    private /*User*/ String usuarioRegistro;
 }

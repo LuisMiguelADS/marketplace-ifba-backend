@@ -1,4 +1,4 @@
-package com.marketplace.ifba.controller;
+/*package com.marketplace.ifba.controller;
 
 import com.marketplace.ifba.dto.InstituicaoRequest;
 import com.marketplace.ifba.dto.InstituicaoResponse;
@@ -58,4 +58,4 @@ public class InstituicaoController {
         instituicaoService.deletarInstituicao(idInstituicao);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-}
+}*/

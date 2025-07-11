@@ -28,52 +28,62 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID idUsuario;
 
-    @Column(nullable = false)
+    @Column(name = "nome_completo", nullable = false)
     private String nomeCompleto;
 
-    @Column(nullable = false)
+    @Column(name = "role", nullable = false)
     private UserRole role;
 
-    @Column(nullable = false)
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "telefone", nullable = false)
     private String telefone;
 
-    @Column(nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(name = "cpf", nullable = false)
     private String cpf;
 
-    @Column(nullable = false)
+    @Column(name = "data_registro", nullable = false)
     private LocalDateTime dataRegistro;
 
-    @Column(nullable = false)
+    @Column(name = "data_nascimento", nullable = false)
     private LocalDate dataNascimento;
 
-    @Column(nullable = false)
+    @Column(name = "biografia", nullable = false)
     private String biografia;
 
-    @Column(nullable = false)
+    @Column(name = "foto_perfil_URL", nullable = false)
     private String fotoPerfilURL;
 
-    @Column(nullable = false)
+    @Column(name = "endereco", nullable = false)
     private String endereco;
 
-    @Column(nullable = false)
+    @Column(name = "instituicao", nullable = false)
     private String instituicao;
 
-    @Column(nullable = false)
+    @Column(name = "organizacao", nullable = false)
     private String organizacao;
 
-    public User(String email, String password, UserRole role) {
-        this.email = email;
-        this.password = password;
-        this.role = role;
-    }
+    public User () {}
 
-    public User() {}
+    public User(String nomeCompleto, UserRole role, String email, String telefone, String password,String cpf, LocalDate dataNascimento,
+                String biografia, String fotoPerfilURL, String endereco, String instituicao, String organizacao) {
+        this.nomeCompleto = nomeCompleto;
+        this.role = role;
+        this.email = email;
+        this.telefone = telefone;
+        this.password = password;
+        this.cpf = cpf;
+        this.dataNascimento = dataNascimento;
+        this.biografia = biografia;
+        this.fotoPerfilURL = fotoPerfilURL;
+        this.endereco = endereco;
+        this.instituicao = instituicao;
+        this.organizacao = organizacao;
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

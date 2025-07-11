@@ -1,4 +1,4 @@
-package com.marketplace.ifba.mapper;
+/*package com.marketplace.ifba.mapper;
 
 import com.marketplace.ifba.dto.InstituicaoRequest;
 import com.marketplace.ifba.dto.InstituicaoResponse;
@@ -10,4 +10,4 @@ public interface InstituicaoMapper {
     public Instituicao toEntity(InstituicaoRequest request);
 
     public InstituicaoResponse toDTO(Instituicao instituicao);
-}
+}*/

@@ -8,6 +8,8 @@ import com.marketplace.ifba.repository.UserRepository;
 import com.marketplace.ifba.service.TokenService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,6 +18,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("auth")
@@ -45,7 +49,9 @@ public class AuthenticationController {
         if (this.userRepository.findByEmail(data.email()) != null) return ResponseEntity.badRequest().build();
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
-        var newUser = new User(data.email(), encryptedPassword, data.role());
+        var newUser = new User(data.nomeCompleto(), data.role(), data.email(), data.telefone(), encryptedPassword, data.cpf(),
+                data.dataNascimento(), data.biografia(), data.fotoPerfilURL(), data.endereco(), data.instituicao(), data.organizacao());
+        newUser.setDataRegistro(LocalDateTime.now());
 
         this.userRepository.save(newUser);
 

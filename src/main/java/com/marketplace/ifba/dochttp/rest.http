@@ -1,9 +1,28 @@
+### registro
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+    "nomeCompleto": "Administrador IFBA",
+      "email": "admin@ifba.com",
+      "role": "ADMIN",
+      "telefone": "75999999999",
+      "password": "admin123",
+      "cpf": "12345678900",
+      "dataNascimento": "1990-01-01",
+      "biografia": "Sou o administrador do sistema.",
+      "fotoPerfilURL": "https://example.com/foto-admin.png",
+      "endereco": "Rua do IFBA, 123",
+      "instituicao": "IFBA",
+      "organizacao": "Coordenação"
+}
+
 ### login
 POST http://localhost:8080/auth/login
 Content-Type: application/json
 
 {
-    "email": "admin@admin.com",
+    "email": "admin@ifba.com",
     "password": "admin123"
 }
 

@@ -1,4 +1,4 @@
-package com.marketplace.ifba.service;
+/*package com.marketplace.ifba.service;
 
 import com.marketplace.ifba.dto.InstituicaoRequest;
 import com.marketplace.ifba.dto.InstituicaoResponse;
@@ -106,4 +106,4 @@ public class InstituicaoService {
         }
         instituicaoRepository.deleteById(idInstituicao);
     }
-}
+}*/

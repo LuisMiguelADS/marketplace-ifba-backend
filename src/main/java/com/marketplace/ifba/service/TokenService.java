@@ -23,7 +23,7 @@ public class TokenService {
             String token = JWT.create()
                     .withIssuer("marketplace-ifba")
                     .withSubject(user.getEmail())
-                    .withExpiresAt(generateExperationDate())
+                    .withExpiresAt(genExperationDate())
                     .sign(algorithm);
             return token;
         } catch (JWTCreationException exception) {
@@ -44,7 +44,7 @@ public class TokenService {
         }
     }
 
-    private Instant generateExperationDate() {
+    private Instant genExperationDate() {
         return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
     }
 }
