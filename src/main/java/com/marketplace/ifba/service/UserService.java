@@ -29,6 +29,7 @@ public class UserService {
         User user = userMapper.toEntity(request);
         user.setDataRegistro(LocalDateTime.now());
         userRepository.save(user);
+
         return userMapper.toDTO(user);
     }
 
@@ -48,14 +49,9 @@ public class UserService {
     }
 
     public UserResponse atualizar(UUID id, UserRequest request) {
-        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Aluno não encontrado"));
-        user.setNomeCompleto(request.getNomeCompleto());
-        user.setRole(request.getRole());
-        user.setEmail(request.getEmail());
-        user.setTelefone(request.getTelefone());
-        user.setPassword(request.getPassword());
-        user.setBiografia(request.getBiografia());
-        user.setEndereco(request.getEndereco());
+        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado!"));
+        userMapper.updateEntityFromRequest(request, user);
+
         return userMapper.toDTO(userRepository.save(user));
     }
 }

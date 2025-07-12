@@ -4,7 +4,6 @@ import com.marketplace.ifba.dto.UserRequest;
 import com.marketplace.ifba.dto.UserResponse;
 import com.marketplace.ifba.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,30 +19,26 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping
-    public ResponseEntity<UserResponse> criar(@RequestBody @Valid UserRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.salvarUsuario(request));
-    }
-
     @GetMapping
-    public ResponseEntity<List<UserResponse>> listarTodos() {
+    public ResponseEntity<List<UserResponse>> listarTodosUsuarios() {
         List<UserResponse> usuarios = userService.listarUsario();
         return ResponseEntity.ok(usuarios);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> buscarPorID(@PathVariable UUID id) {
+    public ResponseEntity<UserResponse> buscarUsuarioPorID(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.buscarPorID(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> atualizar(@PathVariable UUID id, @RequestBody @Valid UserRequest request) {
+    public ResponseEntity<UserResponse> atualizarUsuario(@PathVariable UUID id, @RequestBody @Valid UserRequest request) {
         return ResponseEntity.ok(userService.atualizar(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> remover(@PathVariable UUID id) {
+    public ResponseEntity<Void> removerUsuario(@PathVariable UUID id) {
         userService.removerUsuario(id);
+
         return ResponseEntity.noContent().build();
     }
 }

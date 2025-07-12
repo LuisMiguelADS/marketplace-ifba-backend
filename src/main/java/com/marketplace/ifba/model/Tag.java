@@ -7,11 +7,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.UUID;
 
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "tb_tags")
 public class Tag {
@@ -23,6 +29,6 @@ public class Tag {
 
     @Size(max = 50)
     @Column(name = "name", unique = true, nullable = false)
-    private String tag;
+    private String nomeTag;
 
 }

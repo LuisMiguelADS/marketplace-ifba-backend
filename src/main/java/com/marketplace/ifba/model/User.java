@@ -7,7 +7,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Column;
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -19,7 +22,10 @@ import java.util.List;
 import java.util.UUID;
 /*import java.util.List;*/
 
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Entity
 @Table(name = "tb_users")
 public class User implements UserDetails {
@@ -34,7 +40,7 @@ public class User implements UserDetails {
     @Column(name = "role", nullable = false)
     private UserRole role;
 
-    @Column(name = "email", nullable = false)
+    @Column(name = "email",unique = true, nullable = false)
     private String email;
 
     @Column(name = "telefone", nullable = false)
@@ -43,7 +49,7 @@ public class User implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "cpf", nullable = false)
+    @Column(name = "cpf", unique = true, nullable = false)
     private String cpf;
 
     @Column(name = "data_registro", nullable = false)
@@ -66,8 +72,6 @@ public class User implements UserDetails {
 
     @Column(name = "organizacao", nullable = false)
     private String organizacao;
-
-    public User () {}
 
     public User(String nomeCompleto, UserRole role, String email, String telefone, String password,String cpf, LocalDate dataNascimento,
                 String biografia, String fotoPerfilURL, String endereco, String instituicao, String organizacao) {
