@@ -35,6 +35,7 @@ public class TagController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<List<TagResponse>> listarTodasTags() {
         List<TagResponse> tags = tagService.listarTags();
 
@@ -42,16 +43,19 @@ public class TagController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<TagResponse> buscarTagPorId(@PathVariable UUID id) {
         return ResponseEntity.ok(tagService.buscarTagPorID(id));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TagResponse> atualizarTag(@PathVariable UUID id, @RequestBody @Valid TagRequest request) {
         return ResponseEntity.ok(tagService.atualizarTag(id, request));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> removerTag(@PathVariable UUID id) {
         tagService.removerTag(id);
 
