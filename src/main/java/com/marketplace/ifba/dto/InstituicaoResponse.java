@@ -1,8 +1,10 @@
 package com.marketplace.ifba.dto;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record InstituicaoResponse(
+        UUID idInstituicao,
         String nome,
         String sigla,
         String cnpj,

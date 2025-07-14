@@ -1,4 +1,4 @@
-/*package com.marketplace.ifba.service;
+package com.marketplace.ifba.service;
 
 import com.marketplace.ifba.dto.InstituicaoRequest;
 import com.marketplace.ifba.dto.InstituicaoResponse;
@@ -41,7 +41,9 @@ public class InstituicaoService {
 
     @Transactional(readOnly = true)
     public List<InstituicaoResponse> buscarTodasInstituicoes() {
-        return instituicaoRepository.findAll().stream().map(instituicaoMapper::toDTO).collect(Collectors.toList());
+        return instituicaoRepository.findAll().stream()
+                .map(instituicaoMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -106,4 +108,4 @@ public class InstituicaoService {
         }
         instituicaoRepository.deleteById(idInstituicao);
     }
-}*/
+}

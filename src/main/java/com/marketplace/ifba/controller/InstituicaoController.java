@@ -1,5 +1,6 @@
-/*package com.marketplace.ifba.controller;
+package com.marketplace.ifba.controller;
 
+import com.marketplace.ifba.dto.AprovarInstituicaoRequest;
 import com.marketplace.ifba.dto.InstituicaoRequest;
 import com.marketplace.ifba.dto.InstituicaoResponse;
 import com.marketplace.ifba.service.InstituicaoService;
@@ -23,13 +24,13 @@ public class InstituicaoController {
         this.instituicaoService = instituicaoService;
     }
 
-    @GetMapping(params = "idInstituicao")
-    public ResponseEntity<InstituicaoResponse> buscarInstituicaoPorId(@RequestParam UUID idInstituicao) {
+    @GetMapping("/{idInstituicao}")
+    public ResponseEntity<InstituicaoResponse> buscarInstituicaoPorId(@PathVariable UUID idInstituicao) {
         return ResponseEntity.ok(instituicaoService.buscarInstituicaoPorId(idInstituicao));
     }
 
-    @GetMapping(params = "nome")
-    public ResponseEntity<InstituicaoResponse> buscarInstituicaoPorNome(@RequestParam String nome) {
+    @GetMapping("/name/{nome}")
+    public ResponseEntity<InstituicaoResponse> buscarInstituicaoPorNome(@PathVariable String nome) {
         return ResponseEntity.ok(instituicaoService.buscarInstituicaoPorNome(nome));
     }
 
@@ -38,24 +39,24 @@ public class InstituicaoController {
         return ResponseEntity.ok(instituicaoService.buscarTodasInstituicoes());
     }
 
-    @PostMapping(params = "idUsuarioRegistrador")
-    public ResponseEntity<InstituicaoResponse> registrarInstituicao(@RequestBody @Valid InstituicaoRequest request, @RequestParam UUID idUsuarioRegistrador) {
+    @PostMapping("/{idUsuarioRegistrador}")
+    public ResponseEntity<InstituicaoResponse> registrarInstituicao(@RequestBody @Valid InstituicaoRequest request, @PathVariable UUID idUsuarioRegistrador) {
         return ResponseEntity.status(HttpStatus.CREATED).body(instituicaoService.registrarInstituicao(request, idUsuarioRegistrador));
     }
 
-    @PutMapping(params = "idInstituicao")
-    public ResponseEntity<InstituicaoResponse> atualizarInstituicao(@RequestBody @Valid InstituicaoRequest request, @RequestParam UUID idInstituicao) {
+    @PutMapping("/{idInstituicao}")
+    public ResponseEntity<InstituicaoResponse> atualizarInstituicao(@RequestBody @Valid InstituicaoRequest request, @PathVariable UUID idInstituicao) {
         return ResponseEntity.ok(instituicaoService.atualizarInstituicao(request, idInstituicao));
     }
 
-    @PostMapping(value = "/aprovar/", params = {"idInstituicao", "idAdmAprovador"})
-    public ResponseEntity<InstituicaoResponse> aprovarInstituicao(@RequestParam UUID idInstituicao, @RequestParam UUID idAdmAprovador) {
-        return ResponseEntity.ok(instituicaoService.aprovarInstituicao(idInstituicao, idAdmAprovador));
+    @PostMapping("/aprovar")
+    public ResponseEntity<InstituicaoResponse> aprovarInstituicao(@RequestBody @Valid AprovarInstituicaoRequest request) {
+        return ResponseEntity.ok(instituicaoService.aprovarInstituicao(request.idInstituicao(), request.idAdmAprovador()));
     }
 
-    @DeleteMapping(params = "idInstituicao")
-    public ResponseEntity<Void> deletarInstituicao(@RequestParam UUID idInstituicao) {
+    @DeleteMapping("/{idInstituicao}")
+    public ResponseEntity<Void> deletarInstituicao(@PathVariable UUID idInstituicao) {
         instituicaoService.deletarInstituicao(idInstituicao);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
-}*/
+}

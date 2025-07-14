@@ -46,19 +46,42 @@ public class UserMapper {
         );
     }
 
-    public void updateEntityFromRequest(UserRequest request, User user) {
-        if (request == null || user == null) {
-            return;
+    public User updateEntityFromRequest(UserRequest request, User user) {
+        if (request == null) {
+            throw new IllegalArgumentException("UserRequest não pode ser nulo para atualização.");
+        }
+        if (user == null) {
+            throw new IllegalArgumentException("Usuário a ser atualizado não pode ser nulo.");
         }
 
-        if (request.nomeCompleto() != null) user.setNomeCompleto(request.nomeCompleto());
-        if (request.telefone() != null) user.setTelefone(request.telefone());
-        if (request.password() != null) user.setPassword(request.password());
-        if (request.dataNascimento() != null) user.setDataNascimento(request.dataNascimento());
-        if (request.biografia() != null) user.setBiografia(request.biografia());
-        if (request.fotoPerfilURL() != null) user.setFotoPerfilURL(request.fotoPerfilURL());
-        if (request.endereco() != null) user.setEndereco(request.endereco());
-        if (request.instituicao() != null) user.setInstituicao(request.instituicao());
-        if (request.organizacao() != null) user.setOrganizacao(request.organizacao());
+        if (request.nomeCompleto() != null) {
+            user.setNomeCompleto(request.nomeCompleto());
+        }
+        if (request.telefone() != null) {
+            user.setTelefone(request.telefone());
+        }
+        if (request.password() != null || request.password() != user.getPassword()) {
+            user.setPassword(request.password());
+        }
+        if (request.dataNascimento() != null) {
+            user.setDataNascimento(request.dataNascimento());
+        }
+        if (request.biografia() != null) {
+            user.setBiografia(request.biografia());
+        }
+        if (request.fotoPerfilURL() != null) {
+            user.setFotoPerfilURL(request.fotoPerfilURL());
+        }
+        if (request.endereco() != null) {
+            user.setEndereco(request.endereco());
+        }
+        if (request.instituicao() != null) {
+            user.setInstituicao(request.instituicao());
+        }
+        if (request.organizacao() != null) {
+            user.setOrganizacao(request.organizacao());
+        }
+
+        return user;
     }
 }

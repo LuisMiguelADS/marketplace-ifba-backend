@@ -25,7 +25,6 @@
 	</properties>
 
 	<dependencies>
-		<!-- Existentes -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -51,7 +50,6 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- Adicionadas do projeto "trabalho.arquitetura" -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
@@ -96,13 +94,11 @@
 
 	<build>
 		<plugins>
-			<!-- Spring Boot Plugin -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 
-			<!-- Compiler Plugin (necessário para MapStruct e Lombok) -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
