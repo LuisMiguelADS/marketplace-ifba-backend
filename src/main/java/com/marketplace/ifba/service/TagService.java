@@ -49,8 +49,7 @@ public class TagService {
     }
 
     public TagResponse atualizarTag(UUID id, TagRequest request) {
-        Tag tag = tagRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Tag não encontrada!"));
+        Tag tag = tagRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tag não encontrada!"));
         tagMapper.updateEntityFromRequest(request, tag);
         Tag tagAtualizada = tagRepository.save(tag);
 

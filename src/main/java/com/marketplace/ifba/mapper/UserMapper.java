@@ -15,6 +15,7 @@ public class UserMapper {
 
         User user = new User();
         user.setNomeCompleto(request.nomeCompleto());
+        user.setRole(request.role());
         user.setEmail(request.email());
         user.setTelefone(request.telefone());
         user.setPassword(request.password());
@@ -51,10 +52,8 @@ public class UserMapper {
         }
 
         if (request.nomeCompleto() != null) user.setNomeCompleto(request.nomeCompleto());
-        if (request.email() != null) user.setEmail(request.email());
         if (request.telefone() != null) user.setTelefone(request.telefone());
         if (request.password() != null) user.setPassword(request.password());
-        if (request.cpf() != null) user.setCpf(request.cpf());
         if (request.dataNascimento() != null) user.setDataNascimento(request.dataNascimento());
         if (request.biografia() != null) user.setBiografia(request.biografia());
         if (request.fotoPerfilURL() != null) user.setFotoPerfilURL(request.fotoPerfilURL());

@@ -51,7 +51,8 @@ public class UserService {
     public UserResponse atualizar(UUID id, UserRequest request) {
         User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado!"));
         userMapper.updateEntityFromRequest(request, user);
+        User userAtualizado = userRepository.save(user);
 
-        return userMapper.toDTO(userRepository.save(user));
+        return userMapper.toDTO(userAtualizado);
     }
 }

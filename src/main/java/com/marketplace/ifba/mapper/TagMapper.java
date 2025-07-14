@@ -24,6 +24,10 @@ public class TagMapper {
     }
 
     public void updateEntityFromRequest(TagRequest request, Tag tag) {
+        if (request == null || tag == null) {
+            return;
+        }
+
         if (request.nomeTag() != null) {
             tag.setNomeTag(request.nomeTag());
         }
