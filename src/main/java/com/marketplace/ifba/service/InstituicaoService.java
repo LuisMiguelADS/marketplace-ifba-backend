@@ -36,7 +36,8 @@ public class InstituicaoService {
 
     @Transactional(readOnly = true)
     public InstituicaoResponse buscarInstituicaoPorId(UUID idInstituicao) {
-        return instituicaoMapper.toDTO(instituicaoRepository.findById(idInstituicao).orElseThrow(() -> new DadoNaoEncontradoException("Não foi encontrado usuário com esse ID")));
+        return instituicaoMapper.toDTO(instituicaoRepository.findById(idInstituicao)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Não foi encontrado usuário com esse ID")));
     }
 
     @Transactional(readOnly = true)
