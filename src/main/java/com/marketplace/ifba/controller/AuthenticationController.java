@@ -3,6 +3,8 @@ package com.marketplace.ifba.controller;
 import com.marketplace.ifba.dto.AuthenticationDTO;
 import com.marketplace.ifba.dto.LoginResponse;
 import com.marketplace.ifba.dto.UserRequest;
+import com.marketplace.ifba.dto.UserResponse;
+import com.marketplace.ifba.mapper.UserMapper;
 import com.marketplace.ifba.model.User;
 import com.marketplace.ifba.repository.UserRepository;
 import com.marketplace.ifba.service.TokenService;
@@ -28,13 +30,13 @@ public class AuthenticationController {
     private AuthenticationManager authenticationManager;
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
     private TokenService tokenService;
 
     @Autowired
     private final UserService userService;
+
+    @Autowired
+    UserMapper userMapper;
 
     public AuthenticationController(UserService userService) {
         this.userService = userService;
@@ -44,10 +46,12 @@ public class AuthenticationController {
     public ResponseEntity login(@RequestBody @Valid AuthenticationDTO data) {
         var userNamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         var auth = this.authenticationManager.authenticate(userNamePassword);
-
+        User userAutenticado = (User) auth.getPrincipal();
+        UserResponse userResponse = userMapper.toDTO(userAutenticado);
         var token = tokenService.generateToken((User) auth.getPrincipal());
 
-        return ResponseEntity.ok(new LoginResponse(token));
+
+        return ResponseEntity.ok(new LoginResponse(token, userResponse));
     }
 
     @PostMapping("/register")

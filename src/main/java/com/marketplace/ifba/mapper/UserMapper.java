@@ -37,6 +37,7 @@ public class UserMapper {
         return new UserResponse(
                 user.getIdUsuario(),
                 user.getNomeCompleto(),
+                user.getRole(),
                 user.getEmail(),
                 user.getTelefone(),
                 user.getDataRegistro(),

@@ -2,11 +2,14 @@ package com.marketplace.ifba.service;
 
 import com.marketplace.ifba.dto.UserRequest;
 import com.marketplace.ifba.dto.UserResponse;
+import com.marketplace.ifba.exception.DadoNaoEncontradoException;
 import com.marketplace.ifba.mapper.UserMapper;
 import com.marketplace.ifba.model.User;
 import com.marketplace.ifba.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +26,8 @@ public class UserService {
     private final UserMapper userMapper;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private TokenService tokenService;
 
     public UserService(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
@@ -47,6 +52,20 @@ public class UserService {
 
     public List<UserResponse> listarUsario() {
         return userRepository.findAll().stream().map(userMapper::toDTO).toList();
+    }
+
+    public UserResponse buscarUsuarioPorToken(String token) {
+        String emailLogin;
+        emailLogin = tokenService.validateToken(token);
+        UserDetails userDetails = userRepository.findByEmail(emailLogin);
+
+        if (userDetails == null) {
+            throw new DadoNaoEncontradoException("Usuário não encontrado para o token fornecido.");
+        }
+
+        User user = (User) userDetails;
+        UserResponse userResponse = userMapper.toDTO(user);
+        return userResponse;
     }
 
     public UserResponse buscarPorID(UUID id) {
