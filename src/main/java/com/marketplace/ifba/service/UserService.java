@@ -40,7 +40,6 @@ public class UserService {
         if (user == null) {
             throw new DadoNaoEncontradoException("Usuário não encontrado para o token fornecido.");
         }
-
         return userMapper.toDTO(user);
     }
 
@@ -62,13 +61,11 @@ public class UserService {
         if (userRepository.findByEmail(request.email()) != null) {
             throw new DadoConflitoException("Email já registrado.");
         }
-
         String encryptedPassword = passwordEncoder.encode(request.password());
 
         User newUser = userMapper.toEntity(request);
         newUser.setPassword(encryptedPassword);
         newUser.setDataRegistro(LocalDateTime.now());
-
         User savedUser = userRepository.save(newUser);
 
         return userMapper.toDTO(savedUser);

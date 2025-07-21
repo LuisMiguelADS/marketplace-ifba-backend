@@ -28,10 +28,10 @@ public class Mensagem {
     private Boolean ativo;
 
     @ManyToOne
-    @JoinColumn(name = "chat_id", nullable = false)
+    @JoinColumn(name = "chat_id", nullable = false, updatable = false)
     private Chat chat;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "writing_user_id", nullable = false)
+    @JoinColumn(name = "writing_user_id", nullable = false, updatable = false)
     private User usuarioEscritor;
 }

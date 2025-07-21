@@ -19,7 +19,7 @@ public class Chat {
     @Column(name = "date_created_chat", nullable = false, updatable = false)
     private LocalDateTime dataCriacao;
 
-    @Column(name = "date_finished_chat")
+    @Column(name = "date_finished_chat", updatable = false)
     private LocalDateTime dataEncerrado;
 
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

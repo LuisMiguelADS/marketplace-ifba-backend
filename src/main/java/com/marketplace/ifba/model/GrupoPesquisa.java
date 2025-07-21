@@ -63,6 +63,6 @@ public class GrupoPesquisa {
     private ArrayList<Tag> tags;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "institution_id")
+    @JoinColumn(name = "institution_id", updatable = false)
     private Instituicao instituicao;
 }

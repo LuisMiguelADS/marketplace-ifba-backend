@@ -19,14 +19,6 @@ public class Proposta {
     @Column(name = "id_proposal", updatable = false, nullable = false)
     private UUID idProposta;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "research_group_id")
-    private GrupoPesquisa grupoPesquisa;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "institution_id")
-    private Instituicao instituicao;
-
     @Size(max = 255)
     @Column(name = "name", nullable = false)
     private String nome;
@@ -59,9 +51,17 @@ public class Proposta {
     private StatusProposta status;
 
     @FutureOrPresent()
-    @Column(name = "date_term_proposal")
+    @Column(name = "date_term_proposal", nullable = false)
     private LocalDateTime dataPrazoProposta;
 
     @Column(name = "date_registration", nullable = false, updatable = false)
     private LocalDateTime dataRegistro;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "research_group_id", nullable = false, updatable = false)
+    private GrupoPesquisa grupoPesquisa;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id", nullable = false, updatable = false)
+    private Instituicao instituicao;
 }

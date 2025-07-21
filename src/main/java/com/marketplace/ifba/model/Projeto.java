@@ -26,26 +26,26 @@ public class Projeto {
     private StatusProjeto status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id", updatable = false)
+    @JoinColumn(name = "organization_id", nullable = false, updatable = false)
     private Organizacao organizacao;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "institution_id", updatable = false)
+    @JoinColumn(name = "institution_id", nullable = false, updatable = false)
     private Instituicao instituicao;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "demand_id", updatable = false)
+    @JoinColumn(name = "demand_id", nullable = false, updatable = false)
     private Demanda demanda;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "offer_solution_id", updatable = false)
+    @JoinColumn(name = "offer_solution_id", nullable = false, updatable = false)
     private OfertaSolucao solucaoOferta;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "research_group_id", updatable = false)
+    @JoinColumn(name = "research_group_id", nullable = false, updatable = false)
     private GrupoPesquisa grupoPesquisa;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "chat_id", updatable = false)
+    @JoinColumn(name = "chat_id", nullable = false, updatable = false)
     private Chat chat;
 }

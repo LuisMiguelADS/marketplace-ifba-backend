@@ -69,10 +69,10 @@ public class Organizacao {
     private LocalDateTime dataAprovacao;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "adm_aprovation_id")
+    @JoinColumn(name = "adm_aprovation_id", updatable = false)
     private User admAprovacao;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_registration_id", nullable = false)
+    @JoinColumn(name = "user_registration_id", nullable = false, updatable = false)
     private User usuarioRegistro;
 }

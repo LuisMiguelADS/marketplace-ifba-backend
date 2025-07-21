@@ -37,10 +37,10 @@ public class User implements UserDetails {
     @Column(name = "nome_completo", nullable = false)
     private String nomeCompleto;
 
-    @Column(name = "role", nullable = false)
+    @Column(name = "role", nullable = false, updatable = false)
     private UserRole role;
 
-    @Column(name = "email",unique = true, nullable = false)
+    @Column(name = "email", unique = true, nullable = false, updatable = false)
     private String email;
 
     @Column(name = "telefone", nullable = false)
@@ -49,14 +49,14 @@ public class User implements UserDetails {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "cpf", unique = true, nullable = false)
+    @Column(name = "cpf", unique = true, nullable = false, updatable = false)
     private String cpf;
 
-    @Column(name = "data_registro", nullable = false)
+    @Column(name = "data_registro", nullable = false, updatable = false)
     private LocalDateTime dataRegistro;
 
-    @Column(name = "data_nascimento", nullable = false)
-    private LocalDate dataNascimento;
+    @Column(name = "data_nascimento", nullable = false, updatable = false)
+    private LocalDateTime dataNascimento;
 
     @Column(name = "biografia", nullable = false)
     private String biografia;
@@ -67,13 +67,16 @@ public class User implements UserDetails {
     @Column(name = "endereco", nullable = false)
     private String endereco;
 
-    @Column(name = "instituicao", nullable = false)
+    @Column(name = "instituicao")
     private String instituicao;
 
-    @Column(name = "organizacao", nullable = false)
+    @Column(name = "organizacao")
     private String organizacao;
 
-    public User(String nomeCompleto, UserRole role, String email, String telefone, String password,String cpf, LocalDate dataNascimento,
+    /*@Column(nullable = false)
+    private List<Conexao> conexoes;*/
+
+    public User(String nomeCompleto, UserRole role, String email, String telefone, String password,String cpf, LocalDateTime dataNascimento,
                 String biografia, String fotoPerfilURL, String endereco, String instituicao, String organizacao) {
         this.nomeCompleto = nomeCompleto;
         this.role = role;
@@ -121,6 +124,4 @@ public class User implements UserDetails {
         return true;
     }
 
-    /*@Column(nullable = false)
-    private List<Conexao> conexoes;*/
 }

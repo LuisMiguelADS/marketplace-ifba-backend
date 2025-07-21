@@ -56,14 +56,14 @@ public class Demanda {
     @Column(name = "date_term_demand", nullable = false)
     private LocalDateTime dataPrazoFinal;
 
-    @Column(name = "date_approved_demand")
+    @Column(name = "date_approved_demand", updatable = false)
     private LocalDateTime dataAprovado;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_user_id", nullable = false)
+    @JoinColumn(name = "creator_user_id", nullable = false, updatable = false)
     private User usuarioCriador;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id", nullable = false)
+    @JoinColumn(name = "organization_id", nullable = false, updatable = false)
     private Organizacao organizacao;
 }

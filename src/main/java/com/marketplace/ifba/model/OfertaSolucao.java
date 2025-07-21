@@ -57,7 +57,7 @@ public class OfertaSolucao {
     @Column(name = "necessary_resources", length = 500)
     private String recursoNecessario;
 
-    @Column(name = "date_aprovation")
+    @Column(name = "date_aprovation", updatable = false)
     private LocalDateTime dataAprovacao;
 
     @Column(name = "date_registration", nullable = false, updatable = false)
