@@ -65,6 +65,4 @@ public class GrupoPesquisa {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_id")
     private Instituicao instituicao;
-
-
 }
