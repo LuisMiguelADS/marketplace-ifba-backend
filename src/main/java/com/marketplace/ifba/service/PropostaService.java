@@ -5,9 +5,11 @@ import com.marketplace.ifba.dto.PropostaResponse;
 import com.marketplace.ifba.exception.DadoConflitoException;
 import com.marketplace.ifba.exception.DadoNaoEncontradoException;
 import com.marketplace.ifba.mapper.PropostaMapper;
+import com.marketplace.ifba.model.GrupoPesquisa;
 import com.marketplace.ifba.model.Instituicao;
 import com.marketplace.ifba.model.Proposta;
 import com.marketplace.ifba.model.enums.StatusProposta;
+import com.marketplace.ifba.repository.GrupoPesquisaRepository;
 import com.marketplace.ifba.repository.InstituicaoRepository;
 import com.marketplace.ifba.repository.PropostaRepository;
 import org.springframework.stereotype.Service;
@@ -22,22 +24,23 @@ import java.util.stream.Collectors;
 public class PropostaService {
 
     private final PropostaRepository propostaRepository;
-    //private final GrupoPesquisaRepository grupoPesquisaRepository;
+    private final GrupoPesquisaRepository grupoPesquisaRepository;
     private final InstituicaoRepository instituicaoRepository;
     private final PropostaMapper propostaMapper;
 
     public PropostaService(PropostaRepository propostaRepository,
-                           // GrupoPesquisaRepository grupoPesquisaRepository,
+                           GrupoPesquisaRepository grupoPesquisaRepository,
                            InstituicaoRepository instituicaoRepository,
                            PropostaMapper propostaMapper) {
         this.propostaRepository = propostaRepository;
-        //this.grupoPesquisaRepository = grupoPesquisaRepository;
+        this.grupoPesquisaRepository = grupoPesquisaRepository;
         this.instituicaoRepository = instituicaoRepository;
         this.propostaMapper = propostaMapper;
     }
 
-    // Leitura
+    // ---------- LEITURA
 
+    // BUSCA PROPOSTA PELO SEU ID
     @Transactional(readOnly = true)
     public PropostaResponse buscarPropostaPorId(UUID idProposta) {
         Proposta proposta = propostaRepository.findById(idProposta)
@@ -45,13 +48,7 @@ public class PropostaService {
         return propostaMapper.toDTO(proposta);
     }
 
-    @Transactional(readOnly = true)
-    public List<PropostaResponse> buscarTodasPropostas() {
-        return propostaRepository.findAll().stream()
-                .map(propostaMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
+    // BUSCA PROPOSTA PELO SEU NOME
     @Transactional(readOnly = true)
     public PropostaResponse buscarPropostaPorNome(String nome) {
         Proposta proposta = propostaRepository.findByNome(nome)
@@ -59,29 +56,42 @@ public class PropostaService {
         return propostaMapper.toDTO(proposta);
     }
 
+    // BUSCA PROPOSTA PELO ID DE UM GRUPO DE PESQUISA
     @Transactional(readOnly = true)
     public List<PropostaResponse> buscarPropostasPorGrupoPesquisa(UUID idGrupoPesquisa) {
-        // Validação se o Grupo de Pesquisa existe
-        // if (!grupoPesquisaRepository.existsById(idGrupoPesquisa)) {
-        //     throw new DadoNaoEncontradoException("Grupo de pesquisa não encontrado com o ID: " + idGrupoPesquisa);
-        // }
-        return propostaRepository.findByGrupoPesquisaIdGrupo(idGrupoPesquisa).stream()
+
+         if (!grupoPesquisaRepository.existsById(idGrupoPesquisa)) {
+             throw new DadoNaoEncontradoException("Grupo de pesquisa não encontrado com o ID: " + idGrupoPesquisa);
+         }
+        return propostaRepository.findAll().stream()
+                .filter(proposta -> proposta.getGrupoPesquisa().getIdGrupoPesquisa().equals(idGrupoPesquisa))
                 .map(propostaMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
+    // BUSCA PROPOSTA PELO ID DE UMA INSTITUIÇÃO
     @Transactional(readOnly = true)
     public List<PropostaResponse> buscarPropostasPorInstituicao(UUID idInstituicao) {
         if (!instituicaoRepository.existsById(idInstituicao)) {
             throw new DadoNaoEncontradoException("Instituição não encontrada com o ID: " + idInstituicao);
         }
-        return propostaRepository.findByInstituicaoIdInstituicao(idInstituicao).stream()
+        return propostaRepository.findById(idInstituicao).stream()
+                .filter(proposta -> proposta.getInstituicao().getIdInstituicao().equals(idInstituicao))
                 .map(propostaMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    // Escrita
+    // LISTA TODAS AS PROPOSTAS DO SISTEMA
+    @Transactional(readOnly = true)
+    public List<PropostaResponse> buscarTodasPropostas() {
+        return propostaRepository.findAll().stream()
+                .map(propostaMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 
+    // ---------- ESCRITA
+
+    // REGISTRO PROPOSTA
     @Transactional
     public PropostaResponse registrarProposta(PropostaRequest request) {
         if (propostaRepository.findByNome(request.nome()).isPresent()) {
@@ -92,9 +102,9 @@ public class PropostaService {
         proposta.setDataRegistro(LocalDateTime.now());
         proposta.setStatus(StatusProposta.PENDENTE_APROVACAO);
 
-        // GrupoPesquisa grupoPesquisa = grupoPesquisaRepository.findById(request.idGrupoPesquisa())
-        //         .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado com o ID: " + request.idGrupoPesquisa()));
-        // proposta.setGrupoPesquisa(grupoPesquisa);
+        GrupoPesquisa grupoPesquisa = grupoPesquisaRepository.findById(request.idGrupoPesquisa())
+                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado com o ID: " + request.idGrupoPesquisa()));
+        proposta.setGrupoPesquisa(grupoPesquisa);
 
         Instituicao instituicao = instituicaoRepository.findById(request.idInstituicao())
                 .orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada com o ID: " + request.idInstituicao()));
@@ -104,6 +114,7 @@ public class PropostaService {
         return propostaMapper.toDTO(propostaRepository.save(proposta));
     }
 
+    // ATUALIZA PROPOSTA
     @Transactional
     public PropostaResponse atualizarProposta(UUID idProposta, PropostaRequest request) {
         Proposta propostaExistente = propostaRepository.findById(idProposta)
@@ -121,6 +132,7 @@ public class PropostaService {
         return propostaMapper.toDTO(propostaRepository.save(propostaExistente));
     }
 
+    // ATUALIZA O STATUS DA PROPOSTA
     @Transactional
     public PropostaResponse atualizarStatusProposta(UUID idProposta, StatusProposta novoStatus) {
         Proposta proposta = propostaRepository.findById(idProposta)
@@ -130,8 +142,9 @@ public class PropostaService {
         return propostaMapper.toDTO(propostaRepository.save(proposta));
     }
 
+    // REMOVE PROPOSTA PELO SEU ID
     @Transactional
-    public void deletarProposta(UUID idProposta) {
+    public void removerProposta(UUID idProposta) {
         if (!propostaRepository.existsById(idProposta)) {
             throw new DadoNaoEncontradoException("Proposta não encontrada para exclusão com o ID: " + idProposta);
         }

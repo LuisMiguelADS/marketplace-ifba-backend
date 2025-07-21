@@ -1,5 +1,6 @@
 package com.marketplace.ifba.model;
 
+import com.marketplace.ifba.model.enums.StatusOrganizacao;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -28,7 +29,7 @@ public class Organizacao {
     private String sigla;
 
     @CNPJ()
-    @Column(name = "cnpj", unique = true, nullable = false)
+    @Column(name = "cnpj", unique = true, nullable = false, updatable = false)
     private String cnpj;
 
     @Size(max = 30)
@@ -48,9 +49,9 @@ public class Organizacao {
     @Column(name = "site_url")
     private String site;
 
-    @Size(max = 50)
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "status", nullable = false)
-    private String status;
+    private StatusOrganizacao status;
 
     @URL()
     @Size(max = 500)
@@ -64,7 +65,7 @@ public class Organizacao {
     @Column(name = "date_platform_registration", nullable = false, updatable = false)
     private LocalDateTime dataRegistro;
 
-    @Column(name = "date_aprovation")
+    @Column(name = "date_aprovation", updatable = false)
     private LocalDateTime dataAprovacao;
 
     @ManyToOne(fetch = FetchType.LAZY)

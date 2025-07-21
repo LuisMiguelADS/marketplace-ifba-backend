@@ -27,4 +27,7 @@ public class Chat {
 
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Mensagem> mensagens;
+
+    @OneToOne(mappedBy = "chat", fetch = FetchType.LAZY)
+    private Projeto projeto;
 }

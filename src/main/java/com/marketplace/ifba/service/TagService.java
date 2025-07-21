@@ -8,6 +8,7 @@ import com.marketplace.ifba.repository.TagRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -15,10 +16,7 @@ import java.util.UUID;
 @Service
 public class TagService {
 
-    @Autowired
     private final TagRepository tagRepository;
-
-    @Autowired
     private final TagMapper tagMapper;
 
     public TagService(TagRepository tagRepository, TagMapper tagMapper) {
@@ -26,33 +24,47 @@ public class TagService {
         this.tagMapper = tagMapper;
     }
 
-    public TagResponse salvarTag(TagRequest request) {
+    // ---------- LEITURA
+
+    // BUSCA TAG PELO SEU ID
+    @Transactional(readOnly = true)
+    public TagResponse buscarTagPorID(UUID id) {
+        return tagMapper.toDTO(tagRepository.findById(id).orElseThrow());
+    }
+
+    // LISTA TODAS AS TAGS DO SISTEMA
+    @Transactional(readOnly = true)
+    public List<TagResponse> buscarTodasTags() {
+        return tagRepository.findAll().stream().map(tagMapper::toDTO).toList();
+    }
+
+    // ---------- ESCRITA
+
+    // REGISTRO DA TAG
+    @Transactional()
+    public TagResponse registrarTag(TagRequest request) {
         Tag tag = tagMapper.toEntity(request);
         tagRepository.save(tag);
 
         return tagMapper.toDTO(tag);
     }
 
-    public List<TagResponse> listarTags() {
-        return tagRepository.findAll().stream().map(tagMapper::toDTO).toList();
-    }
-
-    public TagResponse buscarTagPorID(UUID id) {
-        return tagMapper.toDTO(tagRepository.findById(id).orElseThrow());
-    }
-
-    public void removerTag(UUID id) {
-        if (!tagRepository.existsById(id)) {
-            throw new EntityNotFoundException("Tag não encontrada! Id: " + id);
-        }
-        tagRepository.deleteById(id);
-    }
-
+    // ATUALIZA TAG
+    @Transactional()
     public TagResponse atualizarTag(UUID id, TagRequest request) {
         Tag tag = tagRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tag não encontrada!"));
         tagMapper.updateEntityFromRequest(request, tag);
         Tag tagAtualizada = tagRepository.save(tag);
 
         return tagMapper.toDTO(tagAtualizada);
+    }
+
+    // REMOVE TAG PELO SEU ID
+    @Transactional()
+    public void removerTag(UUID id) {
+        if (!tagRepository.existsById(id)) {
+            throw new EntityNotFoundException("Tag não encontrada! Id: " + id);
+        }
+        tagRepository.deleteById(id);
     }
 }

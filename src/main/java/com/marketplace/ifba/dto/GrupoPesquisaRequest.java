@@ -13,13 +13,6 @@ public record GrupoPesquisaRequest(
         @Size(max = 2000, message = "A descrição não pode exceder 2000 caracteres.")
         String descricao,
 
-        @PositiveOrZero(message = "O número de trabalhos deve ser positivo ou zero.")
-        Integer trabalhos,
-
-        @DecimalMin(value = "0.0", message = "A classificação mínima é 0.0.")
-        @DecimalMax(value = "5.0", message = "A classificação máxima é 5.0.")
-        Double classificacao,
-
         @NotNull(message = "O ID da instituição é obrigatório.")
         UUID idInstituicao,
 

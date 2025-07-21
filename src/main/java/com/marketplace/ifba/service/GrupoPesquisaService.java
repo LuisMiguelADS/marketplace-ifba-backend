@@ -44,8 +44,9 @@ public class GrupoPesquisaService {
         this.grupoPesquisaMapper = grupoPesquisaMapper;
     }
 
-    // Leitura
+    // ---------- LEITURA
 
+    // BUSCA GRUPO PESQUISA PELO SEU ID
     @Transactional(readOnly = true)
     public GrupoPesquisaResponse buscarGrupoPesquisaPorId(UUID idGrupoPesquisa) {
         GrupoPesquisa grupo = grupoPesquisaRepository.findById(idGrupoPesquisa)
@@ -53,13 +54,7 @@ public class GrupoPesquisaService {
         return grupoPesquisaMapper.toDTO(grupo);
     }
 
-    @Transactional(readOnly = true)
-    public List<GrupoPesquisaResponse> buscarTodosGruposPesquisa() {
-        return grupoPesquisaRepository.findAll().stream()
-                .map(grupoPesquisaMapper::toDTO)
-                .collect(Collectors.toList());
-    }
-
+    // BUSCA GRUPO PESQUISA PELO SEU NOME
     @Transactional(readOnly = true)
     public GrupoPesquisaResponse buscarGrupoPesquisaPorNome(String nome) {
         GrupoPesquisa grupo = grupoPesquisaRepository.findByNome(nome)
@@ -67,18 +62,29 @@ public class GrupoPesquisaService {
         return grupoPesquisaMapper.toDTO(grupo);
     }
 
+    // BUSCA GRUPOS PESQUISA POR INSTITUIÇÃO
     @Transactional(readOnly = true)
     public List<GrupoPesquisaResponse> buscarGruposPorInstituicao(UUID idInstituicao) {
         if (!instituicaoRepository.existsById(idInstituicao)) {
             throw new DadoNaoEncontradoException("Instituição não encontrada com o ID: " + idInstituicao);
         }
-        return grupoPesquisaRepository.findByInstituicaoIdInstituicao(idInstituicao).stream()
+        return grupoPesquisaRepository.findAll().stream()
+                .filter(grupoPesquisa -> grupoPesquisa.getInstituicao().getIdInstituicao().equals(idInstituicao))
                 .map(grupoPesquisaMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    // Escrita
+    // LISTA TODOS GRUPOS PESQUISA
+    @Transactional(readOnly = true)
+    public List<GrupoPesquisaResponse> buscarTodosGruposPesquisa() {
+        return grupoPesquisaRepository.findAll().stream()
+                .map(grupoPesquisaMapper::toDTO)
+                .collect(Collectors.toList());
+    }
 
+    // ---------- ESCRITA
+
+    // REGISTRA GRUPO PESQUISA
     @Transactional
     public GrupoPesquisaResponse registrarGrupoPesquisa(GrupoPesquisaRequest request) {
         if (grupoPesquisaRepository.findByNome(request.nome()).isPresent()) {
@@ -88,6 +94,8 @@ public class GrupoPesquisaService {
         GrupoPesquisa grupoPesquisa = grupoPesquisaMapper.toEntity(request);
         grupoPesquisa.setDataRegistro(LocalDateTime.now());
         grupoPesquisa.setStatus(StatusGrupoPesquisa.ATIVO);
+        grupoPesquisa.setTrabalhos(0);
+        grupoPesquisa.setClassificacao(0.0);
 
         Instituicao instituicao = instituicaoRepository.findById(request.idInstituicao())
                 .orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada com o ID: " + request.idInstituicao()));
@@ -116,6 +124,7 @@ public class GrupoPesquisaService {
         return grupoPesquisaMapper.toDTO(grupoPesquisaRepository.save(grupoPesquisa));
     }
 
+    // ATUALIZA GRUPO PESQUISA
     @Transactional
     public GrupoPesquisaResponse atualizarGrupoPesquisa(UUID idGrupoPesquisa, GrupoPesquisaRequest request) {
         GrupoPesquisa grupoExistente = grupoPesquisaRepository.findById(idGrupoPesquisa)
@@ -156,6 +165,7 @@ public class GrupoPesquisaService {
         return grupoPesquisaMapper.toDTO(grupoPesquisaRepository.save(grupoExistente));
     }
 
+    // ATUALIZA STATUS GRUPO PESQUISA
     @Transactional
     public GrupoPesquisaResponse atualizarStatusGrupoPesquisa(UUID idGrupoPesquisa, StatusGrupoPesquisa novoStatus) {
         GrupoPesquisa grupo = grupoPesquisaRepository.findById(idGrupoPesquisa)
@@ -164,8 +174,9 @@ public class GrupoPesquisaService {
         return grupoPesquisaMapper.toDTO(grupoPesquisaRepository.save(grupo));
     }
 
+    // REMOVE GRUPO PESQUISA
     @Transactional
-    public void deletarGrupoPesquisa(UUID idGrupoPesquisa) {
+    public void removerGrupoPesquisa(UUID idGrupoPesquisa) {
         if (!grupoPesquisaRepository.existsById(idGrupoPesquisa)) {
             throw new DadoNaoEncontradoException("Grupo de pesquisa não encontrado para exclusão com o ID: " + idGrupoPesquisa);
         }

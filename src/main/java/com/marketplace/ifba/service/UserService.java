@@ -2,14 +2,12 @@ package com.marketplace.ifba.service;
 
 import com.marketplace.ifba.dto.UserRequest;
 import com.marketplace.ifba.dto.UserResponse;
+import com.marketplace.ifba.exception.DadoConflitoException;
 import com.marketplace.ifba.exception.DadoNaoEncontradoException;
 import com.marketplace.ifba.mapper.UserMapper;
 import com.marketplace.ifba.model.User;
 import com.marketplace.ifba.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,23 +18,49 @@ import java.util.UUID;
 @Service
 public class UserService {
 
-    @Autowired
     private final UserRepository userRepository;
-    @Autowired
     private final UserMapper userMapper;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private TokenService tokenService;
+    private final PasswordEncoder passwordEncoder;
+    private final TokenService tokenService;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, PasswordEncoder passwordEncoder, TokenService tokenService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
+        this.passwordEncoder = passwordEncoder;
+        this.tokenService = tokenService;
     }
 
-    public UserResponse salvarUsuario(UserRequest request) {
+    // ---------- LEITURA
+
+    // BUSCA USUÁRIO A PARTIR DO SEU TOKEN DE ACESSO
+    public UserResponse buscarUsuarioPorToken(String token) {
+        String emailLogin = tokenService.validateToken(token);
+        User user = userRepository.findByEmail(emailLogin);
+
+        if (user == null) {
+            throw new DadoNaoEncontradoException("Usuário não encontrado para o token fornecido.");
+        }
+
+        return userMapper.toDTO(user);
+    }
+
+    // BUSCA USUÁRIO PELO SEU ID
+    public UserResponse buscarUsuarioPorID(UUID idUsuario) {
+        return userMapper.toDTO(userRepository.findById(idUsuario)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário não encontrada com o ID: " + idUsuario)));
+    }
+
+    // LISTA TODOS OS USUÁRIOS DO SISTEMA
+    public List<UserResponse> buscarTodosUsuarios() {
+        return userRepository.findAll().stream().map(userMapper::toDTO).toList();
+    }
+
+    // ---------- ESCRITA
+
+    // REGISTRO DO USUÁRIO
+    public UserResponse registrarUsuario(UserRequest request) {
         if (userRepository.findByEmail(request.email()) != null) {
-            throw new IllegalArgumentException("Email já registrado.");
+            throw new DadoConflitoException("Email já registrado.");
         }
 
         String encryptedPassword = passwordEncoder.encode(request.password());
@@ -50,41 +74,21 @@ public class UserService {
         return userMapper.toDTO(savedUser);
     }
 
-    public List<UserResponse> listarUsario() {
-        return userRepository.findAll().stream().map(userMapper::toDTO).toList();
-    }
-
-    public UserResponse buscarUsuarioPorToken(String token) {
-        String emailLogin;
-        emailLogin = tokenService.validateToken(token);
-        UserDetails userDetails = userRepository.findByEmail(emailLogin);
-
-        if (userDetails == null) {
-            throw new DadoNaoEncontradoException("Usuário não encontrado para o token fornecido.");
-        }
-
-        User user = (User) userDetails;
-        UserResponse userResponse = userMapper.toDTO(user);
-        return userResponse;
-    }
-
-    public UserResponse buscarPorID(UUID id) {
-        return userMapper.toDTO(userRepository.findById(id).orElseThrow());
-    }
-
-    public void removerUsuario(UUID id) {
-        if (!userRepository.existsById(id)) {
-            throw new EntityNotFoundException("Usuário não encontrado! ID: " + id);
-        }
-        userRepository.deleteById(id);
-    }
-
-    public UserResponse atualizar(UUID id, UserRequest request) {
-        User user = userRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado!"));
+    // ATUALIZA USUÁRIO
+    public UserResponse atualizarUsuario(UUID idUsuario, UserRequest request) {
+        User user = userRepository.findById(idUsuario).orElseThrow(() -> new DadoNaoEncontradoException("Usuário não encontrada com o ID: " + idUsuario));
         User userAtualizado = userMapper.updateEntityFromRequest(request, user);
         String encryptedPassword = passwordEncoder.encode(userAtualizado.getPassword());
         userAtualizado.setPassword(encryptedPassword);
 
         return userMapper.toDTO(userRepository.save(userAtualizado));
+    }
+
+    // REMOVE USUÁRIO PELO SEU ID
+    public void removerUsuario(UUID id) {
+        if (!userRepository.existsById(id)) {
+            throw new EntityNotFoundException("Usuário não encontrado! ID: " + id);
+        }
+        userRepository.deleteById(id);
     }
 }

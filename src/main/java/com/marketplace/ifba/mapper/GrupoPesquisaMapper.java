@@ -33,8 +33,6 @@ public class GrupoPesquisaMapper {
         GrupoPesquisa grupoPesquisa = new GrupoPesquisa();
         grupoPesquisa.setNome(request.nome());
         grupoPesquisa.setDescricao(request.descricao());
-        grupoPesquisa.setTrabalhos(request.trabalhos());
-        grupoPesquisa.setClassificacao(request.classificacao());
 
         return grupoPesquisa;
     }
@@ -79,7 +77,5 @@ public class GrupoPesquisaMapper {
 
         Optional.ofNullable(request.nome()).ifPresent(grupoPesquisa::setNome);
         Optional.ofNullable(request.descricao()).ifPresent(grupoPesquisa::setDescricao);
-        Optional.ofNullable(request.trabalhos()).ifPresent(grupoPesquisa::setTrabalhos);
-        Optional.ofNullable(request.classificacao()).ifPresent(grupoPesquisa::setClassificacao);
     }
 }

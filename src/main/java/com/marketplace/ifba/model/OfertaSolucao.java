@@ -1,5 +1,6 @@
 package com.marketplace.ifba.model;
 
+import com.marketplace.ifba.model.enums.StatusOfertaSolucao;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
@@ -34,9 +35,9 @@ public class OfertaSolucao {
     @Column(name = "resume", length = 500)
     private String resumo;
 
-    @Size(max = 20)
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "status", nullable = false)
-    private String status;
+    private StatusOfertaSolucao status;
 
     @Column(name = "aprovation")
     private Boolean aprovado;

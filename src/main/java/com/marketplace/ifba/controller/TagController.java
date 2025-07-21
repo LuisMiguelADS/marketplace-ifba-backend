@@ -31,13 +31,13 @@ public class TagController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<TagResponse> criarTag(@RequestBody @Valid TagRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(tagService.salvarTag(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(tagService.registrarTag(request));
     }
 
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<List<TagResponse>> listarTodasTags() {
-        List<TagResponse> tags = tagService.listarTags();
+        List<TagResponse> tags = tagService.buscarTodasTags();
 
         return ResponseEntity.ok(tags);
     }

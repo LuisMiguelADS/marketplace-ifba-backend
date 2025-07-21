@@ -55,8 +55,8 @@ public class InstituicaoController {
     }
 
     @DeleteMapping("/{idInstituicao}")
-    public ResponseEntity<Void> deletarInstituicao(@PathVariable UUID idInstituicao) {
-        instituicaoService.deletarInstituicao(idInstituicao);
+    public ResponseEntity<Void> removerInstituicao(@PathVariable UUID idInstituicao) {
+        instituicaoService.removerInstituicao(idInstituicao);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

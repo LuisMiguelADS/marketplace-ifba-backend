@@ -56,6 +56,6 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody @Valid UserRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.salvarUsuario(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.registrarUsuario(request));
     }
 }

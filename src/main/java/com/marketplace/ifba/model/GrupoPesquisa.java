@@ -39,7 +39,7 @@ public class GrupoPesquisa {
     @Column(name = "stars_rating")
     private Double classificacao;
 
-    @Size(max = 20)
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "status", nullable = false)
     private StatusGrupoPesquisa status;
 

@@ -2,11 +2,20 @@ package com.marketplace.ifba.mapper;
 
 import com.marketplace.ifba.dto.InstituicaoRequest;
 import com.marketplace.ifba.dto.InstituicaoResponse;
+import com.marketplace.ifba.dto.UserResponse;
 import com.marketplace.ifba.model.Instituicao;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class InstituicaoMapper {
+
+    private final UserMapper userMapper;
+
+    public InstituicaoMapper(UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
 
     public Instituicao toEntity(InstituicaoRequest request) {
         if (request == null) {
@@ -32,15 +41,13 @@ public class InstituicaoMapper {
             return null;
         }
 
-        String nomeAdmAprovacao = null;
-        if (instituicao.getAdmAprovacao() != null) {
-            nomeAdmAprovacao = instituicao.getAdmAprovacao().getNomeCompleto();
-        }
+        UserResponse admAprovadorDTO = Optional.ofNullable(instituicao.getAdmAprovacao())
+                .map(userMapper::toDTO)
+                .orElse(null);
 
-        String nomeUsuarioRegistro = null;
-        if (instituicao.getUsuarioRegistro() != null) {
-            nomeUsuarioRegistro = instituicao.getUsuarioRegistro().getNomeCompleto();
-        }
+        UserResponse usuarioRegistroDTO = Optional.ofNullable(instituicao.getUsuarioRegistro())
+                .map(userMapper::toDTO)
+                .orElse(null);
 
         return new InstituicaoResponse(
                 instituicao.getIdInstituicao(),
@@ -57,8 +64,24 @@ public class InstituicaoMapper {
                 instituicao.getDataRegistro(),
                 instituicao.getDataAprovacao(),
                 instituicao.getDataAtualizacao(),
-                nomeAdmAprovacao,
-                nomeUsuarioRegistro
+                admAprovadorDTO,
+                usuarioRegistroDTO
         );
+    }
+
+    public void updateEntityFromRequest(InstituicaoRequest request, Instituicao instituicao) {
+        if (request == null || instituicao == null) {
+            return;
+        }
+
+        Optional.ofNullable(request.nome()).ifPresent(instituicao::setNome);
+        Optional.ofNullable(request.sigla()).ifPresent(instituicao::setSigla);
+        Optional.ofNullable(request.cnpj()).ifPresent(instituicao::setCnpj);
+        Optional.ofNullable(request.tipoInstituicao()).ifPresent(instituicao::setTipoInstituicao);
+        Optional.ofNullable(request.setor()).ifPresent(instituicao::setSetor);
+        Optional.ofNullable(request.telefone()).ifPresent(instituicao::setTelefone);
+        Optional.ofNullable(request.site()).ifPresent(instituicao::setSite);
+        Optional.ofNullable(request.logoURL()).ifPresent(instituicao::setLogoURL);
+        Optional.ofNullable(request.descricao()).ifPresent(instituicao::setDescricao);
     }
 }

@@ -63,8 +63,8 @@ public class GrupoPesquisaController {
 
 
     @DeleteMapping("/{idGrupoPesquisa}")
-    public ResponseEntity<Void> deletarGrupoPesquisa(@PathVariable UUID idGrupoPesquisa) {
-        grupoPesquisaService.deletarGrupoPesquisa(idGrupoPesquisa);
+    public ResponseEntity<Void> removerGrupoPesquisa(@PathVariable UUID idGrupoPesquisa) {
+        grupoPesquisaService.removerGrupoPesquisa(idGrupoPesquisa);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

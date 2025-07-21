@@ -63,8 +63,8 @@ public class PropostaController {
     }
 
     @DeleteMapping("/{idProposta}")
-    public ResponseEntity<Void> deletarProposta(@PathVariable UUID idProposta) {
-        propostaService.deletarProposta(idProposta);
+    public ResponseEntity<Void> removerProposta(@PathVariable UUID idProposta) {
+        propostaService.removerProposta(idProposta);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

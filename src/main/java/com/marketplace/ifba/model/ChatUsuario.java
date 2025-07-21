@@ -24,6 +24,6 @@ public class ChatUsuario {
     @JoinColumn(name = "user_id", nullable = false)
     private User usuario;
 
-    @Column(name = "last_view_date_time", nullable = false)
+    @Column(name = "last_view_date_time")
     private LocalDateTime dataUltimaVisualizacao;
 }

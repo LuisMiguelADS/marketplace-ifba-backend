@@ -2,6 +2,7 @@ package com.marketplace.ifba.controller;
 
 import com.marketplace.ifba.dto.OfertaSolucaoRequest;
 import com.marketplace.ifba.dto.OfertaSolucaoResponse;
+import com.marketplace.ifba.model.enums.StatusOfertaSolucao;
 import com.marketplace.ifba.service.OfertaSolucaoService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ public class OfertaSolucaoController {
 
     @GetMapping(value = "/status/", params = "status")
     public ResponseEntity<List<OfertaSolucaoResponse>> buscarOfertaSolucaoPorStatus(@RequestParam String status) {
-        List<OfertaSolucaoResponse> response = ofertaSolucaoService.buscarOfertasSolucaoPorStatus(status);
+        List<OfertaSolucaoResponse> response = ofertaSolucaoService.buscarOfertasSolucaoPorStatus(StatusOfertaSolucao.fromString(status));
         return ResponseEntity.ok(response);
     }
 
@@ -78,8 +79,8 @@ public class OfertaSolucaoController {
     }
 
     @DeleteMapping(params = "idOfertaSolucao")
-    public ResponseEntity<Void> deletarOfertaSolucao(@RequestParam UUID id) {
-        ofertaSolucaoService.deletarOfertaSolucao(id);
+    public ResponseEntity<Void> removerOfertaSolucao(@RequestParam UUID id) {
+        ofertaSolucaoService.removerOfertaSolucao(id);
         return ResponseEntity.noContent().build();
     }
 }

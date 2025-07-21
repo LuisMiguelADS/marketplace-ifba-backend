@@ -7,9 +7,9 @@ import com.marketplace.ifba.exception.DadoNaoEncontradoException;
 import com.marketplace.ifba.mapper.OrganizacaoMapper;
 import com.marketplace.ifba.model.Organizacao;
 import com.marketplace.ifba.model.User;
+import com.marketplace.ifba.model.enums.StatusOrganizacao;
 import com.marketplace.ifba.repository.OrganizacaoRepository;
 import com.marketplace.ifba.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,11 +21,8 @@ import java.util.stream.Collectors;
 @Service
 public class OrganizacaoService {
 
-    @Autowired
     private final OrganizacaoRepository organizacaoRepository;
-    @Autowired
     private final UserRepository userRepository;
-    @Autowired
     private final OrganizacaoMapper organizacaoMapper;
 
     public OrganizacaoService(OrganizacaoRepository organizacaoRepository, UserRepository userRepository, OrganizacaoMapper organizacaoMapper) {
@@ -34,8 +31,9 @@ public class OrganizacaoService {
         this.organizacaoMapper = organizacaoMapper;
     }
 
-    // Leitura
+    // ---------- LEITURA
 
+    // BUSCA ORGANIZAÇÃO PELO SEU ID
     @Transactional(readOnly = true)
     public OrganizacaoResponse buscarOrganizacaoPorId(UUID idOrganizacao) {
         Organizacao organizacao = organizacaoRepository.findById(idOrganizacao)
@@ -43,6 +41,7 @@ public class OrganizacaoService {
         return organizacaoMapper.toDTO(organizacao);
     }
 
+    // LISTA TODAS AS ORGANIZAÇÕES DO SISTEMA
     @Transactional(readOnly = true)
     public List<OrganizacaoResponse> buscarTodasOrganizacoes() {
         return organizacaoRepository.findAll().stream()
@@ -50,6 +49,7 @@ public class OrganizacaoService {
                 .collect(Collectors.toList());
     }
 
+    // BUSCA ORGANIZAÇÃO PELO SEU NOME
     @Transactional(readOnly = true)
     public OrganizacaoResponse buscarOrganizacaoPorNome(String nome) {
         Organizacao organizacao = organizacaoRepository.findByNome(nome)
@@ -57,8 +57,9 @@ public class OrganizacaoService {
         return organizacaoMapper.toDTO(organizacao);
     }
 
-    // Escrita
+    // ---------- ESCRITA
 
+    // REGISTRA ORGANIZAÇÃO
     @Transactional
     public OrganizacaoResponse registrarOrganizacao(OrganizacaoRequest request, UUID idUsuarioRegistrador) {
         if (organizacaoRepository.findByNome(request.nome()).isPresent()) {
@@ -70,7 +71,7 @@ public class OrganizacaoService {
 
         Organizacao organizacao = organizacaoMapper.toEntity(request);
         organizacao.setDataRegistro(LocalDateTime.now());
-        organizacao.setStatus("PENDENTE_APROVACAO");
+        organizacao.setStatus(StatusOrganizacao.AGUARDANDO_APROVACAO);
 
         User usuarioRegistro = userRepository.findById(idUsuarioRegistrador)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Usuário registrador não encontrado com o ID: " + idUsuarioRegistrador));
@@ -79,6 +80,7 @@ public class OrganizacaoService {
         return organizacaoMapper.toDTO(organizacaoRepository.save(organizacao));
     }
 
+    // ATUALIZA ORGANIZAÇÃO
     @Transactional
     public OrganizacaoResponse atualizarOrganizacao(UUID idOrganizacao, OrganizacaoRequest request) {
         Organizacao organizacaoExistente = organizacaoRepository.findById(idOrganizacao)
@@ -97,27 +99,30 @@ public class OrganizacaoService {
         return organizacaoMapper.toDTO(organizacaoRepository.save(organizacaoExistente));
     }
 
+
+    // APROVA ORGANIZAÇÃO
     @Transactional
     public OrganizacaoResponse aprovarOrganizacao(UUID idOrganizacao, UUID idAdmAprovador) {
         Organizacao organizacao = organizacaoRepository.findById(idOrganizacao)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada para aprovação com o ID: " + idOrganizacao));
 
-        if (!"PENDENTE_APROVACAO".equals(organizacao.getStatus())) {
+        if (!StatusOrganizacao.AGUARDANDO_APROVACAO.equals(organizacao.getStatus())) {
             throw new IllegalStateException("A organização não está no status 'PENDENTE_APROVACAO' para ser aprovada.");
         }
 
         User admAprovador = userRepository.findById(idAdmAprovador)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Administrador aprovador não encontrado com o ID: " + idAdmAprovador));
 
-        organizacao.setStatus("APROVADA");
+        organizacao.setStatus(StatusOrganizacao.APROVADA);
         organizacao.setDataAprovacao(LocalDateTime.now());
         organizacao.setAdmAprovacao(admAprovador);
 
         return organizacaoMapper.toDTO(organizacaoRepository.save(organizacao));
     }
 
+    // REMOVE ORGANIZAÇÃO
     @Transactional
-    public void deletarOrganizacao(UUID idOrganizacao) {
+    public void removerOrganizacao(UUID idOrganizacao) {
         if (!organizacaoRepository.existsById(idOrganizacao)) {
             throw new DadoNaoEncontradoException("Organização não encontrada para exclusão com o ID: " + idOrganizacao);
         }

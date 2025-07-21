@@ -53,8 +53,8 @@ public class OrganizacaoController {
     }
 
     @DeleteMapping("/{idOrganizacao}")
-    public ResponseEntity<Void> deletarOrganizacao(@PathVariable UUID idOrganizacao) {
-        organizacaoService.deletarOrganizacao(idOrganizacao);
+    public ResponseEntity<Void> removerOrganizacao(@PathVariable UUID idOrganizacao) {
+        organizacaoService.removerOrganizacao(idOrganizacao);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

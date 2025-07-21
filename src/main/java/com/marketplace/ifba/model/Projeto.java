@@ -21,31 +21,31 @@ public class Projeto {
     @Column(name = "name", nullable = false)
     private String nome;
 
-    @Size(max = 20)
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "status", nullable = false)
     private StatusProjeto status;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id")
+    @JoinColumn(name = "organization_id", updatable = false)
     private Organizacao organizacao;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "institution_id")
+    @JoinColumn(name = "institution_id", updatable = false)
     private Instituicao instituicao;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "demand_id")
+    @JoinColumn(name = "demand_id", updatable = false)
     private Demanda demanda;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "offer_solution_id")
+    @JoinColumn(name = "offer_solution_id", updatable = false)
     private OfertaSolucao solucaoOferta;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "research_group_id")
+    @JoinColumn(name = "research_group_id", updatable = false)
     private GrupoPesquisa grupoPesquisa;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "chat_id")
+    @JoinColumn(name = "chat_id", updatable = false)
     private Chat chat;
 }

@@ -1,5 +1,8 @@
 package com.marketplace.ifba.dto;
 
+import com.marketplace.ifba.model.User;
+import com.marketplace.ifba.model.enums.StatusInstituicao;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -12,13 +15,13 @@ public record InstituicaoResponse(
         String setor,
         String telefone,
         String site,
-        String status,
+        StatusInstituicao status,
         String logoURL,
         String descricao,
         LocalDateTime dataRegistro,
         LocalDateTime dataAprovacao,
         LocalDateTime dataAtualizacao,
-        String nomeAdmAprovacao,
-        String nomeUsuarioRegistro
+        UserResponse admAprovacao,
+        UserResponse usuarioRegistro
 ) {
 }

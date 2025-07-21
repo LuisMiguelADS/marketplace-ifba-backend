@@ -1,5 +1,6 @@
 package com.marketplace.ifba.model;
 
+import com.marketplace.ifba.model.enums.StatusInstituicao;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Id;
@@ -51,9 +52,9 @@ public class Instituicao {
     @Column(name = "site_url")
     private String site;
 
-    @Size(max = 20)
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "status", nullable = false)
-    private String status;
+    private StatusInstituicao status;
 
     @Size(max = 500)
     @Column(name = "logo_url", length = 500)

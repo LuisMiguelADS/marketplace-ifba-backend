@@ -54,7 +54,7 @@ public class Proposta {
     @Column(name = "necessary_resources", length = 500)
     private String recursosNecessarios;
 
-    @Size(max = 20)
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "status", nullable = false)
     private StatusProposta status;
 

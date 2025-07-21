@@ -17,6 +17,7 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
+    // GERA TOKEN DE ACESSO
     public String generateToken(User user) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -31,6 +32,7 @@ public class TokenService {
         }
     }
 
+    // VALIDA TOKEN DE ACESSO
     public String validateToken(String token) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
@@ -44,6 +46,7 @@ public class TokenService {
         }
     }
 
+    // DEFINE O TEMPO DE VIDA QUE UM TOKEN VAI TER
     private Instant genExperationDate() {
         return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
     }

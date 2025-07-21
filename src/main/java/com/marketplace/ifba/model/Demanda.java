@@ -41,7 +41,7 @@ public class Demanda {
     @Column(name = "criteria", length = 1000, nullable = false)
     private String criterio;
 
-    @Size(max = 20)
+    @Enumerated(EnumType.ORDINAL)
     @Column(name = "status", nullable = false)
     private StatusDemanda status;
 

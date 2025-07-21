@@ -1,5 +1,7 @@
 package com.marketplace.ifba.dto;
 
+import com.marketplace.ifba.model.enums.StatusOrganizacao;
+
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -12,7 +14,7 @@ public record OrganizacaoResponse(
         String setor,
         String telefone,
         String site,
-        String status,
+        StatusOrganizacao status,
         String logoURL,
         String descricao,
         LocalDateTime dataRegistro,
