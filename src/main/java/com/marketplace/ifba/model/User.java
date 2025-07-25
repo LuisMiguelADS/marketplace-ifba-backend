@@ -56,7 +56,7 @@ public class User implements UserDetails {
     private LocalDateTime dataRegistro;
 
     @Column(name = "data_nascimento", nullable = false, updatable = false)
-    private LocalDateTime dataNascimento;
+    private LocalDate dataNascimento;
 
     @Column(name = "biografia", nullable = false)
     private String biografia;
@@ -76,7 +76,7 @@ public class User implements UserDetails {
     /*@Column(nullable = false)
     private List<Conexao> conexoes;*/
 
-    public User(String nomeCompleto, UserRole role, String email, String telefone, String password,String cpf, LocalDateTime dataNascimento,
+    public User(String nomeCompleto, UserRole role, String email, String telefone, String password,String cpf, LocalDate dataNascimento,
                 String biografia, String fotoPerfilURL, String endereco, String instituicao, String organizacao) {
         this.nomeCompleto = nomeCompleto;
         this.role = role;
