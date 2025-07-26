@@ -11,6 +11,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -65,7 +66,7 @@ public class UserService {
 
         User newUser = userMapper.toEntity(request);
         newUser.setPassword(encryptedPassword);
-        newUser.setDataRegistro(LocalDateTime.now());
+        newUser.setDataRegistro(LocalDate.now());
         User savedUser = userRepository.save(newUser);
 
         return userMapper.toDTO(savedUser);

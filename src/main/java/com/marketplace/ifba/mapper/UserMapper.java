@@ -22,10 +22,10 @@ public class UserMapper {
         user.setCpf(request.cpf());
         user.setDataNascimento(request.dataNascimento());
         user.setBiografia(request.biografia());
-        user.setFotoPerfilURL(request.fotoPerfilURL());
-        user.setEndereco(request.endereco());
-        user.setInstituicao(request.instituicao());
-        user.setOrganizacao(request.organizacao());
+//        user.setFotoPerfilURL(request.fotoPerfilURL());
+//        user.setEndereco(request.endereco());
+//        user.setInstituicao(request.instituicao());
+//        user.setOrganizacao(request.organizacao());
         return user;
     }
 
@@ -42,8 +42,7 @@ public class UserMapper {
                 user.getTelefone(),
                 user.getDataRegistro(),
                 user.getDataNascimento(),
-                user.getBiografia(),
-                user.getEndereco()
+                user.getBiografia()
         );
     }
 
@@ -54,7 +53,6 @@ public class UserMapper {
         if (user == null) {
             throw new IllegalArgumentException("Usuário a ser atualizado não pode ser nulo.");
         }
-
         if (request.nomeCompleto() != null) {
             user.setNomeCompleto(request.nomeCompleto());
         }
@@ -70,18 +68,18 @@ public class UserMapper {
         if (request.biografia() != null) {
             user.setBiografia(request.biografia());
         }
-        if (request.fotoPerfilURL() != null) {
-            user.setFotoPerfilURL(request.fotoPerfilURL());
-        }
-        if (request.endereco() != null) {
-            user.setEndereco(request.endereco());
-        }
-        if (request.instituicao() != null) {
-            user.setInstituicao(request.instituicao());
-        }
-        if (request.organizacao() != null) {
-            user.setOrganizacao(request.organizacao());
-        }
+//        if (request.fotoPerfilURL() != null) {
+//            user.setFotoPerfilURL(request.fotoPerfilURL());
+//        }
+//        if (request.endereco() != null) {
+//            user.setEndereco(request.endereco());
+//        }
+//        if (request.instituicao() != null) {
+//            user.setInstituicao(request.instituicao());
+//        }
+//        if (request.organizacao() != null) {
+//            user.setOrganizacao(request.organizacao());
+//        }
 
         return user;
     }

@@ -53,7 +53,7 @@ public class User implements UserDetails {
     private String cpf;
 
     @Column(name = "data_registro", nullable = false, updatable = false)
-    private LocalDateTime dataRegistro;
+    private LocalDate dataRegistro;
 
     @Column(name = "data_nascimento", nullable = false, updatable = false)
     private LocalDate dataNascimento;
@@ -61,11 +61,11 @@ public class User implements UserDetails {
     @Column(name = "biografia", nullable = false)
     private String biografia;
 
-    @Column(name = "foto_perfil_URL", nullable = false)
-    private String fotoPerfilURL;
-
-    @Column(name = "endereco", nullable = false)
-    private String endereco;
+//    @Column(name = "foto_perfil_URL", nullable = false)
+//    private String fotoPerfilURL;
+//
+//    @Column(name = "endereco", nullable = false)
+//    private String endereco;
 
     @Column(name = "instituicao")
     private String instituicao;
@@ -77,7 +77,7 @@ public class User implements UserDetails {
     private List<Conexao> conexoes;*/
 
     public User(String nomeCompleto, UserRole role, String email, String telefone, String password,String cpf, LocalDate dataNascimento,
-                String biografia, String fotoPerfilURL, String endereco, String instituicao, String organizacao) {
+                String biografia, String instituicao, String organizacao) {
         this.nomeCompleto = nomeCompleto;
         this.role = role;
         this.email = email;
@@ -86,8 +86,6 @@ public class User implements UserDetails {
         this.cpf = cpf;
         this.dataNascimento = dataNascimento;
         this.biografia = biografia;
-        this.fotoPerfilURL = fotoPerfilURL;
-        this.endereco = endereco;
         this.instituicao = instituicao;
         this.organizacao = organizacao;
     }

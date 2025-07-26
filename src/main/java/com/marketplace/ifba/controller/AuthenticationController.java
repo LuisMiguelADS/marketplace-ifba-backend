@@ -9,6 +9,10 @@ import com.marketplace.ifba.model.User;
 import com.marketplace.ifba.repository.UserRepository;
 import com.marketplace.ifba.service.TokenService;
 import com.marketplace.ifba.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,25 +28,26 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/auth")
+@Tag(name = "Autenticação do Usuário", description = "Gerencia a autenticação da API")
 public class AuthenticationController {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
-    @Autowired
-    private TokenService tokenService;
+    private final TokenService tokenService;
 
-    @Autowired
     private final UserService userService;
 
-    @Autowired
-    UserMapper userMapper;
+    private final UserMapper userMapper;
 
-    public AuthenticationController(UserService userService) {
+    public AuthenticationController(AuthenticationManager authenticationManager, TokenService tokenService, UserService userService, UserMapper userMapper) {
+        this.authenticationManager = authenticationManager;
+        this.tokenService = tokenService;
         this.userService = userService;
+        this.userMapper = userMapper;
     }
 
-    @PostMapping("/login")
+    @Operation(summary = "Login do usuário", description = "Realiza login do usuário, retornando as informações e token de autenticação do mesmo.")
+    @PostMapping(value = "/login")
     public ResponseEntity login(@RequestBody @Valid AuthenticationDTO data) {
         var userNamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
         var auth = this.authenticationManager.authenticate(userNamePassword);
@@ -50,10 +55,10 @@ public class AuthenticationController {
         UserResponse userResponse = userMapper.toDTO(userAutenticado);
         var token = tokenService.generateToken((User) auth.getPrincipal());
 
-
         return ResponseEntity.ok(new LoginResponse(token, userResponse));
     }
 
+    @Operation(summary = "Registra usuário", description = "Realiza registro do usuário se passar das regras de negócio, como CPF único no sistema")
     @PostMapping("/register")
     public ResponseEntity register(@RequestBody @Valid UserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.registrarUsuario(request));

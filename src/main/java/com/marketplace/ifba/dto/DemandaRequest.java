@@ -30,8 +30,6 @@ public record DemandaRequest(
         @Size(max = 1000, message = "Os critérios não podem exceder 1000 caracteres.")
         String criterio,
 
-        // Status, aprovação e visualizações são gerenciados internamente
-
         @NotNull(message = "A data do prazo final da demanda é obrigatória.")
         @FutureOrPresent(message = "A data do prazo final deve ser no presente ou futuro.")
         LocalDateTime dataPrazoFinal,

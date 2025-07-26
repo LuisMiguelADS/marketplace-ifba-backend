@@ -4,9 +4,10 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record AprovarOrganizacaoRequest(@NotNull(message = "O ID da organização é obrigatório para aprovação.")
-                                        UUID idOrganizacao,
+public record AprovarOrganizacaoRequest(
+        @NotNull(message = "O ID da organização é obrigatório para aprovação.")
+        UUID idOrganizacao,
 
-                                        @NotNull(message = "O ID do administrador aprovador é obrigatório.")
-                                        UUID idAdmAprovador) {
-}
+        @NotNull(message = "O ID do administrador aprovador é obrigatório.")
+        UUID idAdmAprovador
+) {}

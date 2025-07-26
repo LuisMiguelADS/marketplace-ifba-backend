@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.marketplace.ifba.model.enums.UserRole;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record UserResponse(
@@ -13,10 +12,9 @@ public record UserResponse(
         UserRole role,
         String email,
         String telefone,
-        @JsonFormat(pattern = "dd-MM-yyyy'T'HH:mm:ss")
-        LocalDateTime dataRegistro,
+        @JsonFormat(pattern = "dd-MM-yyyy")
+        LocalDate dataRegistro,
         @JsonFormat(pattern = "dd-MM-yyyy")
         LocalDate dataNascimento,
-        String biografia,
-        String endereco
+        String biografia
 ) {}
