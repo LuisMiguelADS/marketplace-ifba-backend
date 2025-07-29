@@ -1,10 +1,6 @@
 package com.marketplace.ifba.service;
 
-import com.marketplace.ifba.dto.DemandaRequest;
-import com.marketplace.ifba.dto.DemandaResponse;
-import com.marketplace.ifba.exception.DadoConflitoException;
 import com.marketplace.ifba.exception.DadoNaoEncontradoException;
-import com.marketplace.ifba.mapper.DemandaMapper;
 import com.marketplace.ifba.model.Demanda;
 import com.marketplace.ifba.model.Organizacao;
 import com.marketplace.ifba.model.User;
@@ -15,10 +11,9 @@ import com.marketplace.ifba.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class DemandaService {
@@ -26,32 +21,27 @@ public class DemandaService {
     private final DemandaRepository demandaRepository;
     private final UserRepository userRepository;
     private final OrganizacaoRepository organizacaoRepository;
-    private final DemandaMapper demandaMapper;
 
     public DemandaService(DemandaRepository demandaRepository, UserRepository userRepository,
-                          OrganizacaoRepository organizacaoRepository, DemandaMapper demandaMapper) {
+                          OrganizacaoRepository organizacaoRepository) {
         this.demandaRepository = demandaRepository;
         this.userRepository = userRepository;
         this.organizacaoRepository = organizacaoRepository;
-        this.demandaMapper = demandaMapper;
     }
 
     // ---------- LEITURA
 
     // BUSCA DEMANDA PELO SEU ID
     @Transactional(readOnly = true)
-    public DemandaResponse buscarDemandaPorId(UUID idDemanda) {
-        Demanda demanda = demandaRepository.findById(idDemanda)
+    public Demanda buscarDemandaPorId(UUID idDemanda) {
+        return demandaRepository.findById(idDemanda)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada com o ID: " + idDemanda));
-        return demandaMapper.toDTO(demanda);
     }
 
     // BUSCA DEMANDA POR NOME
     @Transactional(readOnly = true)
-    public DemandaResponse buscarDemandaPorNome(String nome) {
-        Demanda demanda = demandaRepository.findByNome(nome)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada com o nome: " + nome));
-        return demandaMapper.toDTO(demanda);
+    public Demanda buscarDemandaPorNome(String nome) {
+        return demandaRepository.findAll().stream().filter(dem -> dem.getNome().equals(nome)).findFirst().orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada com o nome: " + nome));
     }
 
     // REALIZA A ADIÇÃO DE VISUALIZAÇÕES
@@ -59,105 +49,90 @@ public class DemandaService {
     public void incrementarVizualizacao(UUID idDemanda) {
         Demanda demanda = demandaRepository.findById(idDemanda)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada com o ID: " + idDemanda));
-        demanda.setVizualizacoes(demanda.getVizualizacoes() + 1);
+        demanda.setVisualizacoes(demanda.getVisualizacoes() + 1);
         demandaRepository.save(demanda);
     }
 
     // LISTA DEMANDAS PELA ORGANIZAÇÃO
     @Transactional(readOnly = true)
-    public List<DemandaResponse> buscarDemandasPorOrganizacao(UUID idOrganizacao) {
+    public List<Demanda> buscarDemandasPorOrganizacao(UUID idOrganizacao) {
         if (!organizacaoRepository.existsById(idOrganizacao)) {
             throw new DadoNaoEncontradoException("Organização não encontrada com o ID: " + idOrganizacao);
         }
         return demandaRepository.findAll().stream()
                 .filter(demanda -> demanda.getOrganizacao().getIdOrganizacao().equals(idOrganizacao))
-                .map(demandaMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // LISTA TODAS DEMANDAS
     @Transactional(readOnly = true)
-    public List<DemandaResponse> buscarTodasDemandas() {
-        return demandaRepository.findAll().stream()
-                .map(demandaMapper::toDTO)
-                .collect(Collectors.toList());
+    public List<Demanda> buscarTodasDemandas() {
+        return demandaRepository.findAll();
     }
 
     // ---------- ESCRITA
 
     // REGITRA DEMANDA
     @Transactional
-    public DemandaResponse registrarDemanda(DemandaRequest request) {
-        if (demandaRepository.findByNome(request.nome()).isPresent()) {
-            throw new DadoConflitoException("Já existe uma demanda com o nome: '" + request.nome() + "'.");
-        }
-
-        Demanda demanda = demandaMapper.toEntity(request);
+    public Demanda registrarDemanda(Demanda demanda, UUID usuarioRegistrador, UUID idOrganizacao) {
         demanda.setStatus(StatusDemanda.AGUARDANDO_APROVACAO);
-        demanda.setAprovacaoDemandante(false);
-        demanda.setVizualizacoes(0);
+        demanda.setVisualizacoes(0);
 
-        User usuarioCriador = userRepository.findById(request.idUsuarioCriador())
-                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário criador não encontrado com o ID: " + request.idUsuarioCriador()));
-        demanda.setUsuarioCriador(usuarioCriador);
+        User usuarioCriador = userRepository.findById(usuarioRegistrador)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário criador não encontrado com o ID: " + usuarioRegistrador));
+        demanda.setUsuarioRegistrador(usuarioCriador);
 
-        Organizacao organizacao = organizacaoRepository.findById(request.idOrganizacao())
-                .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada com o ID: " + request.idOrganizacao()));
+        Organizacao organizacao = organizacaoRepository.findById(idOrganizacao)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada com o ID: " + idOrganizacao));
         demanda.setOrganizacao(organizacao);
 
-        return demandaMapper.toDTO(demandaRepository.save(demanda));
+        return demandaRepository.save(demanda);
     }
 
     // ATUALIZA DEMANDA
     @Transactional
-    public DemandaResponse atualizarDemanda(UUID idDemanda, DemandaRequest request) {
-        Demanda demandaExistente = demandaRepository.findById(idDemanda)
+    public Demanda atualizarDemanda(Demanda demanda, UUID idDemanda) {
+        Demanda demandaSaved = demandaRepository.findById(idDemanda)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada para atualização com o ID: " + idDemanda));
 
-        if (!demandaExistente.getNome().equals(request.nome())) {
-            demandaRepository.findByNome(request.nome()).ifPresent(d -> {
-                if (!d.getIdDemanda().equals(idDemanda)) {
-                    throw new DadoConflitoException("Já existe outra demanda com o nome: '" + request.nome() + "'.");
-                }
-            });
-        }
+        // ATRIBUTOS QUE PODEM SER ALTERADOS
+        demandaSaved.setNome(demanda.getNome());
+        demandaSaved.setOrcamento(demanda.getOrcamento());
+        demandaSaved.setDescricao(demanda.getDescricao());
+        demandaSaved.setCriterio(demanda.getCriterio());
+        demandaSaved.setDataPrazoFinal(demanda.getDataPrazoFinal());
 
-        demandaMapper.updateEntityFromRequest(request, demandaExistente);
-
-        return demandaMapper.toDTO(demandaRepository.save(demandaExistente));
+        return demandaRepository.save(demandaSaved);
     }
 
     // ATUALIZA STATUS DA DEMANDA
     @Transactional
-    public DemandaResponse atualizarStatusDemanda(UUID idDemanda, StatusDemanda novoStatus) {
+    public Demanda atualizarStatusDemanda(UUID idDemanda, StatusDemanda novoStatus) {
         Demanda demanda = demandaRepository.findById(idDemanda)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada com o ID: " + idDemanda));
-
         demanda.setStatus(novoStatus);
-        return demandaMapper.toDTO(demandaRepository.save(demanda));
+
+        return demandaRepository.save(demanda);
     }
 
     // APROVA DEMANDA
     @Transactional
-    public DemandaResponse aprovarDemandaDemandante(UUID idDemanda, Boolean aprovado) {
+    public Demanda aprovarDemandaDemandante(UUID idDemanda, Boolean decisao) {
         Demanda demanda = demandaRepository.findById(idDemanda)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada com o ID: " + idDemanda));
 
-        if (aprovado && demanda.getAprovacaoDemandante()) {
-            throw new IllegalStateException("Demanda já aprovada pelo demandante.");
-        }
-        if (!aprovado && !demanda.getAprovacaoDemandante()) {
-            throw new IllegalStateException("Demanda já está como não aprovada pelo demandante.");
+        if (!demanda.getStatus().equals(StatusDemanda.AGUARDANDO_APROVACAO)) {
+            throw new IllegalStateException("A demanda não está no status 'AGUARDANDO_APROVACAO' para ser aprovada.");
         }
 
-        demanda.setAprovacaoDemandante(aprovado);
-        if (aprovado) {
-            demanda.setDataAprovado(LocalDateTime.now());
+        if (decisao) {
+            demanda.setStatus(StatusDemanda.AGUARDANDO_PROPOSTA);
         } else {
-            demanda.setDataAprovado(null);
+            demanda.setStatus(StatusDemanda.NAO_APROVADA);
         }
+        demanda.setDataAprovado(LocalDate.now());
 
-        return demandaMapper.toDTO(demandaRepository.save(demanda));
+        return demandaRepository.save(demanda);
     }
 
     // REMOVE DEMANDA

@@ -53,11 +53,6 @@ public class Organizacao {
     @Column(name = "status", nullable = false)
     private StatusOrganizacao status;
 
-    @URL()
-    @Size(max = 500)
-    @Column(name = "logo_url", length = 500)
-    private String logoURL;
-
     @Size(max = 2000)
     @Column(name = "description", length = 2000)
     private String descricao;

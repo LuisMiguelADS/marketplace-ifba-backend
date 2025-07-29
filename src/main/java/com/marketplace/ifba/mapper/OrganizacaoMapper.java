@@ -32,7 +32,6 @@ public class OrganizacaoMapper {
         organizacao.setSetor(request.setor());
         organizacao.setTelefone(request.telefone());
         organizacao.setSite(request.site());
-        organizacao.setLogoURL(request.logoURL());
         organizacao.setDescricao(request.descricao());
 
         return organizacao;
@@ -61,7 +60,6 @@ public class OrganizacaoMapper {
                 organizacao.getTelefone(),
                 organizacao.getSite(),
                 organizacao.getStatus(),
-                organizacao.getLogoURL(),
                 organizacao.getDescricao(),
                 organizacao.getDataRegistro(),
                 organizacao.getDataAprovacao(),
@@ -82,7 +80,6 @@ public class OrganizacaoMapper {
         Optional.ofNullable(request.setor()).ifPresent(organizacao::setSetor);
         Optional.ofNullable(request.telefone()).ifPresent(organizacao::setTelefone);
         Optional.ofNullable(request.site()).ifPresent(organizacao::setSite);
-        Optional.ofNullable(request.logoURL()).ifPresent(organizacao::setLogoURL);
         Optional.ofNullable(request.descricao()).ifPresent(organizacao::setDescricao);
     }
 }

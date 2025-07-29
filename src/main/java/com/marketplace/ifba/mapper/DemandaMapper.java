@@ -49,11 +49,10 @@ public class DemandaMapper {
                 demanda.getResumo(),
                 demanda.getCriterio(),
                 demanda.getStatus(),
-                demanda.getAprovacaoDemandante(),
-                demanda.getVizualizacoes(),
+                demanda.getVisualizacoes(),
                 demanda.getDataPrazoFinal(),
                 demanda.getDataAprovado(),
-                Optional.ofNullable(demanda.getUsuarioCriador()).map(userMapper::toDTO).orElse(null),
+                Optional.ofNullable(demanda.getUsuarioRegistrador()).map(userMapper::toDTO).orElse(null),
                 Optional.ofNullable(demanda.getOrganizacao()).map(organizacaoMapper::toDTO).orElse(null)
         );
     }

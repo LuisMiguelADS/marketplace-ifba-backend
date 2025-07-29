@@ -31,36 +31,25 @@ import java.time.LocalDateTime;
 @Tag(name = "Autenticação do Usuário", description = "Gerencia a autenticação da API")
 public class AuthenticationController {
 
-    private final AuthenticationManager authenticationManager;
-
-    private final TokenService tokenService;
-
     private final UserService userService;
-
     private final UserMapper userMapper;
 
-    public AuthenticationController(AuthenticationManager authenticationManager, TokenService tokenService, UserService userService, UserMapper userMapper) {
-        this.authenticationManager = authenticationManager;
-        this.tokenService = tokenService;
+    public AuthenticationController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
         this.userMapper = userMapper;
     }
 
     @Operation(summary = "Login do usuário", description = "Realiza login do usuário, retornando as informações e token de autenticação do mesmo.")
     @PostMapping(value = "/login")
-    public ResponseEntity login(@RequestBody @Valid AuthenticationDTO data) {
-        var userNamePassword = new UsernamePasswordAuthenticationToken(data.email(), data.password());
-        var auth = this.authenticationManager.authenticate(userNamePassword);
-        User userAutenticado = (User) auth.getPrincipal();
-        UserResponse userResponse = userMapper.toDTO(userAutenticado);
-        var token = tokenService.generateToken((User) auth.getPrincipal());
-
-        return ResponseEntity.ok(new LoginResponse(token, userResponse));
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid AuthenticationDTO data) {
+        UserResponse user = userMapper.toDTO(userService.buscarUsuarioPorEmail(data.email()));
+        String token = userService.registraLogin(data.email(), data.password());
+        return ResponseEntity.ok(new LoginResponse(token, user));
     }
 
     @Operation(summary = "Registra usuário", description = "Realiza registro do usuário se passar das regras de negócio, como CPF único no sistema")
     @PostMapping("/register")
-    public ResponseEntity register(@RequestBody @Valid UserRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.registrarUsuario(request));
+    public ResponseEntity<UserResponse> register(@RequestBody @Valid UserRequest request) {
+        return ResponseEntity.ok(userMapper.toDTO(userService.registrarUsuario(userMapper.toEntity(request))));
     }
 }

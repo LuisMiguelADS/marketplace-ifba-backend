@@ -15,10 +15,9 @@ public record OrganizacaoResponse(
         String telefone,
         String site,
         StatusOrganizacao status,
-        String logoURL,
         String descricao,
         LocalDateTime dataRegistro,
         LocalDateTime dataAprovacao,
-        UserResponse admAprovacao, // Usando UserResponse
-        UserResponse usuarioRegistro // Usando UserResponse
+        UserResponse admAprovacao,
+        UserResponse usuarioRegistro
 ) {}

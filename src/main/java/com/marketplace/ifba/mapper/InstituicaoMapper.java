@@ -30,7 +30,6 @@ public class InstituicaoMapper {
         instituicao.setSetor(request.setor());
         instituicao.setTelefone(request.telefone());
         instituicao.setSite(request.site());
-        instituicao.setLogoURL(request.logoURL());
         instituicao.setDescricao(request.descricao());
 
         return instituicao;
@@ -59,7 +58,6 @@ public class InstituicaoMapper {
                 instituicao.getTelefone(),
                 instituicao.getSite(),
                 instituicao.getStatus(),
-                instituicao.getLogoURL(),
                 instituicao.getDescricao(),
                 instituicao.getDataRegistro(),
                 instituicao.getDataAprovacao(),
@@ -70,9 +68,6 @@ public class InstituicaoMapper {
     }
 
     public void updateEntityFromRequest(InstituicaoRequest request, Instituicao instituicao) {
-        if (request == null || instituicao == null) {
-            return;
-        }
 
         Optional.ofNullable(request.nome()).ifPresent(instituicao::setNome);
         Optional.ofNullable(request.sigla()).ifPresent(instituicao::setSigla);
@@ -81,7 +76,6 @@ public class InstituicaoMapper {
         Optional.ofNullable(request.setor()).ifPresent(instituicao::setSetor);
         Optional.ofNullable(request.telefone()).ifPresent(instituicao::setTelefone);
         Optional.ofNullable(request.site()).ifPresent(instituicao::setSite);
-        Optional.ofNullable(request.logoURL()).ifPresent(instituicao::setLogoURL);
         Optional.ofNullable(request.descricao()).ifPresent(instituicao::setDescricao);
     }
 }

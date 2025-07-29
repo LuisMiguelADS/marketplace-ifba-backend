@@ -10,5 +10,4 @@ import java.util.UUID;
 
 @Repository
 public interface DemandaRepository extends JpaRepository<Demanda, UUID> {
-    Optional<Demanda> findByNome(String nome);
 }

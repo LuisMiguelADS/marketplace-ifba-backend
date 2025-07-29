@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -45,23 +45,20 @@ public class Demanda {
     @Column(name = "status", nullable = false)
     private StatusDemanda status;
 
-    @Column(name = "organization_aprovation", nullable = false)
-    private Boolean aprovacaoDemandante;
-
     @Min(value = 0)
     @Column(name = "views_count", nullable = false)
-    private Integer vizualizacoes;
+    private Integer visualizacoes;
 
     @FutureOrPresent()
     @Column(name = "date_term_demand", nullable = false)
-    private LocalDateTime dataPrazoFinal;
+    private LocalDate dataPrazoFinal;
 
     @Column(name = "date_approved_demand", updatable = false)
-    private LocalDateTime dataAprovado;
+    private LocalDate dataAprovado;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "creator_user_id", nullable = false, updatable = false)
-    private User usuarioCriador;
+    @JoinColumn(name = "register_user_id", nullable = false, updatable = false)
+    private User usuarioRegistrador;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false, updatable = false)

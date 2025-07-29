@@ -2,7 +2,7 @@ package com.marketplace.ifba.dto;
 
 import jakarta.validation.constraints.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 public record DemandaRequest(
@@ -32,10 +32,10 @@ public record DemandaRequest(
 
         @NotNull(message = "A data do prazo final da demanda é obrigatória.")
         @FutureOrPresent(message = "A data do prazo final deve ser no presente ou futuro.")
-        LocalDateTime dataPrazoFinal,
+        LocalDate dataPrazoFinal,
 
         @NotNull(message = "O ID do usuário criador é obrigatório.")
-        UUID idUsuarioCriador,
+        UUID idUsuarioRegistrador,
 
         @NotNull(message = "O ID da organização é obrigatório.")
         UUID idOrganizacao

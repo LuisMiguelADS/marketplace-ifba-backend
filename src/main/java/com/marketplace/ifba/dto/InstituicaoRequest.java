@@ -3,6 +3,8 @@ package com.marketplace.ifba.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
+import java.util.UUID;
+
 public record InstituicaoRequest(
         @NotBlank(message = "O nome da instituição é obrigatório.")
         String nome,
@@ -20,8 +22,8 @@ public record InstituicaoRequest(
         @Pattern(regexp = "^(https?|ftp|file)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]$",
                 message = "URL do site inválida.")
         String site,
-        String logoURL,
-        String descricao
+        String descricao,
+        UUID idUsuarioRegistrador
 ) {
     public InstituicaoRequest {
         if (telefone != null && telefone.isBlank()) {
@@ -29,9 +31,6 @@ public record InstituicaoRequest(
         }
         if (site != null && site.isBlank()) {
             site = null;
-        }
-        if (logoURL != null && logoURL.isBlank()) {
-            logoURL = null;
         }
         if (descricao != null && descricao.isBlank()) {
             descricao = null;

@@ -1,9 +1,6 @@
 package com.marketplace.ifba.service;
 
-import com.marketplace.ifba.dto.InstituicaoRequest;
-import com.marketplace.ifba.dto.InstituicaoResponse;
 import com.marketplace.ifba.exception.DadoNaoEncontradoException;
-import com.marketplace.ifba.mapper.InstituicaoMapper;
 import com.marketplace.ifba.model.Instituicao;
 import com.marketplace.ifba.model.User;
 import com.marketplace.ifba.model.enums.StatusInstituicao;
@@ -14,106 +11,92 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class InstituicaoService {
 
     private final InstituicaoRepository instituicaoRepository;
     private final UserRepository userRepository;
-    private final InstituicaoMapper instituicaoMapper;
 
-    public InstituicaoService(InstituicaoRepository instituicaoRepository, UserRepository userRepository, InstituicaoMapper instituicaoMapper) {
+    public InstituicaoService(InstituicaoRepository instituicaoRepository, UserRepository userRepository) {
         this.instituicaoRepository = instituicaoRepository;
         this.userRepository = userRepository;
-        this.instituicaoMapper = instituicaoMapper;
     }
 
     // ---------- LEITURA
 
     // BUSCA INSTITUIÇÃO PELO SEU ID
     @Transactional(readOnly = true)
-    public InstituicaoResponse buscarInstituicaoPorId(UUID idInstituicao) {
-        return instituicaoMapper.toDTO(instituicaoRepository.findById(idInstituicao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Não foi encontrado usuário com esse ID")));
+    public Instituicao buscarInstituicaoPorId(UUID idInstituicao) {
+        return instituicaoRepository.findById(idInstituicao)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Não foi encontrado usuário com esse ID"));
     }
 
     // BUSCA INSTITUIÇÃO PELO SEU NOME
     @Transactional(readOnly = true)
-    public InstituicaoResponse buscarInstituicaoPorNome(String nome) {
-        return instituicaoMapper.toDTO(instituicaoRepository.findAll().stream().filter(inst -> inst.getNome().equals(nome)).findFirst().orElseThrow(() -> new DadoNaoEncontradoException("Não foi encontrado usuário com esse nome")));
+    public Instituicao buscarInstituicaoPorNome(String nome) {
+        return instituicaoRepository.findAll().stream().filter(inst -> inst.getNome().equals(nome)).findFirst().orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada com o nome: " + nome));
     }
 
     // LISTA TODAS INSTITUIÇÕES
     @Transactional(readOnly = true)
-    public List<InstituicaoResponse> buscarTodasInstituicoes() {
-        return instituicaoRepository.findAll().stream()
-                .map(instituicaoMapper::toDTO)
-                .collect(Collectors.toList());
+    public List<Instituicao> buscarTodasInstituicoes() {
+        return instituicaoRepository.findAll();
     }
 
     // ---------- ESCRITA
 
     // REGISTRA INSTITUIÇÃO
     @Transactional
-    public InstituicaoResponse registrarInstituicao(InstituicaoRequest request, UUID idUsuarioRegistrador) {
-        Instituicao instituicao = instituicaoMapper.toEntity(request);
+    public Instituicao registrarInstituicao(Instituicao instituicao, UUID idUsuarioRegistrador) {
         instituicao.setDataRegistro(LocalDateTime.now());
         instituicao.setStatus(StatusInstituicao.AGUARDANDO_APROVACAO);
-        instituicao.setUsuarioRegistro(userRepository.findById(idUsuarioRegistrador).orElseThrow(() -> new DadoNaoEncontradoException("Não foi encontrado usuário com esse ID: " + idUsuarioRegistrador)));
+        User user = userRepository.findById(idUsuarioRegistrador)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário não encontrado com o ID: " + idUsuarioRegistrador));
+        instituicao.setUsuarioRegistro(user);
 
-        return instituicaoMapper.toDTO(instituicaoRepository.save(instituicao));
+        return instituicaoRepository.save(instituicao);
     }
 
     // ATUALIZA INSTITUIÇÃO
     @Transactional
-    public InstituicaoResponse atualizarInstituicao(InstituicaoRequest request, UUID idInstituicao) {
-        Instituicao instituicao = instituicaoRepository.findById(idInstituicao)
+    public Instituicao atualizarInstituicao(Instituicao instituicao, UUID idInstituicao) {
+        Instituicao instituicaoSaved = instituicaoRepository.findById(idInstituicao)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Não foi encontrado instituição com esse ID: " + idInstituicao));
 
-        instituicaoMapper.updateEntityFromRequest(request, instituicao);
+        // ATRIBUTOS QUE PODEM SER ALTERADOS
+        instituicaoSaved.setNome(instituicao.getNome());
+        instituicaoSaved.setSigla(instituicao.getSigla());
+        instituicaoSaved.setTipoInstituicao(instituicao.getTipoInstituicao());
+        instituicaoSaved.setSetor(instituicao.getSetor());
+        instituicaoSaved.setTelefone(instituicao.getTelefone());
+        instituicaoSaved.setSite(instituicao.getSite());
 
-        return instituicaoMapper.toDTO(instituicaoRepository.save(instituicao));
+        return instituicaoRepository.save(instituicaoSaved);
     }
 
-    // APROVA INSTITUIÇÃO
+    // APROVA OU REPROVA INSTITUIÇÃO
     @Transactional
-    public InstituicaoResponse aprovarInstituicao(UUID idInstituicao, UUID idAdmAprovador) {
-        Instituicao instituicao = instituicaoRepository.findById(idInstituicao)
+    public Instituicao aprovarOuReprovaInstituicao(UUID idInstituicao, UUID idAdm, Boolean decisaoAdm) {
+        Instituicao instituicaoSaved = instituicaoRepository.findById(idInstituicao)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada para aprovação com o ID: " + idInstituicao));
 
-        if (!StatusInstituicao.AGUARDANDO_APROVACAO.equals(instituicao.getStatus())) {
+        if (!StatusInstituicao.AGUARDANDO_APROVACAO.equals(instituicaoSaved.getStatus())) {
             throw new IllegalStateException("A instituição não está no status 'AGUARDANDO_APROVACAO' para ser aprovada.");
         }
 
-        User admAprovador = userRepository.findById(idAdmAprovador)
+        User adm = userRepository.findById(idAdm)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Administrador não encontrado"));
 
-        instituicao.setStatus(StatusInstituicao.APROVADA);
-        instituicao.setDataAprovacao(LocalDateTime.now());
-        instituicao.setAdmAprovacao(admAprovador);
-
-        return instituicaoMapper.toDTO(instituicaoRepository.save(instituicao));
-    }
-
-    // REPROVA INSTITUIÇÃO
-    @Transactional
-    public InstituicaoResponse reprovarInstituicao(UUID idInstituicao, UUID idAdmAprovador) {
-        Instituicao instituicao = instituicaoRepository.findById(idInstituicao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada para aprovação com o ID: " + idInstituicao));
-
-        if (!StatusInstituicao.AGUARDANDO_APROVACAO.equals(instituicao.getStatus())) {
-            throw new IllegalStateException("A instituição não está no status 'AGUARDANDO_APROVACAO' para ser aprovada.");
+        if (decisaoAdm) {
+            instituicaoSaved.setStatus(StatusInstituicao.APROVADA);
+        } else {
+            instituicaoSaved.setStatus(StatusInstituicao.NAO_APROVADA);
         }
+        instituicaoSaved.setDataAprovacao(LocalDateTime.now());
+        instituicaoSaved.setAdmAprovacao(adm);
 
-        User admAprovador = userRepository.findById(idAdmAprovador)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Administrador não encontrado"));
-
-        instituicao.setStatus(StatusInstituicao.NAO_APROVADA);
-        instituicao.setDataAprovacao(LocalDateTime.now());
-        instituicao.setAdmAprovacao(admAprovador);
-
-        return instituicaoMapper.toDTO(instituicaoRepository.save(instituicao));
+        return instituicaoRepository.save(instituicaoSaved);
     }
 
     // REMOVE INSTITUIÇÃO

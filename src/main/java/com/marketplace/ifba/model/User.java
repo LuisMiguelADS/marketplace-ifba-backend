@@ -1,31 +1,18 @@
 package com.marketplace.ifba.model;
 
 import com.marketplace.ifba.model.enums.UserRole;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Column;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
-/*import java.util.List;*/
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Getter
-@Setter
+@Data
 @Entity
 @Table(name = "tb_users")
 public class User implements UserDetails {
@@ -61,34 +48,16 @@ public class User implements UserDetails {
     @Column(name = "biografia", nullable = false)
     private String biografia;
 
-//    @Column(name = "foto_perfil_URL", nullable = false)
-//    private String fotoPerfilURL;
-//
-//    @Column(name = "endereco", nullable = false)
-//    private String endereco;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "instituicao_id")
+    private Instituicao instituicao;
 
-    @Column(name = "instituicao")
-    private String instituicao;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organizacao_id")
+    private Organizacao organizacao;
 
-    @Column(name = "organizacao")
-    private String organizacao;
-
-    /*@Column(nullable = false)
-    private List<Conexao> conexoes;*/
-
-    public User(String nomeCompleto, UserRole role, String email, String telefone, String password,String cpf, LocalDate dataNascimento,
-                String biografia, String instituicao, String organizacao) {
-        this.nomeCompleto = nomeCompleto;
-        this.role = role;
-        this.email = email;
-        this.telefone = telefone;
-        this.password = password;
-        this.cpf = cpf;
-        this.dataNascimento = dataNascimento;
-        this.biografia = biografia;
-        this.instituicao = instituicao;
-        this.organizacao = organizacao;
-    }
+    @OneToMany(mappedBy = "user_connected", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Conexao> conexoes;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

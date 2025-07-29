@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.validator.constraints.URL;
 import org.hibernate.validator.constraints.br.CNPJ;
 
+import java.util.UUID;
+
 public record OrganizacaoRequest(
         @NotBlank(message = "O nome da organização é obrigatório.")
         @Size(max = 30, message = "O nome não pode exceder 30 caracteres.")
@@ -36,5 +38,6 @@ public record OrganizacaoRequest(
         String logoURL,
 
         @Size(max = 2000, message = "A descrição não pode exceder 2000 caracteres.")
-        String descricao
+        String descricao,
+        UUID idUsuarioRegistrador
 ) {}

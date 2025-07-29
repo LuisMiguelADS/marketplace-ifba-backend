@@ -18,7 +18,7 @@ public class Conexao {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User usuarioConectado;
+    private User user_connected;
 
     @Column(name = "date_connected", nullable = false, updatable = false)
     private LocalDateTime dataConexao;

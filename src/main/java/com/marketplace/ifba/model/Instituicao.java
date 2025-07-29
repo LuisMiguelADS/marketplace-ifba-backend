@@ -22,7 +22,7 @@ public class Instituicao {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id_institution", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID idInstituicao;
 
     @Size(max = 100)
@@ -55,10 +55,6 @@ public class Instituicao {
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "status", nullable = false)
     private StatusInstituicao status;
-
-    @Size(max = 500)
-    @Column(name = "logo_url", length = 500)
-    private String logoURL;
 
     @Size(max = 2000)
     @Column(name = "description", length = 2000)

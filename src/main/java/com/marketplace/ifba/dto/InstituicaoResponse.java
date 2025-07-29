@@ -16,7 +16,6 @@ public record InstituicaoResponse(
         String telefone,
         String site,
         StatusInstituicao status,
-        String logoURL,
         String descricao,
         LocalDateTime dataRegistro,
         LocalDateTime dataAprovacao,

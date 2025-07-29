@@ -1,9 +1,10 @@
 package com.marketplace.ifba.controller;
 
-import com.marketplace.ifba.dto.AprovarDemandaRequest;
+import com.marketplace.ifba.dto.AprovarOuReprovarDemandaRequest;
 import com.marketplace.ifba.dto.AtualizarStatusDemandaRequest;
 import com.marketplace.ifba.dto.DemandaRequest;
 import com.marketplace.ifba.dto.DemandaResponse;
+import com.marketplace.ifba.mapper.DemandaMapper;
 import com.marketplace.ifba.service.DemandaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,58 +22,60 @@ import java.util.UUID;
 public class DemandaController {
 
     private final DemandaService demandaService;
+    private final DemandaMapper demandaMapper;
 
-    public DemandaController(DemandaService demandaService) {
+    public DemandaController(DemandaService demandaService, DemandaMapper demandaMapper) {
         this.demandaService = demandaService;
+        this.demandaMapper = demandaMapper;
     }
 
     @Operation(summary = "Retorna demanda a partir do ID", description = "Procura uma demanda salva com o ID informado")
     @GetMapping("/{idDemanda}")
     public ResponseEntity<DemandaResponse> buscarDemandaPorId(@PathVariable UUID idDemanda) {
         demandaService.incrementarVizualizacao(idDemanda);
-        return ResponseEntity.ok(demandaService.buscarDemandaPorId(idDemanda));
+        return ResponseEntity.ok(demandaMapper.toDTO(demandaService.buscarDemandaPorId(idDemanda)));
     }
 
     @Operation(summary = "Retorna demanda a partir do NOME", description = "Procura uma demanda salva com o NOME informado")
     @GetMapping("/nome/{nome}")
     public ResponseEntity<DemandaResponse> buscarDemandaPorNome(@PathVariable String nome) {
-        return ResponseEntity.ok(demandaService.buscarDemandaPorNome(nome));
+        return ResponseEntity.ok(demandaMapper.toDTO(demandaService.buscarDemandaPorNome(nome)));
     }
 
     @Operation(summary = "Retorna demanda a partir da ORGANIZAÇÃO associada", description = "Procura uma demanda salva com a ORGANIZAÇÃO(que criou a demanda) associada a DEMANDA")
     @GetMapping("/organizacao/{idOrganizacao}")
     public ResponseEntity<List<DemandaResponse>> buscarDemandasPorOrganizacao(@PathVariable UUID idOrganizacao) {
-        return ResponseEntity.ok(demandaService.buscarDemandasPorOrganizacao(idOrganizacao));
+        return ResponseEntity.ok(demandaService.buscarDemandasPorOrganizacao(idOrganizacao).stream().map(demandaMapper::toDTO).toList());
     }
 
     @Operation(summary = "Retorna todas as demandas", description = "Retorna todas as demandas cadastradas")
     @GetMapping
     public ResponseEntity<List<DemandaResponse>> buscarTodasDemandas() {
-        return ResponseEntity.ok(demandaService.buscarTodasDemandas());
+        return ResponseEntity.ok(demandaService.buscarTodasDemandas().stream().map(demandaMapper::toDTO).toList());
     }
 
     @Operation(summary = "Registra demanda", description = "Realiza registro da demanda se passar das regras de negócio")
     @PostMapping
     public ResponseEntity<DemandaResponse> registrarDemanda(@RequestBody @Valid DemandaRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(demandaService.registrarDemanda(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(demandaMapper.toDTO(demandaService.registrarDemanda(demandaMapper.toEntity(request), request.idUsuarioRegistrador(), request.idOrganizacao())));
     }
 
     @Operation(summary = "Atualiza demanda", description = "Atualiza demanda se passar das regras de negócio")
     @PutMapping("/{idDemanda}")
     public ResponseEntity<DemandaResponse> atualizarDemanda(@RequestBody @Valid DemandaRequest request, @PathVariable UUID idDemanda) {
-        return ResponseEntity.ok(demandaService.atualizarDemanda(idDemanda, request));
+        return ResponseEntity.ok(demandaMapper.toDTO(demandaService.atualizarDemanda(demandaMapper.toEntity(request), idDemanda)));
     }
 
     @Operation(summary = "Atualiza status da demanda", description = "Atualiza o status da demanda se passar das regras de negócio")
     @PatchMapping("/{idDemanda}/status")
     public ResponseEntity<DemandaResponse> atualizarStatusDemanda(@PathVariable UUID idDemanda, @RequestBody @Valid AtualizarStatusDemandaRequest request) {
-        return ResponseEntity.ok(demandaService.atualizarStatusDemanda(idDemanda, request.novoStatus()));
+        return ResponseEntity.ok(demandaMapper.toDTO(demandaService.atualizarStatusDemanda(idDemanda, request.novoStatus())));
     }
 
     @Operation(summary = "Aprova demanda", description = "Aprova a demanda")
-    @PatchMapping("/aprovar")
-    public ResponseEntity<DemandaResponse> aprovarDemandaDemandante(@RequestBody @Valid AprovarDemandaRequest request) {
-        return ResponseEntity.ok(demandaService.aprovarDemandaDemandante(request.idDemanda(), request.aprovado()));
+    @PatchMapping("/aprovar-reprovar")
+    public ResponseEntity<DemandaResponse> aprovarDemandaDemandante(@RequestBody @Valid AprovarOuReprovarDemandaRequest request) {
+        return ResponseEntity.ok(demandaMapper.toDTO(demandaService.aprovarDemandaDemandante(request.idDemanda(), request.decisao())));
     }
 
     @Operation(summary = "Remove demanda", description = "Remove o cadastro da demanda")

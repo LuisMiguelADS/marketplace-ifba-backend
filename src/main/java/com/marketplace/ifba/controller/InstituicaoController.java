@@ -1,8 +1,9 @@
 package com.marketplace.ifba.controller;
 
-import com.marketplace.ifba.dto.AprovarInstituicaoRequest;
+import com.marketplace.ifba.dto.AprovarOuReprovarInstituicaoRequest;
 import com.marketplace.ifba.dto.InstituicaoRequest;
 import com.marketplace.ifba.dto.InstituicaoResponse;
+import com.marketplace.ifba.mapper.InstituicaoMapper;
 import com.marketplace.ifba.service.InstituicaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,45 +21,47 @@ import java.util.UUID;
 public class InstituicaoController {
 
     private final InstituicaoService instituicaoService;
+    private final InstituicaoMapper instituicaoMapper;
 
-    public InstituicaoController(InstituicaoService instituicaoService) {
+    public InstituicaoController(InstituicaoService instituicaoService, InstituicaoMapper instituicaoMapper) {
         this.instituicaoService = instituicaoService;
+        this.instituicaoMapper = instituicaoMapper;
     }
 
     @Operation(summary = "Retorna instituição a partir do ID", description = "Procura uma instituição com o ID informado")
     @GetMapping("/{idInstituicao}")
     public ResponseEntity<InstituicaoResponse> buscarInstituicaoPorId(@PathVariable UUID idInstituicao) {
-        return ResponseEntity.ok(instituicaoService.buscarInstituicaoPorId(idInstituicao));
+        return ResponseEntity.ok(instituicaoMapper.toDTO(instituicaoService.buscarInstituicaoPorId(idInstituicao)));
     }
 
     @Operation(summary = "Retorna instituição a partir do NOME", description = "Procura uma instituição salva com o NOME informado")
     @GetMapping("/name/{nome}")
     public ResponseEntity<InstituicaoResponse> buscarInstituicaoPorNome(@PathVariable String nome) {
-        return ResponseEntity.ok(instituicaoService.buscarInstituicaoPorNome(nome));
+        return ResponseEntity.ok(instituicaoMapper.toDTO(instituicaoService.buscarInstituicaoPorNome(nome)));
     }
 
     @Operation(summary = "Retorna todas as instituições", description = "Retorna todas as instituições cadastradas")
     @GetMapping
     public ResponseEntity<List<InstituicaoResponse>> buscarInstituicoes() {
-        return ResponseEntity.ok(instituicaoService.buscarTodasInstituicoes());
+        return ResponseEntity.ok(instituicaoService.buscarTodasInstituicoes().stream().map(instituicaoMapper::toDTO).toList());
     }
 
     @Operation(summary = "Registra instituição", description = "Realiza registro da instituição se passar das regras de negócio")
-    @PostMapping("/{idUsuarioRegistrador}")
-    public ResponseEntity<InstituicaoResponse> registrarInstituicao(@RequestBody @Valid InstituicaoRequest request, @PathVariable UUID idUsuarioRegistrador) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(instituicaoService.registrarInstituicao(request, idUsuarioRegistrador));
+    @PostMapping
+    public ResponseEntity<InstituicaoResponse> registrarInstituicao(@RequestBody @Valid InstituicaoRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(instituicaoMapper.toDTO(instituicaoService.registrarInstituicao(instituicaoMapper.toEntity(request), request.idUsuarioRegistrador())));
     }
 
     @Operation(summary = "Atualiza instituição", description = "Realiza registro da instituição se passar das regras de negócio")
     @PutMapping("/{idInstituicao}")
     public ResponseEntity<InstituicaoResponse> atualizarInstituicao(@RequestBody @Valid InstituicaoRequest request, @PathVariable UUID idInstituicao) {
-        return ResponseEntity.ok(instituicaoService.atualizarInstituicao(request, idInstituicao));
+        return ResponseEntity.ok(instituicaoMapper.toDTO(instituicaoService.atualizarInstituicao(instituicaoMapper.toEntity(request), idInstituicao)));
     }
 
     @Operation(summary = "Aprova instituição", description = "Realiza registro da instituição se passar das regras de negócio")
-    @PostMapping("/aprovar")
-    public ResponseEntity<InstituicaoResponse> aprovarInstituicao(@RequestBody @Valid AprovarInstituicaoRequest request) {
-        return ResponseEntity.ok(instituicaoService.aprovarInstituicao(request.idInstituicao(), request.idAdmAprovador()));
+    @PostMapping("/aprovar-reprovar")
+    public ResponseEntity<InstituicaoResponse> aprovaOuReprovaInstituicao(@RequestBody @Valid AprovarOuReprovarInstituicaoRequest request) {
+        return ResponseEntity.ok(instituicaoMapper.toDTO(instituicaoService.aprovarOuReprovaInstituicao(request.idInstituicao(), request.idAdm(), request.decisao())));
     }
 
     @Operation(summary = "Remove instituição", description = "Remove o cadastro da instituição")

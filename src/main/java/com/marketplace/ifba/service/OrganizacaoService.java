@@ -7,6 +7,7 @@ import com.marketplace.ifba.exception.DadoNaoEncontradoException;
 import com.marketplace.ifba.mapper.OrganizacaoMapper;
 import com.marketplace.ifba.model.Organizacao;
 import com.marketplace.ifba.model.User;
+import com.marketplace.ifba.model.enums.StatusInstituicao;
 import com.marketplace.ifba.model.enums.StatusOrganizacao;
 import com.marketplace.ifba.repository.OrganizacaoRepository;
 import com.marketplace.ifba.repository.UserRepository;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -23,53 +25,59 @@ public class OrganizacaoService {
 
     private final OrganizacaoRepository organizacaoRepository;
     private final UserRepository userRepository;
-    private final OrganizacaoMapper organizacaoMapper;
 
-    public OrganizacaoService(OrganizacaoRepository organizacaoRepository, UserRepository userRepository, OrganizacaoMapper organizacaoMapper) {
+    public OrganizacaoService(OrganizacaoRepository organizacaoRepository, UserRepository userRepository) {
         this.organizacaoRepository = organizacaoRepository;
         this.userRepository = userRepository;
-        this.organizacaoMapper = organizacaoMapper;
     }
 
     // ---------- LEITURA
 
     // BUSCA ORGANIZAÇÃO PELO SEU ID
     @Transactional(readOnly = true)
-    public OrganizacaoResponse buscarOrganizacaoPorId(UUID idOrganizacao) {
-        Organizacao organizacao = organizacaoRepository.findById(idOrganizacao)
+    public Organizacao buscarOrganizacaoPorId(UUID idOrganizacao) {
+        return organizacaoRepository.findById(idOrganizacao)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada com o ID: " + idOrganizacao));
-        return organizacaoMapper.toDTO(organizacao);
     }
 
     // LISTA TODAS AS ORGANIZAÇÕES DO SISTEMA
     @Transactional(readOnly = true)
-    public List<OrganizacaoResponse> buscarTodasOrganizacoes() {
-        return organizacaoRepository.findAll().stream()
-                .map(organizacaoMapper::toDTO)
-                .collect(Collectors.toList());
+    public List<Organizacao> buscarTodasOrganizacoes() {
+        return organizacaoRepository.findAll();
     }
 
     // BUSCA ORGANIZAÇÃO PELO SEU NOME
     @Transactional(readOnly = true)
-    public OrganizacaoResponse buscarOrganizacaoPorNome(String nome) {
-        Organizacao organizacao = organizacaoRepository.findByNome(nome)
+    public Organizacao buscarOrganizacaoPorNome(String nome) {
+        return organizacaoRepository.findAll().stream()
+                .filter(org -> org.getNome().equals(nome))
+                .findFirst()
                 .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada com o nome: " + nome));
-        return organizacaoMapper.toDTO(organizacao);
+    }
+
+    // BUSCA ORGANIZAÇÃO PELO SEU CNPJ
+    @Transactional(readOnly = true)
+    public Organizacao buscarOrganizacaoPorCnpj(String cnpj) {
+        System.out.println("Passou Service");
+        return organizacaoRepository.findAll().stream()
+                .filter(org -> org.getCnpj().equals(cnpj))
+                .findFirst()
+                .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada com o CNPJ: " + cnpj));
     }
 
     // ---------- ESCRITA
 
     // REGISTRA ORGANIZAÇÃO
     @Transactional
-    public OrganizacaoResponse registrarOrganizacao(OrganizacaoRequest request, UUID idUsuarioRegistrador) {
-        if (organizacaoRepository.findByNome(request.nome()).isPresent()) {
-            throw new DadoConflitoException("Já existe uma organização com o nome: '" + request.nome() + "'.");
-        }
-        if (organizacaoRepository.findByCnpj(request.cnpj()).isPresent()) {
-            throw new DadoConflitoException("Já existe uma organização com o CNPJ: '" + request.cnpj() + "'.");
+    public Organizacao registrarOrganizacao(Organizacao organizacao, UUID idUsuarioRegistrador) {
+        if (organizacaoRepository.findAll().stream().anyMatch(org -> org.getNome().equals(organizacao.getNome()))) {
+            throw new DadoConflitoException("Já existe uma organização com o nome: '" + organizacao.getNome());
         }
 
-        Organizacao organizacao = organizacaoMapper.toEntity(request);
+        if (organizacaoRepository.findAll().stream().anyMatch(org -> org.getCnpj().equals(organizacao.getCnpj()))) {
+            throw new DadoConflitoException("Já existe uma organização com o CNPJ: '" + organizacao.getCnpj());
+        }
+
         organizacao.setDataRegistro(LocalDateTime.now());
         organizacao.setStatus(StatusOrganizacao.AGUARDANDO_APROVACAO);
 
@@ -77,47 +85,57 @@ public class OrganizacaoService {
                 .orElseThrow(() -> new DadoNaoEncontradoException("Usuário registrador não encontrado com o ID: " + idUsuarioRegistrador));
         organizacao.setUsuarioRegistro(usuarioRegistro);
 
-        return organizacaoMapper.toDTO(organizacaoRepository.save(organizacao));
+        usuarioRegistro.setOrganizacao(organizacao);
+        userRepository.save(usuarioRegistro);
+
+        return organizacaoRepository.save(organizacao);
     }
 
     // ATUALIZA ORGANIZAÇÃO
     @Transactional
-    public OrganizacaoResponse atualizarOrganizacao(UUID idOrganizacao, OrganizacaoRequest request) {
-        Organizacao organizacaoExistente = organizacaoRepository.findById(idOrganizacao)
+    public Organizacao atualizarOrganizacao(Organizacao organizacao, UUID idOrganizacao) {
+        Organizacao organizacaoSaved = organizacaoRepository.findById(idOrganizacao)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada para atualização com o ID: " + idOrganizacao));
 
-        if (!organizacaoExistente.getNome().equals(request.nome())) {
-            organizacaoRepository.findByNome(request.nome()).ifPresent(org -> {
-                if (!org.getIdOrganizacao().equals(idOrganizacao)) {
-                    throw new DadoConflitoException("Já existe outra organização com o nome: '" + request.nome() + "'.");
-                }
-            });
+        if (organizacaoSaved.getNome().equals(organizacao.getNome())) {
+            throw new DadoConflitoException("Já existe outra organização com o nome: '" + organizacao.getNome());
         }
 
-        organizacaoMapper.updateEntityFromRequest(request, organizacaoExistente);
+        // ATRIBUTOS QUE PODEM SER ALTERADOS
+        organizacaoSaved.setNome(organizacao.getNome());
+        organizacaoSaved.setSigla(organizacao.getSigla());
+        organizacaoSaved.setTipoOrganizacao(organizacao.getTipoOrganizacao());
+        organizacaoSaved.setSetor(organizacao.getSetor());
+        organizacaoSaved.setTelefone(organizacao.getTelefone());
+        organizacaoSaved.setSite(organizacao.getSite());
+        organizacaoSaved.setDescricao(organizacao.getDescricao());
 
-        return organizacaoMapper.toDTO(organizacaoRepository.save(organizacaoExistente));
+        return organizacaoRepository.save(organizacaoSaved);
     }
 
 
-    // APROVA ORGANIZAÇÃO
+    // APROVA OU REPROVA ORGANIZAÇÃO
     @Transactional
-    public OrganizacaoResponse aprovarOrganizacao(UUID idOrganizacao, UUID idAdmAprovador) {
-        Organizacao organizacao = organizacaoRepository.findById(idOrganizacao)
+    public Organizacao aprovaOuReprovaOrganizacao(UUID idOrganizacao, UUID idAdm, Boolean decisaoAdm) {
+        Organizacao organizacaoSaved = organizacaoRepository.findById(idOrganizacao)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada para aprovação com o ID: " + idOrganizacao));
 
-        if (!StatusOrganizacao.AGUARDANDO_APROVACAO.equals(organizacao.getStatus())) {
-            throw new IllegalStateException("A organização não está no status 'PENDENTE_APROVACAO' para ser aprovada.");
+        if (!StatusOrganizacao.AGUARDANDO_APROVACAO.equals(organizacaoSaved.getStatus())) {
+            throw new IllegalStateException("A organização não está no status 'AGUARDANDO_APROVACAO' para ser aprovada.");
         }
 
-        User admAprovador = userRepository.findById(idAdmAprovador)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Administrador aprovador não encontrado com o ID: " + idAdmAprovador));
+        User adm = userRepository.findById(idAdm)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Administrador aprovador não encontrado com o ID: " + idAdm));
 
-        organizacao.setStatus(StatusOrganizacao.APROVADA);
-        organizacao.setDataAprovacao(LocalDateTime.now());
-        organizacao.setAdmAprovacao(admAprovador);
+        if (decisaoAdm) {
+            organizacaoSaved.setStatus(StatusOrganizacao.APROVADA);
+        } else {
+            organizacaoSaved.setStatus(StatusOrganizacao.NAO_APROVADA);
+        }
+        organizacaoSaved.setDataAprovacao(LocalDateTime.now());
+        organizacaoSaved.setAdmAprovacao(adm);
 
-        return organizacaoMapper.toDTO(organizacaoRepository.save(organizacao));
+        return organizacaoRepository.save(organizacaoSaved);
     }
 
     // REMOVE ORGANIZAÇÃO

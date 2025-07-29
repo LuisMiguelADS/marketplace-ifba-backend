@@ -1,9 +1,19 @@
 package com.marketplace.ifba.mapper;
 
+import com.marketplace.ifba.dto.InstituicaoResponse;
+import com.marketplace.ifba.dto.OrganizacaoResponse;
 import com.marketplace.ifba.dto.UserRequest;
 import com.marketplace.ifba.dto.UserResponse;
+import com.marketplace.ifba.model.Conexao;
+import com.marketplace.ifba.model.Organizacao;
 import com.marketplace.ifba.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Component
 public class UserMapper {
@@ -22,16 +32,18 @@ public class UserMapper {
         user.setCpf(request.cpf());
         user.setDataNascimento(request.dataNascimento());
         user.setBiografia(request.biografia());
-//        user.setFotoPerfilURL(request.fotoPerfilURL());
-//        user.setEndereco(request.endereco());
-//        user.setInstituicao(request.instituicao());
-//        user.setOrganizacao(request.organizacao());
         return user;
     }
 
     public UserResponse toDTO(User user) {
         if (user == null) {
             return null;
+        }
+
+        List<LocalDateTime> conexoes = new ArrayList<>();
+
+        for (Conexao conexao : user.getConexoes()) {
+            conexoes.add(conexao.getDataConexao());
         }
 
         return new UserResponse(
@@ -42,7 +54,10 @@ public class UserMapper {
                 user.getTelefone(),
                 user.getDataRegistro(),
                 user.getDataNascimento(),
-                user.getBiografia()
+                user.getBiografia(),
+                conexoes,
+                (user.getOrganizacao() != null) ? user.getOrganizacao().getIdOrganizacao() : null,
+                (user.getInstituicao() != null) ? user.getInstituicao().getIdInstituicao() : null
         );
     }
 
@@ -68,18 +83,6 @@ public class UserMapper {
         if (request.biografia() != null) {
             user.setBiografia(request.biografia());
         }
-//        if (request.fotoPerfilURL() != null) {
-//            user.setFotoPerfilURL(request.fotoPerfilURL());
-//        }
-//        if (request.endereco() != null) {
-//            user.setEndereco(request.endereco());
-//        }
-//        if (request.instituicao() != null) {
-//            user.setInstituicao(request.instituicao());
-//        }
-//        if (request.organizacao() != null) {
-//            user.setOrganizacao(request.organizacao());
-//        }
 
         return user;
     }

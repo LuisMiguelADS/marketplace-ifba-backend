@@ -2,7 +2,7 @@ package com.marketplace.ifba.model.enums;
 
 public enum StatusDemanda {
     AGUARDANDO_APROVACAO("aguardando_aprovacao"),
-    NAO_APROVADO("nao_aprovado"),
+    NAO_APROVADA("nao_aprovado"),
     AGUARDANDO_PROPOSTA("aguardando_proposta"),
     EXCLUIDA("excluida"),
     INATIVA("inativa"),
