@@ -1,7 +1,6 @@
 package com.marketplace.ifba.service;
 
-import com.marketplace.ifba.exception.DadoConflitoException;
-import com.marketplace.ifba.exception.DadoNaoEncontradoException;
+import com.marketplace.ifba.exception.*;
 import com.marketplace.ifba.model.*;
 import com.marketplace.ifba.model.enums.StatusProjeto;
 import com.marketplace.ifba.repository.*;
@@ -41,14 +40,14 @@ public class ProjetoService {
     @Transactional(readOnly = true)
     public Projeto buscarProjetoPorId(UUID idProjeto) {
         return projetoRepository.findById(idProjeto)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado com o ID!"));
+                .orElseThrow(() -> new ProjetoInvalidoException("Projeto não encontrado com o ID!"));
     }
 
     // BUSCA O PROJETO PELO SEU NOME
     @Transactional(readOnly = true)
     public Projeto buscarProjetoPorNome(String nome) {
         return projetoRepository.findByNome(nome)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado com o nome!"));
+                .orElseThrow(() -> new ProjetoInvalidoException("Projeto não encontrado com o nome!"));
     }
 
     // BUSCA PROJETO PELA SUA DEMANDA
@@ -56,14 +55,14 @@ public class ProjetoService {
     public Projeto buscarProjetoPorDemanda(UUID idDemanda) {
         return projetoRepository.findAll().stream()
                 .filter(projeto -> projeto.getDemanda().getIdDemanda().equals(idDemanda))
-                .findFirst().orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado para a Demanda!"));
+                .findFirst().orElseThrow(() -> new ProjetoInvalidoException("Projeto não encontrado para a Demanda!"));
     }
 
     // BUSCA PROJETO PELO GRUPO DE PESQUISA
     @Transactional(readOnly = true)
     public List<Projeto> buscarProjetosPorGrupoPesquisa(UUID idGrupoPesquisa) {
         if (grupoPesquisaRepository.findById(idGrupoPesquisa).isPresent()) {
-            throw new DadoNaoEncontradoException("Grupo Pesquisa não encontrado!");
+            throw new GrupoPesquisaInvalidoException("Grupo Pesquisa não encontrado!");
         }
         return projetoRepository.findAll().stream()
                 .filter(projeto -> projeto.getGrupoPesquisa().getIdGrupoPesquisa().equals(idGrupoPesquisa))
@@ -74,7 +73,7 @@ public class ProjetoService {
     @Transactional(readOnly = true)
     public List<Projeto> buscarProjetosPorInstituicao(UUID idInstituicao) {
         if (instituicaoRepository.findById(idInstituicao).isPresent()) {
-            throw new DadoNaoEncontradoException("Instituição não encontrada!");
+            throw new InstituicaoInvalidaException("Instituição não encontrada!");
         }
 
         return projetoRepository.findAll().stream()
@@ -86,7 +85,7 @@ public class ProjetoService {
     @Transactional(readOnly = true)
     public List<Projeto> buscarProjetosPorOrganizacao(UUID idOrganizacao) {
         if (organizacaoRepository.findById(idOrganizacao).isPresent()) {
-            throw new DadoNaoEncontradoException("Organização não encontrada!");
+            throw new OrganizacaoInvalidaException("Organização não encontrada!");
         }
 
         return projetoRepository.findAll().stream()
@@ -106,31 +105,31 @@ public class ProjetoService {
     @Transactional
     public Projeto registrarProjeto(Projeto projeto, UUID idOrganizacao, UUID idInstituicao, UUID idDemanda, UUID idOfertaSolucao, UUID idGrupoPesquisa) {
         if (projetoRepository.findAll().stream().anyMatch(proj -> proj.getSolucaoOferta().getIdSolucao().equals(idOfertaSolucao))) {
-            throw new DadoConflitoException("A Demanda já está associada com um projeto!");
+            throw new DemandaInvalidaException("A Demanda já está associada com um projeto!");
         }
 
         Organizacao organizacao = organizacaoRepository.findById(idOrganizacao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada com o ID"));
+                .orElseThrow(() -> new OrganizacaoInvalidaException("Organização não encontrada com o ID"));
         projeto.setOrganizacao(organizacao);
 
         Instituicao instituicao = instituicaoRepository.findById(idInstituicao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada com o ID"));
+                .orElseThrow(() -> new InstituicaoInvalidaException("Instituição não encontrada com o ID"));
         projeto.setInstituicao(instituicao);
 
         Demanda demanda = demandaRepository.findById(idDemanda)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada com o ID"));
+                .orElseThrow(() -> new DemandaInvalidaException("Demanda não encontrada com o ID"));
         projeto.setDemanda(demanda);
 
         GrupoPesquisa grupoPesquisa = grupoPesquisaRepository.findById(idGrupoPesquisa)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de Pesquisa não encontrado com o ID!"));
+                .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de Pesquisa não encontrado com o ID!"));
         projeto.setGrupoPesquisa(grupoPesquisa);
 
         if (idOfertaSolucao != null) {
             OfertaSolucao ofertaSolucao = ofertaSolucaoRepository.findById(idOfertaSolucao)
-                    .orElseThrow(() -> new DadoNaoEncontradoException("Oferta Solução não encontrada!"));
+                    .orElseThrow(() -> new OfertaSolucaoInvalidaException("Oferta Solução não encontrada!"));
             if (projetoRepository.findAll().stream()
                     .anyMatch(proj -> proj.getSolucaoOferta().getIdSolucao().equals(idOfertaSolucao))) {
-                throw new DadoConflitoException("A Oferta Solução já está associada a outro projeto.");
+                throw new OfertaSolucaoInvalidaException("A Oferta Solução já está associada a outro projeto.");
             }
             projeto.setSolucaoOferta(ofertaSolucao);
         }
@@ -156,12 +155,12 @@ public class ProjetoService {
     @Transactional
     public Projeto atualizarNomeProjeto(UUID idProjeto, String novoNome) {
         Projeto projeto = projetoRepository.findById(idProjeto)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado para atualização!"));
+                .orElseThrow(() -> new ProjetoInvalidoException("Projeto não encontrado para atualização!"));
 
         if (!projeto.getNome().equals(novoNome)) {
             projetoRepository.findByNome(novoNome).ifPresent(p -> {
                 if (!p.getIdProjeto().equals(idProjeto)) {
-                    throw new DadoConflitoException("Já existe outro projeto com o nome!");
+                    throw new ProjetoInvalidoException("Já existe outro projeto com o nome!");
                 }
             });
         }
@@ -175,18 +174,18 @@ public class ProjetoService {
     @Transactional
     public Projeto atualizarStatusProjeto(UUID idProjeto, StatusProjeto novoStatus) {
         Projeto projeto = projetoRepository.findById(idProjeto)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado com o ID!"));
+                .orElseThrow(() -> new ProjetoInvalidoException("Projeto não encontrado com o ID!"));
 
         if (StatusProjeto.CANCELADO.equals(projeto.getStatus())) {
-            throw new DadoConflitoException("O projeto está cancelado!");
+            throw new ProjetoInvalidoException("O projeto está cancelado!");
         }
 
         if (StatusProjeto.FINALIZADO.equals(projeto.getStatus())) {
-            throw new DadoConflitoException("O projeto está finalizado!");
+            throw new ProjetoInvalidoException("O projeto está finalizado!");
         }
 
         if (StatusProjeto.DESENVOLVENDO.equals(projeto.getStatus()) && StatusProjeto.DESENVOLVENDO.equals(novoStatus)) {
-            throw new DadoConflitoException("O projeto já está com Status desenvolvendo!");
+            throw new ProjetoInvalidoException("O projeto já está com Status desenvolvendo!");
         }
 
         projeto.setStatus(novoStatus);
@@ -198,7 +197,7 @@ public class ProjetoService {
     @Transactional
     public void removerProjeto(UUID idProjeto) {
         if (!projetoRepository.existsById(idProjeto)) {
-            throw new DadoNaoEncontradoException("Projeto não encontrado para exclusão com o ID: " + idProjeto);
+            throw new ProjetoInvalidoException("Projeto não encontrado para exclusão com o ID: " + idProjeto);
         }
         projetoRepository.deleteById(idProjeto);
     }

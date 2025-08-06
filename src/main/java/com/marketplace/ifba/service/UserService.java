@@ -1,7 +1,6 @@
 package com.marketplace.ifba.service;
 
-import com.marketplace.ifba.exception.DadoConflitoException;
-import com.marketplace.ifba.exception.DadoNaoEncontradoException;
+import com.marketplace.ifba.exception.*;
 import com.marketplace.ifba.model.*;
 import com.marketplace.ifba.model.enums.StatusSolicitacao;
 import com.marketplace.ifba.repository.InstituicaoRepository;
@@ -46,7 +45,7 @@ public class UserService {
         User user = userRepository.findAll().stream().filter(userDetails -> userDetails.getEmail().equals(emailLogin)).findFirst().orElse(null);
 
         if (user == null) {
-            throw new DadoNaoEncontradoException("Usuário não encontrado para o token fornecido.");
+            throw new UsuarioInvalidoException("Usuário não encontrado para o token fornecido.");
         }
         return user;
     }
@@ -54,7 +53,7 @@ public class UserService {
     // BUSCA USUÁRIO PELO SEU ID
     public User buscarUsuarioPorID(UUID idUsuario) {
         return userRepository.findById(idUsuario)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário não encontrada com o ID: " + idUsuario));
+                .orElseThrow(() -> new UsuarioInvalidoException("Usuário não encontrada com o ID: " + idUsuario));
     }
 
     // BUSCA USUÁRIO PELO SEU EMAIL
@@ -72,7 +71,7 @@ public class UserService {
     // REGISTRO DO USUÁRIO
     public User registrarUsuario(User user) {
         if (userRepository.findAll().stream().anyMatch(userDetails -> userDetails.getEmail().equals(user.getEmail()))) {
-            throw new DadoConflitoException("Email já registrado.");
+            throw new EmailInvalidoException("Email já registrado.");
         }
         String encryptedPassword = passwordEncoder.encode(user.getPassword());
 
@@ -85,10 +84,10 @@ public class UserService {
     // ASSOCIA USUÁRIO COM UMA INSTITUIÇÃO
     public void associarInstituicaoUsuario(UUID idUsuario, UUID idInstituicao) {
         User usuario = userRepository.findById(idUsuario)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário não encontrada com o ID: " + idUsuario));
+                .orElseThrow(() -> new UsuarioInvalidoException("Usuário não encontrada com o ID: " + idUsuario));
 
         Instituicao instituicao = instituicaoRepository.findById(idInstituicao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada com o ID: " + idInstituicao));
+                .orElseThrow(() -> new InstituicaoInvalidaException("Instituição não encontrada com o ID: " + idInstituicao));
 
         // ##################### para desevolver
     }
@@ -96,14 +95,14 @@ public class UserService {
     // ASSOCIA USUÁRIO COM UMA ORGANIZAÇÃO
     public void associarOrganizacaoUsuario(UUID idUsuario, UUID idOrganizacao) {
         User usuario = userRepository.findById(idUsuario)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário não encontrada com o ID: " + idUsuario));
+                .orElseThrow(() -> new UsuarioInvalidoException("Usuário não encontrada com o ID: " + idUsuario));
 
         Organizacao organizacao = organizacaoRepository.findById(idOrganizacao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Organizacao não encontrada com o ID: " + idOrganizacao));
+                .orElseThrow(() -> new UsuarioInvalidoException("Organizacao não encontrada com o ID: " + idOrganizacao));
 
-        if (usuario.getOrganizacao() != null) throw new DadoConflitoException("O usuário já está associado há uma organização");
+        if (usuario.getOrganizacao() != null) throw new OrganizacaoInvalidaException("O usuário já está associado há uma organização");
 
-        if (usuario.getInstituicao() != null) throw new DadoConflitoException("O usuário está associado há uma instituição, sendo assim, não pode se associar uma organização");
+        if (usuario.getInstituicao() != null) throw new InstituicaoInvalidaException("O usuário está associado há uma instituição, sendo assim, não pode se associar uma organização");
 
         organizacao.getUsuariosIntegrantes().add(usuario);
         organizacao.getSolicitacoes().forEach((solicitacao) -> {
@@ -120,10 +119,10 @@ public class UserService {
     // SOLICITA A ASSOIAÇÃO DO USUÁRIO COM UMA ORGANIZAÇÃO
     public void solicitarAssociacaoOrganizacao(UUID idUsuario, UUID idOrganizacao) {
         User usuario = userRepository.findById(idUsuario)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário não encontrada com o ID: " + idUsuario));
+                .orElseThrow(() -> new UsuarioInvalidoException("Usuário não encontrada com o ID: " + idUsuario));
 
         Organizacao organizacao = organizacaoRepository.findById(idOrganizacao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Organizacao não encontrada com o ID: " + idOrganizacao));
+                .orElseThrow(() -> new OrganizacaoInvalidaException("Organizacao não encontrada com o ID: " + idOrganizacao));
 
         Solicitacao solicitacao = new Solicitacao();
         solicitacao.setOrganizacaoRequested(organizacao);
@@ -151,7 +150,7 @@ public class UserService {
 
     // ATUALIZA USUÁRIO
     public User atualizarUsuario(UUID idUsuario, User user) {
-        User userSaved = userRepository.findById(idUsuario).orElseThrow(() -> new DadoNaoEncontradoException("Usuário não encontrada com o ID: " + idUsuario));
+        User userSaved = userRepository.findById(idUsuario).orElseThrow(() -> new UsuarioInvalidoException("Usuário não encontrada com o ID: " + idUsuario));
 
         // ATRIBUTOS QUE PODEM SER ALTERADOS
         userSaved.setNomeCompleto(user.getNomeCompleto());

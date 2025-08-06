@@ -1,6 +1,8 @@
 package com.marketplace.ifba.service;
 
-import com.marketplace.ifba.exception.DadoNaoEncontradoException;
+import com.marketplace.ifba.exception.AdmException;
+import com.marketplace.ifba.exception.InstituicaoInvalidaException;
+import com.marketplace.ifba.exception.UsuarioInvalidoException;
 import com.marketplace.ifba.model.Instituicao;
 import com.marketplace.ifba.model.User;
 import com.marketplace.ifba.model.enums.StatusInstituicao;
@@ -29,13 +31,13 @@ public class InstituicaoService {
     @Transactional(readOnly = true)
     public Instituicao buscarInstituicaoPorId(UUID idInstituicao) {
         return instituicaoRepository.findById(idInstituicao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Não foi encontrado usuário com esse ID"));
+                .orElseThrow(() -> new InstituicaoInvalidaException("Não foi encontrado usuário com esse ID"));
     }
 
     // BUSCA INSTITUIÇÃO PELO SEU NOME
     @Transactional(readOnly = true)
     public Instituicao buscarInstituicaoPorNome(String nome) {
-        return instituicaoRepository.findAll().stream().filter(inst -> inst.getNome().equals(nome)).findFirst().orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada com o nome: " + nome));
+        return instituicaoRepository.findAll().stream().filter(inst -> inst.getNome().equals(nome)).findFirst().orElseThrow(() -> new InstituicaoInvalidaException("Instituição não encontrada com o nome: " + nome));
     }
 
     // LISTA TODAS INSTITUIÇÕES
@@ -52,7 +54,7 @@ public class InstituicaoService {
         instituicao.setDataRegistro(LocalDateTime.now());
         instituicao.setStatus(StatusInstituicao.AGUARDANDO_APROVACAO);
         User user = userRepository.findById(idUsuarioRegistrador)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário não encontrado com o ID: " + idUsuarioRegistrador));
+                .orElseThrow(() -> new UsuarioInvalidoException("Usuário não encontrado com o ID: " + idUsuarioRegistrador));
         instituicao.setUsuarioRegistro(user);
 
         return instituicaoRepository.save(instituicao);
@@ -62,7 +64,7 @@ public class InstituicaoService {
     @Transactional
     public Instituicao atualizarInstituicao(Instituicao instituicao, UUID idInstituicao) {
         Instituicao instituicaoSaved = instituicaoRepository.findById(idInstituicao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Não foi encontrado instituição com esse ID: " + idInstituicao));
+                .orElseThrow(() -> new InstituicaoInvalidaException("Não foi encontrado instituição com esse ID: " + idInstituicao));
 
         // ATRIBUTOS QUE PODEM SER ALTERADOS
         instituicaoSaved.setNome(instituicao.getNome());
@@ -79,14 +81,14 @@ public class InstituicaoService {
     @Transactional
     public Instituicao aprovarOuReprovaInstituicao(UUID idInstituicao, UUID idAdm, Boolean decisaoAdm) {
         Instituicao instituicaoSaved = instituicaoRepository.findById(idInstituicao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada para aprovação com o ID: " + idInstituicao));
+                .orElseThrow(() -> new InstituicaoInvalidaException("Instituição não encontrada para aprovação com o ID: " + idInstituicao));
 
         if (!StatusInstituicao.AGUARDANDO_APROVACAO.equals(instituicaoSaved.getStatus())) {
             throw new IllegalStateException("A instituição não está no status 'AGUARDANDO_APROVACAO' para ser aprovada.");
         }
 
         User adm = userRepository.findById(idAdm)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Administrador não encontrado"));
+                .orElseThrow(() -> new AdmException("Administrador não encontrado"));
 
         if (decisaoAdm) {
             instituicaoSaved.setStatus(StatusInstituicao.APROVADA);
@@ -103,7 +105,7 @@ public class InstituicaoService {
     @Transactional
     public void removerInstituicao(UUID idInstituicao) {
         if (!instituicaoRepository.existsById(idInstituicao)) {
-            throw new DadoNaoEncontradoException("Instituição não encontrada para exclusão com o ID: " + idInstituicao);
+            throw new InstituicaoInvalidaException("Instituição não encontrada para exclusão com o ID: " + idInstituicao);
         }
         instituicaoRepository.deleteById(idInstituicao);
     }

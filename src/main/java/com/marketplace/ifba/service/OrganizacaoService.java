@@ -3,8 +3,7 @@ package com.marketplace.ifba.service;
 import com.marketplace.ifba.dto.OrganizacaoRequest;
 import com.marketplace.ifba.dto.OrganizacaoResponse;
 import com.marketplace.ifba.dto.UserInfosMinResponse;
-import com.marketplace.ifba.exception.DadoConflitoException;
-import com.marketplace.ifba.exception.DadoNaoEncontradoException;
+import com.marketplace.ifba.exception.*;
 import com.marketplace.ifba.mapper.OrganizacaoMapper;
 import com.marketplace.ifba.model.Organizacao;
 import com.marketplace.ifba.model.Solicitacao;
@@ -41,7 +40,7 @@ public class OrganizacaoService {
     @Transactional(readOnly = true)
     public Organizacao buscarOrganizacaoPorId(UUID idOrganizacao) {
         return organizacaoRepository.findById(idOrganizacao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada com o ID"));
+                .orElseThrow(() -> new OrganizacaoInvalidaException("Organização não encontrada com o ID"));
     }
 
     // LISTA TODAS AS ORGANIZAÇÕES DO SISTEMA
@@ -56,7 +55,7 @@ public class OrganizacaoService {
         return organizacaoRepository.findAll().stream()
                 .filter(org -> org.getNome().equals(nome))
                 .findFirst()
-                .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada com o nome"));
+                .orElseThrow(() -> new OrganizacaoInvalidaException("Organização não encontrada com o nome"));
     }
 
     // BUSCA ORGANIZAÇÃO PELO SEU CNPJ
@@ -65,7 +64,7 @@ public class OrganizacaoService {
         return organizacaoRepository.findAll().stream()
                 .filter(org -> org.getCnpj().equals(cnpj))
                 .findFirst()
-                .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada com o CNPJ"));
+                .orElseThrow(() -> new OrganizacaoInvalidaException("Organização não encontrada com o CNPJ"));
     }
 
     // BUSCA DADOS DE USUÁRIOS QUE SOLICITARAM A ENTRADA NA ORGANIZAÇÃO
@@ -91,25 +90,25 @@ public class OrganizacaoService {
     @Transactional
     public Organizacao registrarOrganizacao(Organizacao organizacao, UUID idUsuarioRegistrador) {
         if (organizacaoRepository.findAll().stream().anyMatch(org -> org.getNome().equals(organizacao.getNome()))) {
-            throw new DadoConflitoException("Já existe uma organização com o nome");
+            throw new OrganizacaoInvalidaException("Já existe uma organização com o nome");
         }
 
         if (organizacaoRepository.findAll().stream().anyMatch(org -> org.getCnpj().equals(organizacao.getCnpj()))) {
-            throw new DadoConflitoException("Já existe uma organização com o CNPJ");
+            throw new OrganizacaoInvalidaException("Já existe uma organização com o CNPJ");
         }
 
         organizacao.setDataRegistro(LocalDateTime.now());
         organizacao.setStatus(StatusOrganizacao.AGUARDANDO_APROVACAO);
 
         User usuarioRegistro = userRepository.findById(idUsuarioRegistrador)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário registrador não encontrado com o ID"));
+                .orElseThrow(() -> new UsuarioInvalidoException("Usuário registrador não encontrado com o ID"));
 
         if (usuarioRegistro.getOrganizacao() != null) {
-            throw new DadoConflitoException("Usuário já está associado a uma organização, não pode solicitar a criação de outra organização");
+            throw new UsuarioInvalidoException("Usuário já está associado a uma organização, não pode solicitar a criação de outra organização");
         }
 
         if (usuarioRegistro.getInstituicao() != null) {
-            throw new DadoConflitoException("Usuário já está associado a uma instituição, não pode solicitar a criação de uma organização");
+            throw new UsuarioInvalidoException("Usuário já está associado a uma instituição, não pode solicitar a criação de uma organização");
         }
 
         organizacao.setUsuarioRegistro(usuarioRegistro);
@@ -126,10 +125,10 @@ public class OrganizacaoService {
     @Transactional
     public Organizacao atualizarOrganizacao(Organizacao organizacao, UUID idOrganizacao) {
         Organizacao organizacaoSaved = organizacaoRepository.findById(idOrganizacao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada para atualização com o ID"));
+                .orElseThrow(() -> new OrganizacaoInvalidaException("Organização não encontrada para atualização com o ID"));
 
         if (organizacaoSaved.getNome().equals(organizacao.getNome())) {
-            throw new DadoConflitoException("Já existe outra organização com o nome: '" + organizacao.getNome());
+            throw new OrganizacaoInvalidaException("Já existe outra organização com o nome: '" + organizacao.getNome());
         }
 
         // ATRIBUTOS QUE PODEM SER ALTERADOS
@@ -149,14 +148,14 @@ public class OrganizacaoService {
     @Transactional
     public Organizacao aprovaOuReprovaOrganizacao(UUID idOrganizacao, UUID idAdm, Boolean decisaoAdm) {
         Organizacao organizacaoSaved = organizacaoRepository.findById(idOrganizacao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada!"));
+                .orElseThrow(() -> new OrganizacaoInvalidaException("Organização não encontrada!"));
 
         if (!StatusOrganizacao.AGUARDANDO_APROVACAO.equals(organizacaoSaved.getStatus())) {
             throw new IllegalStateException("A organização não está no status 'AGUARDANDO_APROVACAO' para ser aprovada.");
         }
 
         User adm = userRepository.findById(idAdm)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Administrador aprovador não encontrado!"));
+                .orElseThrow(() -> new AdmException("Administrador aprovador não encontrado!"));
 
         if (decisaoAdm) {
             organizacaoSaved.setStatus(StatusOrganizacao.APROVADA);
@@ -173,7 +172,7 @@ public class OrganizacaoService {
     @Transactional
     public void removerOrganizacao(UUID idOrganizacao) {
         if (!organizacaoRepository.existsById(idOrganizacao)) {
-            throw new DadoNaoEncontradoException("Organização não encontrada para exclusão com o ID");
+            throw new OrganizacaoInvalidaException("Organização não encontrada para exclusão com o ID");
         }
         organizacaoRepository.deleteById(idOrganizacao);
     }

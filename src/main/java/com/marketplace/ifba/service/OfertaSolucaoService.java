@@ -1,12 +1,9 @@
 package com.marketplace.ifba.service;
 
-import com.marketplace.ifba.exception.DadoConflitoException;
-import com.marketplace.ifba.exception.DadoNaoEncontradoException;
-import com.marketplace.ifba.mapper.OfertaSolucaoMapper;
+import com.marketplace.ifba.exception.DemandaInvalidaException;
+import com.marketplace.ifba.exception.OfertaSolucaoInvalidaException;
 import com.marketplace.ifba.model.Demanda;
 import com.marketplace.ifba.model.OfertaSolucao;
-import com.marketplace.ifba.dto.OfertaSolucaoRequest;
-import com.marketplace.ifba.dto.OfertaSolucaoResponse;
 import com.marketplace.ifba.model.enums.StatusOfertaSolucao;
 import com.marketplace.ifba.repository.DemandaRepository;
 import com.marketplace.ifba.repository.OfertaSolucaoRepository;
@@ -16,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class OfertaSolucaoService {
@@ -34,14 +30,14 @@ public class OfertaSolucaoService {
     // BUSCA OFERTA SOLUÇÃO PELO SEU ID
     @Transactional(readOnly = true)
     public OfertaSolucao buscarOfertaSolucaoPorId(UUID idOfertaSolucao) {
-        return ofertaSolucaoRepository.findById(idOfertaSolucao).orElseThrow(() -> new DadoNaoEncontradoException("Oferta Solução não encontrada com o ID"));
+        return ofertaSolucaoRepository.findById(idOfertaSolucao).orElseThrow(() -> new OfertaSolucaoInvalidaException("Oferta Solução não encontrada com o ID"));
     }
 
     // BUSCA OFERTA SOLUÇÃO PELO SEU NOME
     @Transactional(readOnly = true)
     public OfertaSolucao buscarOfertasSolucaoPorNome(String nome) {
         return ofertaSolucaoRepository.findAll().stream().filter(ofertaSolucao -> ofertaSolucao.getNome().equals(nome)).findFirst()
-                .orElseThrow(() -> new DadoNaoEncontradoException("Oferta Solução não encontrada com o NOME"));
+                .orElseThrow(() -> new OfertaSolucaoInvalidaException("Oferta Solução não encontrada com o NOME"));
     }
 
     // LISTA OFERTAS SOLUÇÃO PELO SEU STATUS
@@ -63,7 +59,7 @@ public class OfertaSolucaoService {
     public OfertaSolucao registrarOfertaSolucao(UUID idDemanda, OfertaSolucao ofertaSolucao) {
 
         Demanda demanda = demandaRepository.findById(idDemanda)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada com ID"));
+                .orElseThrow(() -> new DemandaInvalidaException("Demanda não encontrada com ID"));
         demanda.getOfertasSolucoes().add(ofertaSolucao);
         ofertaSolucao.setDemanda(demanda);
 
@@ -77,7 +73,7 @@ public class OfertaSolucaoService {
     @Transactional
     public OfertaSolucao atualizarOfertaSolucao(UUID idOfertaSolucao, OfertaSolucao ofertaSolucao) {
         OfertaSolucao ofertaSolucaoSaved = ofertaSolucaoRepository.findById(idOfertaSolucao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Não foi encontrada oferta de solução com o ID"));
+                .orElseThrow(() -> new OfertaSolucaoInvalidaException("Não foi encontrada oferta de solução com o ID"));
 
         // ATRIBUTOS QUE PODEM SER ALTERADOS
         ofertaSolucaoSaved.setNome(ofertaSolucao.getNome());
@@ -95,10 +91,10 @@ public class OfertaSolucaoService {
     @Transactional
     public OfertaSolucao aprovarOuReprovarOfertaSolucao(UUID idOfertaSolucao, Boolean decisao) {
         OfertaSolucao ofertaSolucaoSaved = ofertaSolucaoRepository.findById(idOfertaSolucao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Oferta de solução não encontrada para aprovação com o ID"));
+                .orElseThrow(() -> new OfertaSolucaoInvalidaException("Oferta de solução não encontrada para aprovação com o ID"));
 
         if (!StatusOfertaSolucao.AGUARDANDO_APROVACAO.equals(ofertaSolucaoSaved.getStatus())) {
-            throw new DadoConflitoException("O status não está em AGUARDANDO_APROVAÇÃO para aceitar está ação");
+            throw new IllegalStateException("O status não está em AGUARDANDO_APROVAÇÃO para aceitar está ação");
         }
 
         if (decisao) {
@@ -114,7 +110,7 @@ public class OfertaSolucaoService {
     @Transactional
     public void removerOfertaSolucao(UUID idSolucao) {
         if (!ofertaSolucaoRepository.existsById(idSolucao)) {
-            throw new DadoNaoEncontradoException("Oferta de solução não encontrada para exclusão com o ID");
+            throw new OfertaSolucaoInvalidaException("Oferta de solução não encontrada para exclusão com o ID");
         }
         ofertaSolucaoRepository.deleteById(idSolucao);
     }

@@ -1,6 +1,6 @@
 package com.marketplace.ifba.service;
 
-import com.marketplace.ifba.exception.DadoNaoEncontradoException;
+import com.marketplace.ifba.exception.*;
 import com.marketplace.ifba.model.Demanda;
 import com.marketplace.ifba.model.Organizacao;
 import com.marketplace.ifba.model.User;
@@ -35,20 +35,20 @@ public class DemandaService {
     @Transactional(readOnly = true)
     public Demanda buscarDemandaPorId(UUID idDemanda) {
         return demandaRepository.findById(idDemanda)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada com o ID: " + idDemanda));
+                .orElseThrow(() -> new DemandaInvalidaException("Demanda não encontrada com o ID: " + idDemanda));
     }
 
     // BUSCA DEMANDA POR NOME
     @Transactional(readOnly = true)
     public Demanda buscarDemandaPorNome(String nome) {
-        return demandaRepository.findAll().stream().filter(dem -> dem.getNome().equals(nome)).findFirst().orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada com o nome: " + nome));
+        return demandaRepository.findAll().stream().filter(dem -> dem.getNome().equals(nome)).findFirst().orElseThrow(() -> new DemandaInvalidaException("Demanda não encontrada com o nome: " + nome));
     }
 
     // REALIZA A ADIÇÃO DE VISUALIZAÇÕES
     @Transactional
     public void incrementarVizualizacao(UUID idDemanda) {
         Demanda demanda = demandaRepository.findById(idDemanda)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada com o ID: " + idDemanda));
+                .orElseThrow(() -> new DemandaInvalidaException("Demanda não encontrada com o ID: " + idDemanda));
         demanda.setVisualizacoes(demanda.getVisualizacoes() + 1);
         demandaRepository.save(demanda);
     }
@@ -57,7 +57,7 @@ public class DemandaService {
     @Transactional(readOnly = true)
     public List<Demanda> buscarDemandasPorOrganizacao(UUID idOrganizacao) {
         if (!organizacaoRepository.existsById(idOrganizacao)) {
-            throw new DadoNaoEncontradoException("Organização não encontrada com o ID: " + idOrganizacao);
+            throw new OrganizacaoInvalidaException("Organização não encontrada com o ID: " + idOrganizacao);
         }
         return demandaRepository.findAll().stream()
                 .filter(demanda -> demanda.getOrganizacao().getIdOrganizacao().equals(idOrganizacao))
@@ -79,11 +79,11 @@ public class DemandaService {
         demanda.setVisualizacoes(0);
 
         User usuarioCriador = userRepository.findById(usuarioRegistrador)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário criador não encontrado com o ID: " + usuarioRegistrador));
+                .orElseThrow(() -> new UsuarioInvalidoException("Usuário criador não encontrado com o ID: " + usuarioRegistrador));
         demanda.setUsuarioRegistrador(usuarioCriador);
 
         Organizacao organizacao = organizacaoRepository.findById(idOrganizacao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada com o ID: " + idOrganizacao));
+                .orElseThrow(() -> new OrganizacaoInvalidaException("Organização não encontrada com o ID: " + idOrganizacao));
         demanda.setOrganizacao(organizacao);
 
         return demandaRepository.save(demanda);
@@ -93,7 +93,7 @@ public class DemandaService {
     @Transactional
     public Demanda atualizarDemanda(Demanda demanda, UUID idDemanda) {
         Demanda demandaSaved = demandaRepository.findById(idDemanda)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada para atualização com o ID: " + idDemanda));
+                .orElseThrow(() -> new DemandaInvalidaException("Demanda não encontrada para atualização com o ID: " + idDemanda));
 
         // ATRIBUTOS QUE PODEM SER ALTERADOS
         demandaSaved.setNome(demanda.getNome());
@@ -109,7 +109,7 @@ public class DemandaService {
     @Transactional
     public Demanda atualizarStatusDemanda(UUID idDemanda, StatusDemanda novoStatus) {
         Demanda demanda = demandaRepository.findById(idDemanda)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada com o ID: " + idDemanda));
+                .orElseThrow(() -> new DemandaInvalidaException("Demanda não encontrada com o ID: " + idDemanda));
         demanda.setStatus(novoStatus);
 
         return demandaRepository.save(demanda);
@@ -119,7 +119,7 @@ public class DemandaService {
     @Transactional
     public Demanda aprovarDemandaDemandante(UUID idDemanda, Boolean decisao) {
         Demanda demanda = demandaRepository.findById(idDemanda)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada com o ID: " + idDemanda));
+                .orElseThrow(() -> new DemandaInvalidaException("Demanda não encontrada com o ID: " + idDemanda));
 
         if (!demanda.getStatus().equals(StatusDemanda.AGUARDANDO_APROVACAO)) {
             throw new IllegalStateException("A demanda não está no status 'AGUARDANDO_APROVACAO' para ser aprovada.");
@@ -139,7 +139,7 @@ public class DemandaService {
     @Transactional
     public void removerDemanda(UUID idDemanda) {
         if (!demandaRepository.existsById(idDemanda)) {
-            throw new DadoNaoEncontradoException("Demanda não encontrada para exclusão com o ID: " + idDemanda);
+            throw new DemandaInvalidaException("Demanda não encontrada para exclusão com o ID: " + idDemanda);
         }
         demandaRepository.deleteById(idDemanda);
     }

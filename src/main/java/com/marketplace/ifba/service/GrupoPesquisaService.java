@@ -1,7 +1,6 @@
 package com.marketplace.ifba.service;
 
-import com.marketplace.ifba.exception.DadoConflitoException;
-import com.marketplace.ifba.exception.DadoNaoEncontradoException;
+import com.marketplace.ifba.exception.*;
 import com.marketplace.ifba.model.GrupoPesquisa;
 import com.marketplace.ifba.model.Instituicao;
 import com.marketplace.ifba.model.Area;
@@ -43,21 +42,21 @@ public class GrupoPesquisaService {
     @Transactional(readOnly = true)
     public GrupoPesquisa buscarGrupoPesquisaPorId(UUID idGrupoPesquisa) {
         return grupoPesquisaRepository.findById(idGrupoPesquisa)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado com o ID"));
+                .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de pesquisa não encontrado com o ID"));
     }
 
     // BUSCA GRUPO PESQUISA PELO SEU NOME
     @Transactional(readOnly = true)
     public GrupoPesquisa buscarGrupoPesquisaPorNome(String nome) {
         return grupoPesquisaRepository.findAll().stream().filter(grupoPesquisa -> grupoPesquisa.getNome().equals(nome)).findFirst()
-                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado com o NOME"));
+                .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de pesquisa não encontrado com o NOME"));
     }
 
     // BUSCA GRUPOS PESQUISA POR INSTITUIÇÃO
     @Transactional(readOnly = true)
     public List<GrupoPesquisa> buscarGruposPorInstituicao(UUID idInstituicao) {
         if (!instituicaoRepository.existsById(idInstituicao)) {
-            throw new DadoNaoEncontradoException("Instituição não encontrada com o ID");
+            throw new InstituicaoInvalidaException("Instituição não encontrada com o ID");
         }
 
         return grupoPesquisaRepository.findAll().stream()
@@ -77,7 +76,7 @@ public class GrupoPesquisaService {
     @Transactional
     public GrupoPesquisa registrarGrupoPesquisa(GrupoPesquisa grupoPesquisa, UUID idInstituicao, UUID idUsuarioRegistrador, List<UUID> idAreas) {
         if (grupoPesquisaRepository.findAll().stream().anyMatch(grupoPes -> grupoPes.getNome().equals(grupoPesquisa.getNome()))) {
-            throw new DadoConflitoException("Já existe um grupo de pesquisa com o NOME");
+            throw new GrupoPesquisaInvalidoException("Já existe um grupo de pesquisa com o NOME");
         }
 
         grupoPesquisa.setDataRegistro(LocalDateTime.now());
@@ -86,17 +85,17 @@ public class GrupoPesquisaService {
         grupoPesquisa.setClassificacao(0.0);
 
         Instituicao instituicao = instituicaoRepository.findById(idInstituicao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada com o ID"));
+                .orElseThrow(() -> new InstituicaoInvalidaException("Instituição não encontrada com o ID"));
         grupoPesquisa.setInstituicao(instituicao);
 
         User usuarioResgistrador = userRepository.findById(idUsuarioRegistrador)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário não encontrada com o ID"));
+                .orElseThrow(() -> new UsuarioInvalidoException("Usuário não encontrada com o ID"));
         grupoPesquisa.setUsuarioRegistrador(usuarioResgistrador);
 
         if (grupoPesquisa.getAreas() != null) {
             List<Area> areas = areaRepository.findAllById(idAreas);
             if (areas.size() != idAreas.size()) {
-                throw new DadoNaoEncontradoException("Um ou mais IDs de tags fornecidos não foram encontrados.");
+                throw new AreaInvalidaException("Um ou mais IDs de areas fornecidos não foram encontrados.");
             }
             grupoPesquisa.setAreas(new ArrayList<>(areas));
         }
@@ -107,11 +106,11 @@ public class GrupoPesquisaService {
     @Transactional
     public GrupoPesquisa atualizarGrupoPesquisa(UUID idGrupoPesquisa, GrupoPesquisa grupoPesquisa) {
         GrupoPesquisa grupoPesquisaSaved = grupoPesquisaRepository.findById(idGrupoPesquisa)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado para atualização com o ID"));
+                .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de pesquisa não encontrado para atualização com o ID"));
 
         if (!grupoPesquisaSaved.getNome().equals(grupoPesquisa.getNome())) {
             if (grupoPesquisaRepository.findAll().stream().anyMatch(grupoPes -> grupoPes.getNome().equals(grupoPesquisa.getNome()))) {
-                throw new DadoConflitoException("Já existe outro grupo de pesquisa com o NOME");
+                throw new GrupoPesquisaInvalidoException("Já existe outro grupo de pesquisa com o NOME");
             }
         }
 
@@ -127,7 +126,7 @@ public class GrupoPesquisaService {
     @Transactional
     public GrupoPesquisa atualizarStatusGrupoPesquisa(UUID idGrupoPesquisa, StatusGrupoPesquisa novoStatus) {
         GrupoPesquisa grupo = grupoPesquisaRepository.findById(idGrupoPesquisa)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado com o ID"));
+                .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de pesquisa não encontrado com o ID"));
         grupo.setStatus(novoStatus);
         return grupoPesquisaRepository.save(grupo);
     }
@@ -136,7 +135,7 @@ public class GrupoPesquisaService {
     @Transactional
     public void removerGrupoPesquisa(UUID idGrupoPesquisa) {
         if (!grupoPesquisaRepository.existsById(idGrupoPesquisa)) {
-            throw new DadoNaoEncontradoException("Grupo de pesquisa não encontrado para exclusão com o ID: " + idGrupoPesquisa);
+            throw new GrupoPesquisaInvalidoException("Grupo de pesquisa não encontrado para exclusão com o ID: " + idGrupoPesquisa);
         }
         grupoPesquisaRepository.deleteById(idGrupoPesquisa);
     }

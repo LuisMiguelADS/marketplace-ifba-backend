@@ -1,7 +1,6 @@
 package com.marketplace.ifba.service;
 
-import com.marketplace.ifba.exception.DadoConflitoException;
-import com.marketplace.ifba.exception.DadoNaoEncontradoException;
+import com.marketplace.ifba.exception.AreaInvalidaException;
 import com.marketplace.ifba.model.Area;
 import com.marketplace.ifba.repository.AreaRepository;
 import org.springframework.stereotype.Service;
@@ -21,46 +20,46 @@ public class AreaService {
 
     // ---------- LEITURA
 
-    // BUSCA TAG PELO SEU ID
+    // BUSCA AREA PELO SEU ID
     @Transactional(readOnly = true)
-    public Area buscarTagPorID(UUID id) {
-        return areaRepository.findById(id).orElseThrow(() -> new DadoNaoEncontradoException("Tag não encontrada com esse id!"));
+    public Area buscarAreaPorID(UUID id) {
+        return areaRepository.findById(id).orElseThrow(() -> new AreaInvalidaException("Area não encontrada com esse id!"));
     }
 
-    // LISTA TODAS AS TAGS DO SISTEMA
+    // LISTA TODAS AS AREAS DO SISTEMA
     @Transactional(readOnly = true)
-    public List<Area> buscarTodasTags() {
+    public List<Area> buscarTodasAreas() {
         return areaRepository.findAll();
     }
 
     // ---------- ESCRITA
 
-    // REGISTRO DA TAG
+    // REGISTRO DA AREA
     @Transactional()
-    public Area registrarTag(Area area) {
-        if (areaRepository.findAll().stream().anyMatch(tagSave -> tagSave.getNomeTag().equals(area.getNomeTag()))) {
-            throw new DadoConflitoException("Já existe uma tag com o nome: '" + area.getNomeTag());
+    public Area registrarArea(Area area) {
+        if (areaRepository.findAll().stream().anyMatch(areaSave -> areaSave.getNomeArea().equals(area.getNomeArea()))) {
+            throw new AreaInvalidaException("Já existe uma area com o nome: '" + area.getNomeArea());
         }
 
         return areaRepository.save(area);
     }
 
-    // ATUALIZA TAG
+    // ATUALIZA AREA
     @Transactional()
     public Area atualizarTag(UUID id, Area area) {
-        Area areaSaved = areaRepository.findById(id).orElseThrow(() -> new DadoNaoEncontradoException("Tag não encontrada!"));
+        Area areaSaved = areaRepository.findById(id).orElseThrow(() -> new AreaInvalidaException("Tag não encontrada!"));
 
         // ATRIBUTOS QUE PODEM SER ALTERADOS
-        areaSaved.setNomeTag(area.getNomeTag());
+        areaSaved.setNomeArea(area.getNomeArea());
 
         return areaRepository.save(areaSaved);
     }
 
-    // REMOVE TAG PELO SEU ID
+    // REMOVE AREA PELO SEU ID
     @Transactional()
     public void removerTag(UUID id) {
         if (!areaRepository.existsById(id)) {
-            throw new DadoNaoEncontradoException("Tag não encontrada!");
+            throw new AreaInvalidaException("Tag não encontrada!");
         }
         areaRepository.deleteById(id);
     }

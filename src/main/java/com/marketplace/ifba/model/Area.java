@@ -19,16 +19,16 @@ import java.util.UUID;
 @Getter
 @Setter
 @Entity
-@Table(name = "tb_tags")
+@Table(name = "tb_areas")
 public class Area {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "id_tag", updatable = false, nullable = false)
-    private UUID idTag;
+    @Column(name = "id_area", updatable = false, nullable = false)
+    private UUID idArea;
 
     @Size(max = 50)
     @Column(name = "name", unique = true, nullable = false)
-    private String nomeTag;
+    private String nomeArea;
 
 }

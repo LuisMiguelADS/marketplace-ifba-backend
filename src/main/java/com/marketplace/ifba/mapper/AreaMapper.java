@@ -12,7 +12,7 @@ public class AreaMapper {
             return null;
         }
         Area area = new Area();
-        area.setNomeTag(request.nomeTag());
+        area.setNomeArea(request.nomeArea());
         return area;
     }
 
@@ -20,6 +20,6 @@ public class AreaMapper {
         if (area == null) {
             return null;
         }
-        return new AreaResponse(area.getIdTag(), area.getNomeTag());
+        return new AreaResponse(area.getIdArea(), area.getNomeArea());
     }
 }
