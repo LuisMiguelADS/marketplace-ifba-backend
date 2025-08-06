@@ -1,13 +1,10 @@
 package com.marketplace.ifba.model.enums;
 
 public enum StatusProposta {
-    ATIVA("ativa"),
     INATIVA("inativa"),
-    REJEITADA("rejeitada"),
-    CANCELADA("cancelada"),
-    CONCLUIDA("concluida"),
-    PENDENTE_APROVACAO("pendente_aprovacao"),;
-
+    NAO_APROVADA("nao-aprovada"),
+    APROVADA("aprovada"),
+    AGUARDANDO_APROVACAO("aguardando_aprovacao"),;
 
     private String statusProposta;
 

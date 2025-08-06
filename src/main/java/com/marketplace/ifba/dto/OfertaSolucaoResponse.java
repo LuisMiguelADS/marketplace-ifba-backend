@@ -12,7 +12,6 @@ public record OfertaSolucaoResponse(
         Integer prazo,
         String resumo,
         StatusOfertaSolucao status,
-        Boolean aprovado,
         String tipoSolucao,
         String restricao,
         Double preco,

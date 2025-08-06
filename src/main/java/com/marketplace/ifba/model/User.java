@@ -49,6 +49,10 @@ public class User implements UserDetails {
     private String biografia;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "grupoPesquisa_id")
+    private GrupoPesquisa grupoPesquisa;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "instituicao_id")
     private Instituicao instituicao;
 

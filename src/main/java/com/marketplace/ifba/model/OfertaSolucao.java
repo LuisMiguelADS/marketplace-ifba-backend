@@ -39,9 +39,6 @@ public class OfertaSolucao {
     @Column(name = "status", nullable = false)
     private StatusOfertaSolucao status;
 
-    @Column(name = "aprovation")
-    private Boolean aprovado;
-
     @Size(max = 50)
     @Column(name = "type_solution", nullable = false)
     private String tipoSolucao;
@@ -55,11 +52,15 @@ public class OfertaSolucao {
 
     @Size(max = 500)
     @Column(name = "necessary_resources", length = 500)
-    private String recursoNecessario;
+    private String recursosNecessarios;
 
     @Column(name = "date_aprovation", updatable = false)
     private LocalDateTime dataAprovacao;
 
     @Column(name = "date_registration", nullable = false, updatable = false)
     private LocalDateTime dataRegistro;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "demanda_requested_id", updatable = false, nullable = false)
+    private Demanda demanda;
 }

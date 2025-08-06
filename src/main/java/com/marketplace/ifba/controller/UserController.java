@@ -1,10 +1,9 @@
 package com.marketplace.ifba.controller;
 
-import com.marketplace.ifba.dto.AssociarUsuarioInstituicao;
+import com.marketplace.ifba.dto.AssociarUsuarioInstituicaoOrganizacao;
 import com.marketplace.ifba.dto.UserRequest;
 import com.marketplace.ifba.dto.UserResponse;
 import com.marketplace.ifba.mapper.UserMapper;
-import com.marketplace.ifba.model.User;
 import com.marketplace.ifba.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -53,13 +52,25 @@ public class UserController {
     }
 
     @PostMapping("/associar-instituicao")
-    public ResponseEntity<Void> associarInstituicaoUsuario(@RequestBody @Valid AssociarUsuarioInstituicao request) {
-        userService.associarInstituicaoUsuario(request.idUsuario(), request.idInstituicao());
+    public ResponseEntity<Void> associarInstituicaoUsuario(@RequestBody @Valid AssociarUsuarioInstituicaoOrganizacao request) {
+        userService.associarInstituicaoUsuario(request.idUsuario(), request.idInstituicaoOuOrganizacao());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/associar-organizacao")
+    public ResponseEntity<Void> associarOrganizacaoUsuario(@RequestBody @Valid AssociarUsuarioInstituicaoOrganizacao request) {
+        userService.associarOrganizacaoUsuario(request.idUsuario(), request.idInstituicaoOuOrganizacao());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/solicitar-organizacao")
+    public ResponseEntity<Void> solicitarAssociacaoOrganizacao(@RequestBody @Valid AssociarUsuarioInstituicaoOrganizacao request) {
+        userService.solicitarAssociacaoOrganizacao(request.idUsuario(), request.idInstituicaoOuOrganizacao());
         return ResponseEntity.noContent().build();
     }
 
     @Operation(summary = "Atualiza usuário", description = "Realiza registro do usuário se passar das regras de negócio")
-    @PutMapping("/{id}")
+    @PutMapping("/{idUsuario}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<UserResponse> atualizarUsuario(@PathVariable UUID idUsuario, @RequestBody @Valid UserRequest request) {
         return ResponseEntity.ok(userMapper.toDTO(userService.atualizarUsuario(idUsuario, userMapper.toEntity(request))));

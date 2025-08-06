@@ -1,11 +1,14 @@
 package com.marketplace.ifba.service;
 
+import com.marketplace.ifba.exception.DadoConflitoException;
 import com.marketplace.ifba.exception.DadoNaoEncontradoException;
 import com.marketplace.ifba.mapper.OfertaSolucaoMapper;
+import com.marketplace.ifba.model.Demanda;
 import com.marketplace.ifba.model.OfertaSolucao;
 import com.marketplace.ifba.dto.OfertaSolucaoRequest;
 import com.marketplace.ifba.dto.OfertaSolucaoResponse;
 import com.marketplace.ifba.model.enums.StatusOfertaSolucao;
+import com.marketplace.ifba.repository.DemandaRepository;
 import com.marketplace.ifba.repository.OfertaSolucaoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,130 +22,99 @@ import java.util.stream.Collectors;
 public class OfertaSolucaoService {
 
     private final OfertaSolucaoRepository ofertaSolucaoRepository;
-    private final OfertaSolucaoMapper ofertaSolucaoMapper;
+    private final DemandaRepository demandaRepository;
 
-    public OfertaSolucaoService(OfertaSolucaoRepository ofertaSolucaoRepository, OfertaSolucaoMapper ofertaSolucaoMapper) {
+    public OfertaSolucaoService(OfertaSolucaoRepository ofertaSolucaoRepository, DemandaRepository demandaRepository) {
         this.ofertaSolucaoRepository = ofertaSolucaoRepository;
-        this.ofertaSolucaoMapper = ofertaSolucaoMapper;
+        this.demandaRepository = demandaRepository;
     }
 
     // ---------- LEITURA
 
     // BUSCA OFERTA SOLUÇÃO PELO SEU ID
     @Transactional(readOnly = true)
-    public OfertaSolucaoResponse buscarOfertaSolucaoPorId(UUID idSolucao) {
-        return ofertaSolucaoMapper.toDTO(ofertaSolucaoRepository.findById(idSolucao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Não foi encontrada oferta de solução com o ID: " + idSolucao)));
-    }
-
-
-    // LISTA TODAS OFERTAS SOLUÇÃO
-    @Transactional(readOnly = true)
-    public List<OfertaSolucaoResponse> buscarTodasOfertasSolucao() {
-        return ofertaSolucaoRepository.findAll().stream()
-                .map(ofertaSolucaoMapper::toDTO)
-                .collect(Collectors.toList());
+    public OfertaSolucao buscarOfertaSolucaoPorId(UUID idOfertaSolucao) {
+        return ofertaSolucaoRepository.findById(idOfertaSolucao).orElseThrow(() -> new DadoNaoEncontradoException("Oferta Solução não encontrada com o ID"));
     }
 
     // BUSCA OFERTA SOLUÇÃO PELO SEU NOME
     @Transactional(readOnly = true)
-    public List<OfertaSolucaoResponse> buscarOfertasSolucaoPorNome(String nome) {
-        List<OfertaSolucao> solucoes = ofertaSolucaoRepository.findByNome(nome);
-        if (solucoes.isEmpty()) {
-            throw new DadoNaoEncontradoException("Nenhuma oferta de solução encontrada com o nome: " + nome);
-        }
-        return solucoes.stream()
-                .map(ofertaSolucaoMapper::toDTO)
-                .collect(Collectors.toList());
+    public OfertaSolucao buscarOfertasSolucaoPorNome(String nome) {
+        return ofertaSolucaoRepository.findAll().stream().filter(ofertaSolucao -> ofertaSolucao.getNome().equals(nome)).findFirst()
+                .orElseThrow(() -> new DadoNaoEncontradoException("Oferta Solução não encontrada com o NOME"));
     }
 
     // LISTA OFERTAS SOLUÇÃO PELO SEU STATUS
     @Transactional(readOnly = true)
-    public List<OfertaSolucaoResponse> buscarOfertasSolucaoPorStatus(StatusOfertaSolucao status) {
-        List<OfertaSolucao> solucoes = ofertaSolucaoRepository.findByStatus(status);
-        if (solucoes.isEmpty()) {
-            throw new DadoNaoEncontradoException("Nenhuma oferta de solução encontrada com o status: " + status);
-        }
-        return solucoes.stream()
-                .map(ofertaSolucaoMapper::toDTO)
-                .collect(Collectors.toList());
+    public List<OfertaSolucao> buscarOfertasSolucaoPorStatus(StatusOfertaSolucao status) {
+        return ofertaSolucaoRepository.findAll().stream().filter(ofertaSolucao -> ofertaSolucao.getStatus().equals(status)).toList();
     }
 
-    // LISTA OFERTAS SOLUÇÃO QUE ESTÃO APROVADAS PELO ADM
+    // LISTA TODAS OFERTAS SOLUÇÃO
     @Transactional(readOnly = true)
-    public List<OfertaSolucaoResponse> buscarOfertasSolucaoAprovadas(Boolean aprovado) {
-        List<OfertaSolucao> solucoes = ofertaSolucaoRepository.findByAprovado(aprovado);
-        if (solucoes.isEmpty()) {
-            String statusAprovacao = aprovado ? "aprovadas" : "não aprovadas";
-            throw new DadoNaoEncontradoException("Nenhuma oferta de solução encontrada com o status de aprovação: " + statusAprovacao);
-        }
-        return solucoes.stream()
-                .map(ofertaSolucaoMapper::toDTO)
-                .collect(Collectors.toList());
+    public List<OfertaSolucao> buscarTodasOfertasSolucao() {
+        return ofertaSolucaoRepository.findAll();
     }
 
     // ---------- ESCRITA
 
-
     // REGISTRA OFERTA SOLUÇÃO
     @Transactional
-    public OfertaSolucaoResponse registrarOfertaSolucao(OfertaSolucaoRequest request) {
-        OfertaSolucao ofertaSolucao = ofertaSolucaoMapper.toEntity(request);
-        ofertaSolucao.setDataRegistro(LocalDateTime.now());
-        ofertaSolucao.setStatus(StatusOfertaSolucao.ENVIADA);
-        ofertaSolucao.setAprovado(false);
+    public OfertaSolucao registrarOfertaSolucao(UUID idDemanda, OfertaSolucao ofertaSolucao) {
 
-        return ofertaSolucaoMapper.toDTO(ofertaSolucaoRepository.save(ofertaSolucao));
+        Demanda demanda = demandaRepository.findById(idDemanda)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada com ID"));
+        demanda.getOfertasSolucoes().add(ofertaSolucao);
+        ofertaSolucao.setDemanda(demanda);
+
+        ofertaSolucao.setDataRegistro(LocalDateTime.now());
+        ofertaSolucao.setStatus(StatusOfertaSolucao.AGUARDANDO_APROVACAO);
+
+        return ofertaSolucaoRepository.save(ofertaSolucao);
     }
 
     // ATUALIZA OFERTA SOLUÇÃO
     @Transactional
-    public OfertaSolucaoResponse atualizarOfertaSolucao(UUID idSolucao, OfertaSolucaoRequest request) {
-        OfertaSolucao ofertaSolucaoExistente = ofertaSolucaoRepository.findById(idSolucao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Não foi encontrada oferta de solução com o ID: " + idSolucao));
+    public OfertaSolucao atualizarOfertaSolucao(UUID idOfertaSolucao, OfertaSolucao ofertaSolucao) {
+        OfertaSolucao ofertaSolucaoSaved = ofertaSolucaoRepository.findById(idOfertaSolucao)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Não foi encontrada oferta de solução com o ID"));
 
-        ofertaSolucaoMapper.updateEntityFromRequest(request, ofertaSolucaoExistente);
+        // ATRIBUTOS QUE PODEM SER ALTERADOS
+        ofertaSolucaoSaved.setNome(ofertaSolucao.getNome());
+        ofertaSolucaoSaved.setDescricao(ofertaSolucao.getDescricao());
+        ofertaSolucaoSaved.setPreco(ofertaSolucao.getPreco());
+        ofertaSolucaoSaved.setPrazo(ofertaSolucao.getPrazo());
+        ofertaSolucaoSaved.setResumo(ofertaSolucao.getResumo());
+        ofertaSolucaoSaved.setRestricao(ofertaSolucao.getRestricao());
+        ofertaSolucaoSaved.setRecursosNecessarios(ofertaSolucao.getRecursosNecessarios());
 
-        return ofertaSolucaoMapper.toDTO(ofertaSolucaoRepository.save(ofertaSolucaoExistente));
+        return ofertaSolucaoRepository.save(ofertaSolucaoSaved);
     }
 
     // APROVA OFERTA SOLUÇÃO PELA ORGANIZAÇÃO
     @Transactional
-    public OfertaSolucaoResponse aprovarOfertaSolucao(UUID idSolucao) {
-        OfertaSolucao ofertaSolucao = ofertaSolucaoRepository.findById(idSolucao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Oferta de solução não encontrada para aprovação com o ID: " + idSolucao));
+    public OfertaSolucao aprovarOuReprovarOfertaSolucao(UUID idOfertaSolucao, Boolean decisao) {
+        OfertaSolucao ofertaSolucaoSaved = ofertaSolucaoRepository.findById(idOfertaSolucao)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Oferta de solução não encontrada para aprovação com o ID"));
 
-        if (!"PENDENTE_APROVACAO".equals(ofertaSolucao.getStatus())) {
-            throw new IllegalStateException("A oferta de solução não está no status 'PENDENTE_APROVACAO' para ser aprovada.");
+        if (!StatusOfertaSolucao.AGUARDANDO_APROVACAO.equals(ofertaSolucaoSaved.getStatus())) {
+            throw new DadoConflitoException("O status não está em AGUARDANDO_APROVAÇÃO para aceitar está ação");
         }
 
-        ofertaSolucao.setStatus(StatusOfertaSolucao.APROVADA);
-        ofertaSolucao.setAprovado(true);
-        ofertaSolucao.setDataAprovacao(LocalDateTime.now());
-
-        return ofertaSolucaoMapper.toDTO(ofertaSolucaoRepository.save(ofertaSolucao));
-    }
-
-    // REPROVA OFERTA SOLUÇÃO PELA ORGANIZAÇÃO
-    @Transactional
-    public OfertaSolucaoResponse reprovarOfertaSolucao(UUID idSolucao) {
-        OfertaSolucao ofertaSolucao = ofertaSolucaoRepository.findById(idSolucao)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Oferta de solução não encontrada para reprovação com o ID: " + idSolucao));
-
-        if (!"PENDENTE_APROVACAO".equals(ofertaSolucao.getStatus())) {
-            throw new IllegalStateException("A oferta de solução não está no status 'PENDENTE_APROVACAO' para ser reprovada.");
+        if (decisao) {
+            ofertaSolucaoSaved.setStatus(StatusOfertaSolucao.APROVADA);
+        } else {
+            ofertaSolucaoSaved.setStatus(StatusOfertaSolucao.REPROVADA);
         }
 
-        ofertaSolucao.setStatus(StatusOfertaSolucao.NAO_APROVADA);
-        ofertaSolucao.setAprovado(false);
-        return ofertaSolucaoMapper.toDTO(ofertaSolucaoRepository.save(ofertaSolucao));
+        return ofertaSolucaoRepository.save(ofertaSolucaoSaved);
     }
 
     // REMOVER OFERTA SOLUÇÃO
     @Transactional
     public void removerOfertaSolucao(UUID idSolucao) {
         if (!ofertaSolucaoRepository.existsById(idSolucao)) {
-            throw new DadoNaoEncontradoException("Oferta de solução não encontrada para exclusão com o ID: " + idSolucao);
+            throw new DadoNaoEncontradoException("Oferta de solução não encontrada para exclusão com o ID");
         }
         ofertaSolucaoRepository.deleteById(idSolucao);
     }

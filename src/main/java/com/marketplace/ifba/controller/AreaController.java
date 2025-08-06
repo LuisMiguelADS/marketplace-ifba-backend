@@ -1,8 +1,10 @@
 package com.marketplace.ifba.controller;
 
-import com.marketplace.ifba.dto.TagRequest;
-import com.marketplace.ifba.dto.TagResponse;
-import com.marketplace.ifba.service.TagService;
+import com.marketplace.ifba.dto.AreaRequest;
+import com.marketplace.ifba.dto.AreaResponse;
+import com.marketplace.ifba.mapper.AreaMapper;
+import com.marketplace.ifba.model.Area;
+import com.marketplace.ifba.service.AreaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -24,49 +26,48 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/tag")
 @Tag(name = "Tag", description = "Gerencia as operações relacionadas às tags no marketplace.")
-public class TagController {
-    private final TagService tagService;
+public class AreaController {
+    private final AreaService areaService;
+    private final AreaMapper areaMapper;
 
-    public TagController(TagService tagService) {
-        this.tagService = tagService;
+    public AreaController(AreaService areaService, AreaMapper areaMapper) {
+        this.areaService = areaService;
+        this.areaMapper = areaMapper;
     }
 
     @Operation(summary = "Retorna tag a partir do ID", description = "Procura uma tag com o ID informado")
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
-    public ResponseEntity<TagResponse> buscarTagPorId(@PathVariable UUID id) {
-        return ResponseEntity.ok(tagService.buscarTagPorID(id));
+    public ResponseEntity<AreaResponse> buscarTagPorId(@PathVariable UUID id) {
+        return ResponseEntity.ok(areaMapper.toDTO(areaService.buscarTagPorID(id)));
     }
 
     @Operation(summary = "Retorna todas as tags", description = "Retorna todas as tags cadastradas")
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
-    public ResponseEntity<List<TagResponse>> listarTodasTags() {
-        List<TagResponse> tags = tagService.buscarTodasTags();
-
-        return ResponseEntity.ok(tags);
+    public ResponseEntity<List<AreaResponse>> listarTodasTags() {
+        return ResponseEntity.ok(areaService.buscarTodasTags().stream().map(areaMapper::toDTO).toList());
     }
 
     @Operation(summary = "Registra tag", description = "Realiza registro da tag se passar das regras de negócio")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TagResponse> criarTag(@RequestBody @Valid TagRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(tagService.registrarTag(request));
+    public ResponseEntity<AreaResponse> criarTag(@RequestBody @Valid AreaRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(areaMapper.toDTO(areaService.registrarTag(areaMapper.toEntity(request))));
     }
 
     @Operation(summary = "Atualiza tag", description = "Realiza registro da tag se passar das regras de negócio")
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TagResponse> atualizarTag(@PathVariable UUID id, @RequestBody @Valid TagRequest request) {
-        return ResponseEntity.ok(tagService.atualizarTag(id, request));
+    public ResponseEntity<AreaResponse> atualizarTag(@PathVariable UUID id, @RequestBody @Valid AreaRequest request) {
+        return ResponseEntity.ok(areaMapper.toDTO(areaService.atualizarTag(id, areaMapper.toEntity(request))));
     }
 
     @Operation(summary = "Remove tag", description = "Remove o cadastro da tag")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> removerTag(@PathVariable UUID id) {
-        tagService.removerTag(id);
-
+        areaService.removerTag(id);
         return ResponseEntity.noContent().build();
     }
 }

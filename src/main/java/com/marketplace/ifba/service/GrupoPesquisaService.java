@@ -1,18 +1,15 @@
 package com.marketplace.ifba.service;
 
-import com.marketplace.ifba.dto.GrupoPesquisaRequest;
-import com.marketplace.ifba.dto.GrupoPesquisaResponse;
 import com.marketplace.ifba.exception.DadoConflitoException;
 import com.marketplace.ifba.exception.DadoNaoEncontradoException;
-import com.marketplace.ifba.mapper.GrupoPesquisaMapper;
 import com.marketplace.ifba.model.GrupoPesquisa;
 import com.marketplace.ifba.model.Instituicao;
-import com.marketplace.ifba.model.Tag;
+import com.marketplace.ifba.model.Area;
 import com.marketplace.ifba.model.User;
 import com.marketplace.ifba.model.enums.StatusGrupoPesquisa;
 import com.marketplace.ifba.repository.GrupoPesquisaRepository;
 import com.marketplace.ifba.repository.InstituicaoRepository;
-import com.marketplace.ifba.repository.TagRepository;
+import com.marketplace.ifba.repository.AreaRepository;
 import com.marketplace.ifba.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,7 +18,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class GrupoPesquisaService {
@@ -29,149 +25,111 @@ public class GrupoPesquisaService {
     private final GrupoPesquisaRepository grupoPesquisaRepository;
     private final InstituicaoRepository instituicaoRepository;
     private final UserRepository userRepository;
-    private final TagRepository tagRepository;
-    private final GrupoPesquisaMapper grupoPesquisaMapper;
+    private final AreaRepository areaRepository;
 
     public GrupoPesquisaService(GrupoPesquisaRepository grupoPesquisaRepository,
                                 InstituicaoRepository instituicaoRepository,
                                 UserRepository userRepository,
-                                TagRepository tagRepository,
-                                GrupoPesquisaMapper grupoPesquisaMapper) {
+                                AreaRepository areaRepository) {
         this.grupoPesquisaRepository = grupoPesquisaRepository;
         this.instituicaoRepository = instituicaoRepository;
         this.userRepository = userRepository;
-        this.tagRepository = tagRepository;
-        this.grupoPesquisaMapper = grupoPesquisaMapper;
+        this.areaRepository = areaRepository;
     }
 
     // ---------- LEITURA
 
     // BUSCA GRUPO PESQUISA PELO SEU ID
     @Transactional(readOnly = true)
-    public GrupoPesquisaResponse buscarGrupoPesquisaPorId(UUID idGrupoPesquisa) {
-        GrupoPesquisa grupo = grupoPesquisaRepository.findById(idGrupoPesquisa)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado com o ID: " + idGrupoPesquisa));
-        return grupoPesquisaMapper.toDTO(grupo);
+    public GrupoPesquisa buscarGrupoPesquisaPorId(UUID idGrupoPesquisa) {
+        return grupoPesquisaRepository.findById(idGrupoPesquisa)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado com o ID"));
     }
 
     // BUSCA GRUPO PESQUISA PELO SEU NOME
     @Transactional(readOnly = true)
-    public GrupoPesquisaResponse buscarGrupoPesquisaPorNome(String nome) {
-        GrupoPesquisa grupo = grupoPesquisaRepository.findByNome(nome)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado com o nome: " + nome));
-        return grupoPesquisaMapper.toDTO(grupo);
+    public GrupoPesquisa buscarGrupoPesquisaPorNome(String nome) {
+        return grupoPesquisaRepository.findAll().stream().filter(grupoPesquisa -> grupoPesquisa.getNome().equals(nome)).findFirst()
+                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado com o NOME"));
     }
 
     // BUSCA GRUPOS PESQUISA POR INSTITUIÇÃO
     @Transactional(readOnly = true)
-    public List<GrupoPesquisaResponse> buscarGruposPorInstituicao(UUID idInstituicao) {
+    public List<GrupoPesquisa> buscarGruposPorInstituicao(UUID idInstituicao) {
         if (!instituicaoRepository.existsById(idInstituicao)) {
-            throw new DadoNaoEncontradoException("Instituição não encontrada com o ID: " + idInstituicao);
+            throw new DadoNaoEncontradoException("Instituição não encontrada com o ID");
         }
+
         return grupoPesquisaRepository.findAll().stream()
                 .filter(grupoPesquisa -> grupoPesquisa.getInstituicao().getIdInstituicao().equals(idInstituicao))
-                .map(grupoPesquisaMapper::toDTO)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     // LISTA TODOS GRUPOS PESQUISA
     @Transactional(readOnly = true)
-    public List<GrupoPesquisaResponse> buscarTodosGruposPesquisa() {
-        return grupoPesquisaRepository.findAll().stream()
-                .map(grupoPesquisaMapper::toDTO)
-                .collect(Collectors.toList());
+    public List<GrupoPesquisa> buscarTodosGruposPesquisa() {
+        return grupoPesquisaRepository.findAll();
     }
 
     // ---------- ESCRITA
 
     // REGISTRA GRUPO PESQUISA
     @Transactional
-    public GrupoPesquisaResponse registrarGrupoPesquisa(GrupoPesquisaRequest request) {
-        if (grupoPesquisaRepository.findByNome(request.nome()).isPresent()) {
-            throw new DadoConflitoException("Já existe um grupo de pesquisa com o nome: '" + request.nome() + "'.");
+    public GrupoPesquisa registrarGrupoPesquisa(GrupoPesquisa grupoPesquisa, UUID idInstituicao, UUID idUsuarioRegistrador, List<UUID> idAreas) {
+        if (grupoPesquisaRepository.findAll().stream().anyMatch(grupoPes -> grupoPes.getNome().equals(grupoPesquisa.getNome()))) {
+            throw new DadoConflitoException("Já existe um grupo de pesquisa com o NOME");
         }
 
-        GrupoPesquisa grupoPesquisa = grupoPesquisaMapper.toEntity(request);
         grupoPesquisa.setDataRegistro(LocalDateTime.now());
         grupoPesquisa.setStatus(StatusGrupoPesquisa.ATIVO);
         grupoPesquisa.setTrabalhos(0);
         grupoPesquisa.setClassificacao(0.0);
 
-        Instituicao instituicao = instituicaoRepository.findById(request.idInstituicao())
-                .orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada com o ID: " + request.idInstituicao()));
+        Instituicao instituicao = instituicaoRepository.findById(idInstituicao)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada com o ID"));
         grupoPesquisa.setInstituicao(instituicao);
 
-        if (request.idsUsuarios() != null && !request.idsUsuarios().isEmpty()) {
-            List<User> usuarios = userRepository.findAllById(request.idsUsuarios());
-            if (usuarios.size() != request.idsUsuarios().size()) {
-                throw new DadoNaoEncontradoException("Um ou mais IDs de usuários fornecidos não foram encontrados.");
-            }
-            grupoPesquisa.setUsuarios(new ArrayList<>(usuarios));
-        } else {
-            grupoPesquisa.setUsuarios(new ArrayList<>());
-        }
+        User usuarioResgistrador = userRepository.findById(idUsuarioRegistrador)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário não encontrada com o ID"));
+        grupoPesquisa.setUsuarioRegistrador(usuarioResgistrador);
 
-        if (request.idsTags() != null && !request.idsTags().isEmpty()) {
-            List<Tag> tags = tagRepository.findAllById(request.idsTags());
-            if (tags.size() != request.idsTags().size()) {
+        if (grupoPesquisa.getAreas() != null) {
+            List<Area> areas = areaRepository.findAllById(idAreas);
+            if (areas.size() != idAreas.size()) {
                 throw new DadoNaoEncontradoException("Um ou mais IDs de tags fornecidos não foram encontrados.");
             }
-            grupoPesquisa.setTags(new ArrayList<>(tags));
-        } else {
-            grupoPesquisa.setTags(new ArrayList<>());
+            grupoPesquisa.setAreas(new ArrayList<>(areas));
         }
-
-        return grupoPesquisaMapper.toDTO(grupoPesquisaRepository.save(grupoPesquisa));
+        return grupoPesquisaRepository.save(grupoPesquisa);
     }
 
     // ATUALIZA GRUPO PESQUISA
     @Transactional
-    public GrupoPesquisaResponse atualizarGrupoPesquisa(UUID idGrupoPesquisa, GrupoPesquisaRequest request) {
-        GrupoPesquisa grupoExistente = grupoPesquisaRepository.findById(idGrupoPesquisa)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado para atualização com o ID: " + idGrupoPesquisa));
+    public GrupoPesquisa atualizarGrupoPesquisa(UUID idGrupoPesquisa, GrupoPesquisa grupoPesquisa) {
+        GrupoPesquisa grupoPesquisaSaved = grupoPesquisaRepository.findById(idGrupoPesquisa)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado para atualização com o ID"));
 
-        if (!grupoExistente.getNome().equals(request.nome())) {
-            grupoPesquisaRepository.findByNome(request.nome()).ifPresent(g -> {
-                if (!g.getIdGrupoPesquisa().equals(idGrupoPesquisa)) {
-                    throw new DadoConflitoException("Já existe outro grupo de pesquisa com o nome: '" + request.nome());
-                }
-            });
-        }
-
-        grupoPesquisaMapper.updateEntityFromRequest(request, grupoExistente);
-
-        if (!grupoExistente.getInstituicao().getIdInstituicao().equals(request.idInstituicao())) {
-            Instituicao novaInstituicao = instituicaoRepository.findById(request.idInstituicao())
-                    .orElseThrow(() -> new DadoNaoEncontradoException("Nova instituição não encontrada com o ID: " + request.idInstituicao()));
-            grupoExistente.setInstituicao(novaInstituicao);
-        }
-
-        if (request.idsUsuarios() != null) {
-            List<User> novosUsuarios = userRepository.findAllById(request.idsUsuarios());
-            if (novosUsuarios.size() != request.idsUsuarios().size()) {
-                throw new DadoNaoEncontradoException("Um ou mais IDs de usuários fornecidos para atualização não foram encontrados.");
+        if (!grupoPesquisaSaved.getNome().equals(grupoPesquisa.getNome())) {
+            if (grupoPesquisaRepository.findAll().stream().anyMatch(grupoPes -> grupoPes.getNome().equals(grupoPesquisa.getNome()))) {
+                throw new DadoConflitoException("Já existe outro grupo de pesquisa com o NOME");
             }
-            grupoExistente.setUsuarios(new ArrayList<>(novosUsuarios));
         }
 
-        if (request.idsTags() != null) {
-            List<Tag> novasTags = tagRepository.findAllById(request.idsTags());
-            if (novasTags.size() != request.idsTags().size()) {
-                throw new DadoNaoEncontradoException("Um ou mais IDs de tags fornecidos para atualização não foram encontrados.");
-            }
-            grupoExistente.setTags(new ArrayList<>(novasTags));
-        }
+        // ATRIBUTOS QUE PODEM SER ALTERADOS
+        grupoPesquisaSaved.setNome(grupoPesquisa.getNome());
+        grupoPesquisaSaved.setAreas(grupoPesquisa.getAreas());
+        grupoPesquisaSaved.setDescricao(grupoPesquisa.getDescricao());
 
-        return grupoPesquisaMapper.toDTO(grupoPesquisaRepository.save(grupoExistente));
+        return grupoPesquisaRepository.save(grupoPesquisaSaved);
     }
 
     // ATUALIZA STATUS GRUPO PESQUISA
     @Transactional
-    public GrupoPesquisaResponse atualizarStatusGrupoPesquisa(UUID idGrupoPesquisa, StatusGrupoPesquisa novoStatus) {
+    public GrupoPesquisa atualizarStatusGrupoPesquisa(UUID idGrupoPesquisa, StatusGrupoPesquisa novoStatus) {
         GrupoPesquisa grupo = grupoPesquisaRepository.findById(idGrupoPesquisa)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado com o ID: " + idGrupoPesquisa));
+                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado com o ID"));
         grupo.setStatus(novoStatus);
-        return grupoPesquisaMapper.toDTO(grupoPesquisaRepository.save(grupo));
+        return grupoPesquisaRepository.save(grupo);
     }
 
     // REMOVE GRUPO PESQUISA

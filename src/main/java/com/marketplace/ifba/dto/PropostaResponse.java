@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public record PropostaResponse(
         UUID idProposta,
-        // GrupoPesquisaResponse grupoPesquisa,
+        GrupoPesquisaResponse grupoPesquisa,
         InstituicaoResponse instituicao,
         String nome,
         String solucao,

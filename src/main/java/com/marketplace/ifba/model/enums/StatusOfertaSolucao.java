@@ -1,10 +1,11 @@
 package com.marketplace.ifba.model.enums;
 
 public enum StatusOfertaSolucao {
-    ENVIADA("enviada"),
+    AGUARDANDO_APROVACAO("aguardando-aprovacao"),
     APROVADA("aprovada"),
-    NAO_APROVADA("nao_aprovada"),
-    EXCLUIDA("excluida");
+    REPROVADA("reprovada"),
+    EXCLUIDA("excluida"),
+    ACEITA("aceita");
 
     private String statusOfertaSolucao;
 

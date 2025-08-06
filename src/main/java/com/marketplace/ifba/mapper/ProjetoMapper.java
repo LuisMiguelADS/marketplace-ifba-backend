@@ -53,11 +53,4 @@ public class ProjetoMapper {
         );
     }
 
-    public void updateEntityFromRequest(ProjetoRequest request, Projeto projeto) {
-        if (request == null || projeto == null) {
-            return;
-        }
-
-        Optional.ofNullable(request.nome()).ifPresent(projeto::setNome);
-    }
 }

@@ -66,16 +66,4 @@ public class InstituicaoMapper {
                 usuarioRegistroDTO
         );
     }
-
-    public void updateEntityFromRequest(InstituicaoRequest request, Instituicao instituicao) {
-
-        Optional.ofNullable(request.nome()).ifPresent(instituicao::setNome);
-        Optional.ofNullable(request.sigla()).ifPresent(instituicao::setSigla);
-        Optional.ofNullable(request.cnpj()).ifPresent(instituicao::setCnpj);
-        Optional.ofNullable(request.tipoInstituicao()).ifPresent(instituicao::setTipoInstituicao);
-        Optional.ofNullable(request.setor()).ifPresent(instituicao::setSetor);
-        Optional.ofNullable(request.telefone()).ifPresent(instituicao::setTelefone);
-        Optional.ofNullable(request.site()).ifPresent(instituicao::setSite);
-        Optional.ofNullable(request.descricao()).ifPresent(instituicao::setDescricao);
-    }
 }

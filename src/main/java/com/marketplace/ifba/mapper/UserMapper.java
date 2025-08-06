@@ -1,9 +1,6 @@
 package com.marketplace.ifba.mapper;
 
-import com.marketplace.ifba.dto.InstituicaoResponse;
-import com.marketplace.ifba.dto.OrganizacaoResponse;
-import com.marketplace.ifba.dto.UserRequest;
-import com.marketplace.ifba.dto.UserResponse;
+import com.marketplace.ifba.dto.*;
 import com.marketplace.ifba.model.Conexao;
 import com.marketplace.ifba.model.Organizacao;
 import com.marketplace.ifba.model.User;
@@ -42,8 +39,10 @@ public class UserMapper {
 
         List<LocalDateTime> conexoes = new ArrayList<>();
 
-        for (Conexao conexao : user.getConexoes()) {
-            conexoes.add(conexao.getDataConexao());
+        if (user.getConexoes() != null) {
+            for (Conexao conexao : user.getConexoes()) {
+                conexoes.add(conexao.getDataConexao());
+            }
         }
 
         return new UserResponse(
@@ -61,29 +60,16 @@ public class UserMapper {
         );
     }
 
-    public User updateEntityFromRequest(UserRequest request, User user) {
-        if (request == null) {
-            throw new IllegalArgumentException("UserRequest não pode ser nulo para atualização.");
-        }
+   public UserInfosMinResponse toDTOInfosMin(User user) {
         if (user == null) {
-            throw new IllegalArgumentException("Usuário a ser atualizado não pode ser nulo.");
-        }
-        if (request.nomeCompleto() != null) {
-            user.setNomeCompleto(request.nomeCompleto());
-        }
-        if (request.telefone() != null) {
-            user.setTelefone(request.telefone());
-        }
-        if (request.password() != null || request.password() != user.getPassword()) {
-            user.setPassword(request.password());
-        }
-        if (request.dataNascimento() != null) {
-            user.setDataNascimento(request.dataNascimento());
-        }
-        if (request.biografia() != null) {
-            user.setBiografia(request.biografia());
+            return null;
         }
 
-        return user;
-    }
+        return new UserInfosMinResponse(
+                user.getIdUsuario(),
+                user.getNomeCompleto(),
+                user.getEmail(),
+                user.getTelefone()
+        );
+   }
 }

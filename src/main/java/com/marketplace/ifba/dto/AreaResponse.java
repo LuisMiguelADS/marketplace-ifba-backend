@@ -2,7 +2,7 @@ package com.marketplace.ifba.dto;
 
 import java.util.UUID;
 
-public record TagResponse(
+public record AreaResponse(
         UUID idTag,
         String nomeTag
 ) {

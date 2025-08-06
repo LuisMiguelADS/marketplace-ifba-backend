@@ -1,12 +1,11 @@
 package com.marketplace.ifba.service;
 
-import com.marketplace.ifba.dto.*;
 import com.marketplace.ifba.exception.DadoConflitoException;
 import com.marketplace.ifba.exception.DadoNaoEncontradoException;
-import com.marketplace.ifba.mapper.UserMapper;
-import com.marketplace.ifba.model.Conexao;
-import com.marketplace.ifba.model.Instituicao;
-import com.marketplace.ifba.model.User;
+import com.marketplace.ifba.model.*;
+import com.marketplace.ifba.model.enums.StatusSolicitacao;
+import com.marketplace.ifba.repository.InstituicaoRepository;
+import com.marketplace.ifba.repository.OrganizacaoRepository;
 import com.marketplace.ifba.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -26,15 +25,17 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
-    private final InstituicaoService instituicaoService;
     private final AuthenticationManager authenticationManager;
+    private final OrganizacaoRepository organizacaoRepository;
+    private final InstituicaoRepository instituicaoRepository;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenService tokenService, AuthenticationManager authenticationManager, InstituicaoService instituicaoService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenService tokenService, AuthenticationManager authenticationManager, OrganizacaoRepository organizacaoRepository, InstituicaoRepository instituicaoRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
         this.authenticationManager = authenticationManager;
-        this.instituicaoService = instituicaoService;
+        this.organizacaoRepository = organizacaoRepository;
+        this.instituicaoRepository = instituicaoRepository;
     }
 
     // ---------- LEITURA
@@ -70,7 +71,7 @@ public class UserService {
 
     // REGISTRO DO USUÁRIO
     public User registrarUsuario(User user) {
-        if (userRepository.findAll().stream().filter(userDetails -> userDetails.getEmail().equals(user.getEmail())).findFirst() != null) {
+        if (userRepository.findAll().stream().anyMatch(userDetails -> userDetails.getEmail().equals(user.getEmail()))) {
             throw new DadoConflitoException("Email já registrado.");
         }
         String encryptedPassword = passwordEncoder.encode(user.getPassword());
@@ -86,7 +87,51 @@ public class UserService {
         User usuario = userRepository.findById(idUsuario)
                 .orElseThrow(() -> new DadoNaoEncontradoException("Usuário não encontrada com o ID: " + idUsuario));
 
-        usuario.setInstituicao(instituicaoService.buscarInstituicaoPorId(idInstituicao));
+        Instituicao instituicao = instituicaoRepository.findById(idInstituicao)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada com o ID: " + idInstituicao));
+
+        // ##################### para desevolver
+    }
+
+    // ASSOCIA USUÁRIO COM UMA ORGANIZAÇÃO
+    public void associarOrganizacaoUsuario(UUID idUsuario, UUID idOrganizacao) {
+        User usuario = userRepository.findById(idUsuario)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário não encontrada com o ID: " + idUsuario));
+
+        Organizacao organizacao = organizacaoRepository.findById(idOrganizacao)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Organizacao não encontrada com o ID: " + idOrganizacao));
+
+        if (usuario.getOrganizacao() != null) throw new DadoConflitoException("O usuário já está associado há uma organização");
+
+        if (usuario.getInstituicao() != null) throw new DadoConflitoException("O usuário está associado há uma instituição, sendo assim, não pode se associar uma organização");
+
+        organizacao.getUsuariosIntegrantes().add(usuario);
+        organizacao.getSolicitacoes().forEach((solicitacao) -> {
+            if (solicitacao.getUserApplicant().equals(usuario)) {
+                solicitacao.setStatus(StatusSolicitacao.APROVADA);
+            }
+        });
+        organizacaoRepository.save(organizacao);
+
+        usuario.setOrganizacao(organizacao);
+        userRepository.save(usuario);
+    }
+
+    // SOLICITA A ASSOIAÇÃO DO USUÁRIO COM UMA ORGANIZAÇÃO
+    public void solicitarAssociacaoOrganizacao(UUID idUsuario, UUID idOrganizacao) {
+        User usuario = userRepository.findById(idUsuario)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Usuário não encontrada com o ID: " + idUsuario));
+
+        Organizacao organizacao = organizacaoRepository.findById(idOrganizacao)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Organizacao não encontrada com o ID: " + idOrganizacao));
+
+        Solicitacao solicitacao = new Solicitacao();
+        solicitacao.setOrganizacaoRequested(organizacao);
+        solicitacao.setUserApplicant(usuario);
+        solicitacao.setStatus(StatusSolicitacao.ATIVA);
+
+        organizacao.getSolicitacoes().add(solicitacao);
+        organizacaoRepository.save(organizacao);
     }
 
     // RESGISTRA LOGIN DO USUÁRIO

@@ -56,18 +56,4 @@ public class DemandaMapper {
                 Optional.ofNullable(demanda.getOrganizacao()).map(organizacaoMapper::toDTO).orElse(null)
         );
     }
-
-    public void updateEntityFromRequest(DemandaRequest request, Demanda demanda) {
-        if (request == null || demanda == null) {
-            return;
-        }
-
-        Optional.ofNullable(request.nome()).ifPresent(demanda::setNome);
-        Optional.ofNullable(request.emailResponsavel()).ifPresent(demanda::setEmailResponsavel);
-        Optional.ofNullable(request.orcamento()).ifPresent(demanda::setOrcamento);
-        Optional.ofNullable(request.descricao()).ifPresent(demanda::setDescricao);
-        Optional.ofNullable(request.resumo()).ifPresent(demanda::setResumo);
-        Optional.ofNullable(request.criterio()).ifPresent(demanda::setCriterio);
-        Optional.ofNullable(request.dataPrazoFinal()).ifPresent(demanda::setDataPrazoFinal);
-    }
 }

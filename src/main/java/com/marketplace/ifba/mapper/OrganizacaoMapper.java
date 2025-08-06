@@ -2,22 +2,27 @@ package com.marketplace.ifba.mapper;
 
 import com.marketplace.ifba.dto.OrganizacaoRequest;
 import com.marketplace.ifba.dto.OrganizacaoResponse;
+import com.marketplace.ifba.dto.SolicitacaoResponse;
 import com.marketplace.ifba.dto.UserResponse;
 import com.marketplace.ifba.model.Organizacao;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.marketplace.ifba.model.Solicitacao;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Component
 public class OrganizacaoMapper {
 
-    @Autowired
     private final UserMapper userMapper;
+    private final SolicitacaoMapper solicitacaoMapper;
 
-    public OrganizacaoMapper(UserMapper userMapper) {
+    public OrganizacaoMapper(UserMapper userMapper, SolicitacaoMapper solicitacaoMapper) {
         this.userMapper = userMapper;
+        this.solicitacaoMapper = solicitacaoMapper;
     }
+
 
     public Organizacao toEntity(OrganizacaoRequest request) {
         if (request == null) {
@@ -50,6 +55,22 @@ public class OrganizacaoMapper {
                 .map(userMapper::toDTO)
                 .orElse(null);
 
+        UserResponse usuarioGerente = Optional.ofNullable(organizacao.getUsuarioGerente())
+                .map(userMapper::toDTO)
+                .orElse(null);
+
+        List<UserResponse> usuariosIntegrantes = organizacao.getUsuariosIntegrantes().stream()
+                .map(userMapper::toDTO)
+                .toList();
+
+        List<SolicitacaoResponse> solicitacoes = new ArrayList<>();
+
+        if (organizacao.getSolicitacoes() != null) {
+            for (Solicitacao solicitacao : organizacao.getSolicitacoes()) {
+                solicitacoes.add(solicitacaoMapper.toDTO(solicitacao));
+            }
+        }
+
         return new OrganizacaoResponse(
                 organizacao.getIdOrganizacao(),
                 organizacao.getNome(),
@@ -64,22 +85,10 @@ public class OrganizacaoMapper {
                 organizacao.getDataRegistro(),
                 organizacao.getDataAprovacao(),
                 admAprovacaoDTO,
-                usuarioRegistroDTO
+                usuarioRegistroDTO,
+                usuarioGerente,
+                usuariosIntegrantes,
+                solicitacoes
         );
-    }
-
-    public void updateEntityFromRequest(OrganizacaoRequest request, Organizacao organizacao) {
-        if (request == null || organizacao == null) {
-            return;
-        }
-
-        Optional.ofNullable(request.nome()).ifPresent(organizacao::setNome);
-        Optional.ofNullable(request.sigla()).ifPresent(organizacao::setSigla);
-        Optional.ofNullable(request.cnpj()).ifPresent(organizacao::setCnpj);
-        Optional.ofNullable(request.tipoOrganizacao()).ifPresent(organizacao::setTipoOrganizacao);
-        Optional.ofNullable(request.setor()).ifPresent(organizacao::setSetor);
-        Optional.ofNullable(request.telefone()).ifPresent(organizacao::setTelefone);
-        Optional.ofNullable(request.site()).ifPresent(organizacao::setSite);
-        Optional.ofNullable(request.descricao()).ifPresent(organizacao::setDescricao);
     }
 }

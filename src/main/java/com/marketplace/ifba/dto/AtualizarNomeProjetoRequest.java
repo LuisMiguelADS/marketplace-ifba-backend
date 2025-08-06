@@ -5,9 +5,10 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.UUID;
 
-public record AtualizarStatusProjetoRequest(
+public record AtualizarNomeProjetoRequest(
         @NotNull(message = "O id do projeto é obrigatório.")
         UUID idProjeto,
-        @NotNull(message = "O novo status do projeto é obrigatório.")
-        StatusProjeto novoStatus
-) {}
+        @NotNull(message = "O novo nome do projeto é obrigatório.")
+        String novoNome
+) {
+}

@@ -9,5 +9,4 @@ import java.util.UUID;
 
 @Repository
 public interface GrupoPesquisaRepository extends JpaRepository<GrupoPesquisa, UUID> {
-    Optional<GrupoPesquisa> findByNome(String nome);
 }

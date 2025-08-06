@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.URL;
 import org.hibernate.validator.constraints.br.CNPJ;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -70,4 +71,14 @@ public class Organizacao {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_registration_id", nullable = false, updatable = false)
     private User usuarioRegistro;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_manager_id", nullable = false, updatable = false)
+    private User usuarioGerente;
+
+    @OneToMany(mappedBy = "organizacao", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<User> usuariosIntegrantes;
+
+    @OneToMany(mappedBy = "organizacaoRequested", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Solicitacao> solicitacoes;
 }

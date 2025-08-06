@@ -1,10 +1,7 @@
 package com.marketplace.ifba.service;
 
-import com.marketplace.ifba.dto.ProjetoRequest;
-import com.marketplace.ifba.dto.ProjetoResponse;
 import com.marketplace.ifba.exception.DadoConflitoException;
 import com.marketplace.ifba.exception.DadoNaoEncontradoException;
-import com.marketplace.ifba.mapper.ProjetoMapper;
 import com.marketplace.ifba.model.*;
 import com.marketplace.ifba.model.enums.StatusProjeto;
 import com.marketplace.ifba.repository.*;
@@ -14,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,127 +23,117 @@ public class ProjetoService {
     private final DemandaRepository demandaRepository;
     private final OfertaSolucaoRepository ofertaSolucaoRepository;
     private final GrupoPesquisaRepository grupoPesquisaRepository;
-    private final ChatRepository chatRepository;
-    private final ProjetoMapper projetoMapper;
 
     public ProjetoService(ProjetoRepository projetoRepository, OrganizacaoRepository organizacaoRepository,
                           InstituicaoRepository instituicaoRepository, DemandaRepository demandaRepository,
-                          OfertaSolucaoRepository ofertaSolucaoRepository, GrupoPesquisaRepository grupoPesquisaRepository,
-                          ChatRepository chatRepository, ProjetoMapper projetoMapper) {
+                          OfertaSolucaoRepository ofertaSolucaoRepository, GrupoPesquisaRepository grupoPesquisaRepository) {
         this.projetoRepository = projetoRepository;
         this.organizacaoRepository = organizacaoRepository;
         this.instituicaoRepository = instituicaoRepository;
         this.demandaRepository = demandaRepository;
         this.ofertaSolucaoRepository = ofertaSolucaoRepository;
         this.grupoPesquisaRepository = grupoPesquisaRepository;
-        this.chatRepository = chatRepository;
-        this.projetoMapper = projetoMapper;
     }
 
     // ---------- LEITURA
 
     // BUSCA PROJETO PELO SEU ID
     @Transactional(readOnly = true)
-    public ProjetoResponse buscarProjetoPorId(UUID idProjeto) {
-        Projeto projeto = projetoRepository.findById(idProjeto)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado com o ID: " + idProjeto));
-        return projetoMapper.toDTO(projeto);
+    public Projeto buscarProjetoPorId(UUID idProjeto) {
+        return projetoRepository.findById(idProjeto)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado com o ID!"));
     }
 
     // BUSCA O PROJETO PELO SEU NOME
     @Transactional(readOnly = true)
-    public ProjetoResponse buscarProjetoPorNome(String nome) {
-        Projeto projeto = projetoRepository.findByNome(nome)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado com o nome: " + nome));
-        return projetoMapper.toDTO(projeto);
+    public Projeto buscarProjetoPorNome(String nome) {
+        return projetoRepository.findByNome(nome)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado com o nome!"));
     }
 
     // BUSCA PROJETO PELA SUA DEMANDA
     @Transactional(readOnly = true)
-    public ProjetoResponse buscarProjetoPorDemanda(UUID idDemanda) {
-        Projeto projeto = projetoRepository.findAll().stream()
-                .filter(proj -> proj.getDemanda().getIdDemanda().equals(idDemanda))
-                .findFirst().orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado para a Demanda com o ID: " + idDemanda));
-        return projetoMapper.toDTO(projeto);
+    public Projeto buscarProjetoPorDemanda(UUID idDemanda) {
+        return projetoRepository.findAll().stream()
+                .filter(projeto -> projeto.getDemanda().getIdDemanda().equals(idDemanda))
+                .findFirst().orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado para a Demanda!"));
     }
 
     // BUSCA PROJETO PELO GRUPO DE PESQUISA
     @Transactional(readOnly = true)
-    public List<ProjetoResponse> buscarProjetoPorGrupoPesquisa(UUID idGrupoPesquisa) {
+    public List<Projeto> buscarProjetosPorGrupoPesquisa(UUID idGrupoPesquisa) {
+        if (grupoPesquisaRepository.findById(idGrupoPesquisa).isPresent()) {
+            throw new DadoNaoEncontradoException("Grupo Pesquisa não encontrado!");
+        }
         return projetoRepository.findAll().stream()
                 .filter(projeto -> projeto.getGrupoPesquisa().getIdGrupoPesquisa().equals(idGrupoPesquisa))
-                .map(projetoMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     // BUSCA PROJETO PELA INSTITUIÇÃO
     @Transactional(readOnly = true)
-    public List<ProjetoResponse> buscarProjetoPorInstituicao(UUID idInstituicao) {
+    public List<Projeto> buscarProjetosPorInstituicao(UUID idInstituicao) {
+        if (instituicaoRepository.findById(idInstituicao).isPresent()) {
+            throw new DadoNaoEncontradoException("Instituição não encontrada!");
+        }
+
         return projetoRepository.findAll().stream()
                 .filter(projeto -> projeto.getInstituicao().getIdInstituicao().equals(idInstituicao))
-                .map(projetoMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     // BUSCA PROJETO PELA ORGANIZAÇÃO
     @Transactional(readOnly = true)
-    public List<ProjetoResponse> buscarProjetoPorOrganizacao(UUID idOrganizacao) {
+    public List<Projeto> buscarProjetosPorOrganizacao(UUID idOrganizacao) {
+        if (organizacaoRepository.findById(idOrganizacao).isPresent()) {
+            throw new DadoNaoEncontradoException("Organização não encontrada!");
+        }
+
         return projetoRepository.findAll().stream()
-                .filter(projeto -> projeto.getOrganizacao().getIdOrganizacao().equals(idOrganizacao))
-                .map(projetoMapper::toDTO)
+                .filter(projeto -> projeto.getInstituicao().getIdInstituicao().equals(idOrganizacao))
                 .collect(Collectors.toList());
     }
 
     // LISTA TODOS OS PROJETOS DO SISTEMA
     @Transactional(readOnly = true)
-    public List<ProjetoResponse> buscarTodosProjetos() {
-        return projetoRepository.findAll().stream()
-                .map(projetoMapper::toDTO)
-                .collect(Collectors.toList());
+    public List<Projeto> buscarTodosProjetos() {
+        return projetoRepository.findAll();
     }
 
     // ---------- ESCRITA
 
     // REGISTRA PROJETO
     @Transactional
-    public ProjetoResponse registrarProjeto(ProjetoRequest request) {
-        if (projetoRepository.findAll().stream()
-                .filter(projeto -> projeto.getDemanda().getIdDemanda().equals(request.idDemanda()))
-                .findFirst()
-                .isPresent()) {
-            throw new DadoConflitoException("A Demanda com o ID: '" + request.idDemanda() + "' já está associada a outro projeto.");
+    public Projeto registrarProjeto(Projeto projeto, UUID idOrganizacao, UUID idInstituicao, UUID idDemanda, UUID idOfertaSolucao, UUID idGrupoPesquisa) {
+        if (projetoRepository.findAll().stream().anyMatch(proj -> proj.getSolucaoOferta().getIdSolucao().equals(idOfertaSolucao))) {
+            throw new DadoConflitoException("A Demanda já está associada com um projeto!");
         }
 
-        Projeto projeto = projetoMapper.toEntity(request);
-        projeto.setStatus(StatusProjeto.DESENVOLVENDO);
-
-        Organizacao organizacao = organizacaoRepository.findById(request.idOrganizacao())
-                .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada com o ID: " + request.idOrganizacao()));
+        Organizacao organizacao = organizacaoRepository.findById(idOrganizacao)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Organização não encontrada com o ID"));
         projeto.setOrganizacao(organizacao);
 
-        Instituicao instituicao = instituicaoRepository.findById(request.idInstituicao())
-                .orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada com o ID: " + request.idInstituicao()));
+        Instituicao instituicao = instituicaoRepository.findById(idInstituicao)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Instituição não encontrada com o ID"));
         projeto.setInstituicao(instituicao);
 
-        Demanda demanda = demandaRepository.findById(request.idDemanda())
-                .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada com o ID: " + request.idDemanda()));
+        Demanda demanda = demandaRepository.findById(idDemanda)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Demanda não encontrada com o ID"));
         projeto.setDemanda(demanda);
 
-        if (request.idOfertaSolucao() != null) {
-            OfertaSolucao ofertaSolucao = ofertaSolucaoRepository.findById(request.idOfertaSolucao())
-                    .orElseThrow(() -> new DadoNaoEncontradoException("Oferta de Solução não encontrada com o ID: " + request.idOfertaSolucao()));
+        GrupoPesquisa grupoPesquisa = grupoPesquisaRepository.findById(idGrupoPesquisa)
+                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de Pesquisa não encontrado com o ID!"));
+        projeto.setGrupoPesquisa(grupoPesquisa);
+
+        if (idOfertaSolucao != null) {
+            OfertaSolucao ofertaSolucao = ofertaSolucaoRepository.findById(idOfertaSolucao)
+                    .orElseThrow(() -> new DadoNaoEncontradoException("Oferta Solução não encontrada!"));
             if (projetoRepository.findAll().stream()
-                    .filter(proj -> projeto.getSolucaoOferta().getIdSolucao().equals(ofertaSolucao.getIdSolucao()))
-                    .findFirst()
-                    .isPresent()) {
-                throw new DadoConflitoException("A Oferta de Solução com o ID: '" + request.idOfertaSolucao() + "' já está associada a outro projeto.");
+                    .anyMatch(proj -> proj.getSolucaoOferta().getIdSolucao().equals(idOfertaSolucao))) {
+                throw new DadoConflitoException("A Oferta Solução já está associada a outro projeto.");
             }
             projeto.setSolucaoOferta(ofertaSolucao);
         }
-
-        GrupoPesquisa grupoPesquisa = grupoPesquisaRepository.findById(request.idGrupoPesquisa())
-                .orElseThrow(() -> new DadoNaoEncontradoException("Grupo de pesquisa não encontrado com o ID: " + request.idGrupoPesquisa()));
-        projeto.setGrupoPesquisa(grupoPesquisa);
 
         Chat chat = new Chat();
         chat.setDataCriacao(LocalDateTime.now());
@@ -160,39 +146,52 @@ public class ProjetoService {
             chatUsuarios.add(chatUsuario);
         }
         chat.setChatUsuarios(chatUsuarios);
-
         projeto.setChat(chat);
-        chat.setProjeto(projeto);
 
-        return projetoMapper.toDTO(projetoRepository.save(projeto));
+        projeto.setStatus(StatusProjeto.DESENVOLVENDO);
+        return projetoRepository.save(projeto);
     }
 
     // ATUALIZA NOME DO PROJETO
     @Transactional
-    public ProjetoResponse atualizarNomeProjeto(UUID idProjeto, String novoNome) {
+    public Projeto atualizarNomeProjeto(UUID idProjeto, String novoNome) {
         Projeto projeto = projetoRepository.findById(idProjeto)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado para atualização com o ID: " + idProjeto));
+                .orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado para atualização!"));
 
         if (!projeto.getNome().equals(novoNome)) {
             projetoRepository.findByNome(novoNome).ifPresent(p -> {
                 if (!p.getIdProjeto().equals(idProjeto)) {
-                    throw new DadoConflitoException("Já existe outro projeto com o nome: '" + novoNome + "'.");
+                    throw new DadoConflitoException("Já existe outro projeto com o nome!");
                 }
             });
         }
 
         projeto.setNome(novoNome);
-        return projetoMapper.toDTO(projetoRepository.save(projeto));
+
+        return projetoRepository.save(projeto);
     }
 
     // ATUALIZA STATUS DO PROJETO
     @Transactional
-    public ProjetoResponse atualizarStatusProjeto(UUID idProjeto, StatusProjeto novoStatus) {
+    public Projeto atualizarStatusProjeto(UUID idProjeto, StatusProjeto novoStatus) {
         Projeto projeto = projetoRepository.findById(idProjeto)
-                .orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado com o ID: " + idProjeto));
+                .orElseThrow(() -> new DadoNaoEncontradoException("Projeto não encontrado com o ID!"));
+
+        if (StatusProjeto.CANCELADO.equals(projeto.getStatus())) {
+            throw new DadoConflitoException("O projeto está cancelado!");
+        }
+
+        if (StatusProjeto.FINALIZADO.equals(projeto.getStatus())) {
+            throw new DadoConflitoException("O projeto está finalizado!");
+        }
+
+        if (StatusProjeto.DESENVOLVENDO.equals(projeto.getStatus()) && StatusProjeto.DESENVOLVENDO.equals(novoStatus)) {
+            throw new DadoConflitoException("O projeto já está com Status desenvolvendo!");
+        }
 
         projeto.setStatus(novoStatus);
-        return projetoMapper.toDTO(projetoRepository.save(projeto));
+
+        return projetoRepository.save(projeto);
     }
 
     // REMOVE PROJETO PELO SEU ID

@@ -20,7 +20,7 @@ import java.util.UUID;
 @Setter
 @Entity
 @Table(name = "tb_tags")
-public class Tag {
+public class Area {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

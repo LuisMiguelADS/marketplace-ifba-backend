@@ -1,5 +1,6 @@
 package com.marketplace.ifba.dto;
 
+import com.marketplace.ifba.model.User;
 import com.marketplace.ifba.model.enums.StatusGrupoPesquisa;
 
 import java.time.LocalDateTime;
@@ -16,5 +17,6 @@ public record GrupoPesquisaResponse(
         LocalDateTime dataRegistro,
         InstituicaoResponse instituicao,
         List<UserResponse> usuarios,
-        List<TagResponse> tags
+        List<AreaResponse> tags,
+        User usuarioRegistrador
 ) {}

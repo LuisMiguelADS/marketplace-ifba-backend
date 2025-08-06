@@ -10,11 +10,11 @@ import java.util.Optional;
 @Component
 public class PropostaMapper {
 
-    // private final GrupoPesquisaMapper grupoPesquisaMapper;
+    private final GrupoPesquisaMapper grupoPesquisaMapper;
     private final InstituicaoMapper instituicaoMapper;
 
-    public PropostaMapper(/* GrupoPesquisaMapper grupoPesquisaMapper, */InstituicaoMapper instituicaoMapper) {
-        // this.grupoPesquisaMapper = grupoPesquisaMapper;
+    public PropostaMapper(GrupoPesquisaMapper grupoPesquisaMapper, InstituicaoMapper instituicaoMapper) {
+        this.grupoPesquisaMapper = grupoPesquisaMapper;
         this.instituicaoMapper = instituicaoMapper;
     }
 
@@ -43,7 +43,7 @@ public class PropostaMapper {
 
         return new PropostaResponse(
                 proposta.getIdProposta(),
-                // Optional.ofNullable(proposta.getGrupoPesquisa()).map(grupoPesquisaMapper::toDTO).orElse(null),
+                Optional.ofNullable(proposta.getGrupoPesquisa()).map(grupoPesquisaMapper::toDTO).orElse(null),
                 Optional.ofNullable(proposta.getInstituicao()).map(instituicaoMapper::toDTO).orElse(null),
                 proposta.getNome(),
                 proposta.getSolucao(),
@@ -56,20 +56,5 @@ public class PropostaMapper {
                 proposta.getDataPrazoProposta(),
                 proposta.getDataRegistro()
         );
-    }
-
-    public void updateEntityFromRequest(PropostaRequest request, Proposta proposta) {
-        if (request == null || proposta == null) {
-            return;
-        }
-
-        Optional.ofNullable(request.nome()).ifPresent(proposta::setNome);
-        Optional.ofNullable(request.solucao()).ifPresent(proposta::setSolucao);
-        Optional.ofNullable(request.descricao()).ifPresent(proposta::setDescricao);
-        Optional.ofNullable(request.resumo()).ifPresent(proposta::setResumo);
-        Optional.ofNullable(request.orcamento()).ifPresent(proposta::setOrcamento);
-        Optional.ofNullable(request.restricoes()).ifPresent(proposta::setRestricoes);
-        Optional.ofNullable(request.recursosNecessarios()).ifPresent(proposta::setRecursosNecessarios);
-        Optional.ofNullable(request.dataPrazoProposta()).ifPresent(proposta::setDataPrazoProposta);
     }
 }

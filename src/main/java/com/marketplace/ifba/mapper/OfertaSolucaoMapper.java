@@ -23,7 +23,7 @@ public class OfertaSolucaoMapper {
         ofertaSolucao.setTipoSolucao(request.tipoSolucao());
         ofertaSolucao.setRestricao(request.restricao());
         ofertaSolucao.setPreco(request.preco());
-        ofertaSolucao.setRecursoNecessario(request.recursoNecessario());
+        ofertaSolucao.setRecursosNecessarios(request.recursosNecessarios());
 
         return ofertaSolucao;
     }
@@ -40,28 +40,12 @@ public class OfertaSolucaoMapper {
                 ofertaSolucao.getPrazo(),
                 ofertaSolucao.getResumo(),
                 ofertaSolucao.getStatus(),
-                ofertaSolucao.getAprovado(),
                 ofertaSolucao.getTipoSolucao(),
                 ofertaSolucao.getRestricao(),
                 ofertaSolucao.getPreco(),
-                ofertaSolucao.getRecursoNecessario(),
+                ofertaSolucao.getRecursosNecessarios(),
                 ofertaSolucao.getDataAprovacao(),
                 ofertaSolucao.getDataRegistro()
         );
-    }
-
-    public void updateEntityFromRequest(OfertaSolucaoRequest request, OfertaSolucao ofertaSolucao) {
-        if (request == null || ofertaSolucao == null) {
-            return;
-        }
-
-        Optional.ofNullable(request.nome()).ifPresent(ofertaSolucao::setNome);
-        Optional.ofNullable(request.descricao()).ifPresent(ofertaSolucao::setDescricao);
-        Optional.ofNullable(request.prazo()).ifPresent(ofertaSolucao::setPrazo);
-        Optional.ofNullable(request.resumo()).ifPresent(ofertaSolucao::setResumo);
-        Optional.ofNullable(request.tipoSolucao()).ifPresent(ofertaSolucao::setTipoSolucao);
-        Optional.ofNullable(request.restricao()).ifPresent(ofertaSolucao::setRestricao);
-        Optional.ofNullable(request.preco()).ifPresent(ofertaSolucao::setPreco);
-        Optional.ofNullable(request.recursoNecessario()).ifPresent(ofertaSolucao::setRecursoNecessario);
     }
 }

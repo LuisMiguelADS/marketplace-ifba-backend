@@ -6,6 +6,7 @@ import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -63,4 +64,7 @@ public class Demanda {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false, updatable = false)
     private Organizacao organizacao;
+
+    @OneToMany(mappedBy = "demanda", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OfertaSolucao> ofertasSolucoes;
 }

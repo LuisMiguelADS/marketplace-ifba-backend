@@ -4,6 +4,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.util.UUID;
+
 public record OfertaSolucaoRequest(
         @NotBlank(message = "O nome da solução é obrigatório.")
         @Size(max = 255, message = "O nome da solução não pode exceder 255 caracteres.")
@@ -31,6 +33,10 @@ public record OfertaSolucaoRequest(
         Double preco,
 
         @Size(max = 500, message = "Os recursos necessários não podem exceder 500 caracteres.")
-        String recursoNecessario
+        String recursosNecessarios,
+
+        UUID idDemanda,
+
+        UUID idOfertaSolucao
 ) {
 }

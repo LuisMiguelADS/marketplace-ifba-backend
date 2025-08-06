@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -46,13 +46,12 @@ public class GrupoPesquisa {
     @Column(name = "date_platform_registration", nullable = false, updatable = false)
     private LocalDateTime dataRegistro;
 
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "tb_research_group_users",
-            joinColumns = @JoinColumn(name = "research_group_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private ArrayList<User> usuarios;
+    @OneToOne
+    @JoinColumn(name = "usuario_registrador_id_usuario")
+    private User usuarioRegistrador;
+
+    @OneToMany(mappedBy = "grupoPesquisa", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<User> usuarios;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
@@ -60,7 +59,7 @@ public class GrupoPesquisa {
             joinColumns = @JoinColumn(name = "research_group_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-    private ArrayList<Tag> tags;
+    private List<Area> areas;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_id", updatable = false)

@@ -2,7 +2,7 @@ package com.marketplace.ifba.mapper;
 
 import com.marketplace.ifba.dto.GrupoPesquisaRequest;
 import com.marketplace.ifba.dto.GrupoPesquisaResponse;
-import com.marketplace.ifba.dto.TagResponse;
+import com.marketplace.ifba.dto.AreaResponse;
 import com.marketplace.ifba.dto.UserResponse;
 import com.marketplace.ifba.model.GrupoPesquisa;
 import org.springframework.stereotype.Component;
@@ -17,12 +17,12 @@ public class GrupoPesquisaMapper {
 
     private final InstituicaoMapper instituicaoMapper;
     private final UserMapper userMapper;
-    private final TagMapper tagMapper;
+    private final AreaMapper areaMapper;
 
-    public GrupoPesquisaMapper(InstituicaoMapper instituicaoMapper, UserMapper userMapper, TagMapper tagMapper) {
+    public GrupoPesquisaMapper(InstituicaoMapper instituicaoMapper, UserMapper userMapper, AreaMapper areaMapper) {
         this.instituicaoMapper = instituicaoMapper;
         this.userMapper = userMapper;
-        this.tagMapper = tagMapper;
+        this.areaMapper = areaMapper;
     }
 
     public GrupoPesquisa toEntity(GrupoPesquisaRequest request) {
@@ -48,10 +48,10 @@ public class GrupoPesquisaMapper {
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
 
-        List<TagResponse> tagsDTO = Optional.ofNullable(grupoPesquisa.getTags())
+        List<AreaResponse> tagsDTO = Optional.ofNullable(grupoPesquisa.getAreas())
                 .orElseGet(ArrayList::new)
                 .stream()
-                .map(tagMapper::toDTO)
+                .map(areaMapper::toDTO)
                 .collect(Collectors.toList());
 
         return new GrupoPesquisaResponse(
@@ -66,16 +66,8 @@ public class GrupoPesquisaMapper {
                         .map(instituicaoMapper::toDTO)
                         .orElse(null),
                 usuariosDTO,
-                tagsDTO
+                tagsDTO,
+                grupoPesquisa.getUsuarioRegistrador()
         );
-    }
-
-    public void updateEntityFromRequest(GrupoPesquisaRequest request, GrupoPesquisa grupoPesquisa) {
-        if (request == null || grupoPesquisa == null) {
-            return;
-        }
-
-        Optional.ofNullable(request.nome()).ifPresent(grupoPesquisa::setNome);
-        Optional.ofNullable(request.descricao()).ifPresent(grupoPesquisa::setDescricao);
     }
 }

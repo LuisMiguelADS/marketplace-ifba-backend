@@ -16,7 +16,10 @@ public record GrupoPesquisaRequest(
         @NotNull(message = "O ID da instituição é obrigatório.")
         UUID idInstituicao,
 
-        List<UUID> idsUsuarios,
+        List<UUID> idsAreas,
 
-        List<UUID> idsTags
+        @NotNull(message = "O ID do usuário registrador é obrigatório.")
+        UUID usuarioRegistrador,
+
+        UUID idGrupoPesquisa
 ) {}

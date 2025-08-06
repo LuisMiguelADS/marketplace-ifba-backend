@@ -8,7 +8,4 @@ import java.util.List;
 import java.util.UUID;
 
 public interface OfertaSolucaoRepository extends JpaRepository<OfertaSolucao, UUID> {
-    List<OfertaSolucao> findByNome(String nome);
-    List<OfertaSolucao> findByStatus(StatusOfertaSolucao status);
-    List<OfertaSolucao> findByAprovado(Boolean aprovado);
 }

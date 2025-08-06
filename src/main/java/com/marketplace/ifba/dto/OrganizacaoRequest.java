@@ -33,10 +33,6 @@ public record OrganizacaoRequest(
         @Size(max = 255, message = "A URL do site não pode exceder 255 caracteres.")
         String site,
 
-        @URL(message = "URL do logo inválida.")
-        @Size(max = 500, message = "A URL do logo não pode exceder 500 caracteres.")
-        String logoURL,
-
         @Size(max = 2000, message = "A descrição não pode exceder 2000 caracteres.")
         String descricao,
         UUID idUsuarioRegistrador
