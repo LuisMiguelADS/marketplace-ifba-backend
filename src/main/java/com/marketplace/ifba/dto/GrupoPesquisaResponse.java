@@ -17,6 +17,6 @@ public record GrupoPesquisaResponse(
         LocalDateTime dataRegistro,
         InstituicaoResponse instituicao,
         List<UserResponse> usuarios,
-        List<AreaResponse> tags,
+        List<AreaResponse> areas,
         UserResponse usuarioRegistrador
 ) {}

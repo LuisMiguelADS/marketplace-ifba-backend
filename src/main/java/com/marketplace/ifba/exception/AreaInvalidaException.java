@@ -4,7 +4,7 @@ import java.util.UUID;
 
 public class AreaInvalidaException extends RuntimeException {
     public AreaInvalidaException(UUID id) {
-      super("TAG não encontrada com ID: " + id);
+      super("AREA não encontrada com ID: " + id);
     }
     public AreaInvalidaException(String message) {
       super(message);

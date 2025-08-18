@@ -46,8 +46,8 @@ public class AreaService {
 
     // ATUALIZA AREA
     @Transactional()
-    public Area atualizarTag(UUID id, Area area) {
-        Area areaSaved = areaRepository.findById(id).orElseThrow(() -> new AreaInvalidaException("Tag não encontrada!"));
+    public Area atualizarArea(UUID id, Area area) {
+        Area areaSaved = areaRepository.findById(id).orElseThrow(() -> new AreaInvalidaException("Area não encontrada!"));
 
         // ATRIBUTOS QUE PODEM SER ALTERADOS
         areaSaved.setNomeArea(area.getNomeArea());
@@ -57,9 +57,9 @@ public class AreaService {
 
     // REMOVE AREA PELO SEU ID
     @Transactional()
-    public void removerTag(UUID id) {
+    public void removerArea(UUID id) {
         if (!areaRepository.existsById(id)) {
-            throw new AreaInvalidaException("Tag não encontrada!");
+            throw new AreaInvalidaException("Area não encontrada!");
         }
         areaRepository.deleteById(id);
     }

@@ -24,7 +24,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/area")
-@Tag(name = "Tag", description = "Gerencia as operações relacionadas às tags no marketplace.")
+@Tag(name = "Area", description = "Gerencia as operações relacionadas às areas no marketplace.")
 public class AreaController {
     private final AreaService areaService;
     private final AreaMapper areaMapper;
@@ -34,39 +34,39 @@ public class AreaController {
         this.areaMapper = areaMapper;
     }
 
-    @Operation(summary = "Retorna tag a partir do ID", description = "Procura uma tag com o ID informado")
+    @Operation(summary = "Retorna area a partir do ID", description = "Procura uma area com o ID informado")
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
-    public ResponseEntity<AreaResponse> buscarTagPorId(@PathVariable UUID id) {
+    public ResponseEntity<AreaResponse> buscarAreaPorId(@PathVariable UUID id) {
         return ResponseEntity.ok(areaMapper.toDTO(areaService.buscarAreaPorID(id)));
     }
 
-    @Operation(summary = "Retorna todas as tags", description = "Retorna todas as tags cadastradas")
+    @Operation(summary = "Retorna todas as areas", description = "Retorna todas as areas cadastradas")
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
-    public ResponseEntity<List<AreaResponse>> listarTodasTags() {
+    public ResponseEntity<List<AreaResponse>> listarTodasAreas() {
         return ResponseEntity.ok(areaService.buscarTodasAreas().stream().map(areaMapper::toDTO).toList());
     }
 
-    @Operation(summary = "Registra tag", description = "Realiza registro da tag se passar das regras de negócio")
+    @Operation(summary = "Registra area", description = "Realiza registro da area se passar das regras de negócio")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AreaResponse> criarTag(@RequestBody @Valid AreaRequest request) {
+    public ResponseEntity<AreaResponse> criarArea(@RequestBody @Valid AreaRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(areaMapper.toDTO(areaService.registrarArea(areaMapper.toEntity(request))));
     }
 
-    @Operation(summary = "Atualiza tag", description = "Realiza registro da tag se passar das regras de negócio")
+    @Operation(summary = "Atualiza area", description = "Realiza atualização da area se passar das regras de negócio")
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<AreaResponse> atualizarTag(@PathVariable UUID id, @RequestBody @Valid AreaRequest request) {
-        return ResponseEntity.ok(areaMapper.toDTO(areaService.atualizarTag(id, areaMapper.toEntity(request))));
+    public ResponseEntity<AreaResponse> atualizarArea(@PathVariable UUID id, @RequestBody @Valid AreaRequest request) {
+        return ResponseEntity.ok(areaMapper.toDTO(areaService.atualizarArea(id, areaMapper.toEntity(request))));
     }
 
-    @Operation(summary = "Remove tag", description = "Remove o cadastro da tag")
+    @Operation(summary = "Remove area", description = "Remove o cadastro da area")
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> removerTag(@PathVariable UUID id) {
-        areaService.removerTag(id);
+    public ResponseEntity<Void> removerArea(@PathVariable UUID id) {
+        areaService.removerArea(id);
         return ResponseEntity.noContent().build();
     }
 }
