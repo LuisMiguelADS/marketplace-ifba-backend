@@ -67,4 +67,7 @@ public class Demanda {
 
     @OneToMany(mappedBy = "demanda", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OfertaSolucao> ofertasSolucoes;
+
+    @ManyToMany(mappedBy = "demandas", fetch = FetchType.LAZY)
+    private List<GrupoPesquisa> gruposPesquisa;
 }

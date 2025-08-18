@@ -1,10 +1,8 @@
 package com.marketplace.ifba.mapper;
 
-import com.marketplace.ifba.dto.GrupoPesquisaRequest;
-import com.marketplace.ifba.dto.GrupoPesquisaResponse;
-import com.marketplace.ifba.dto.AreaResponse;
-import com.marketplace.ifba.dto.UserResponse;
+import com.marketplace.ifba.dto.*;
 import com.marketplace.ifba.model.GrupoPesquisa;
+import com.marketplace.ifba.model.User;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -48,11 +46,19 @@ public class GrupoPesquisaMapper {
                 .map(userMapper::toDTO)
                 .collect(Collectors.toList());
 
-        List<AreaResponse> tagsDTO = Optional.ofNullable(grupoPesquisa.getAreas())
+        List<AreaResponse> areasDTO = Optional.ofNullable(grupoPesquisa.getAreas())
                 .orElseGet(ArrayList::new)
                 .stream()
                 .map(areaMapper::toDTO)
                 .collect(Collectors.toList());
+
+        InstituicaoResponse instituicaoDTO = Optional.ofNullable(grupoPesquisa.getInstituicao())
+                .map(instituicaoMapper::toDTO)
+                .orElse(null);
+
+        UserResponse usuarioRegistrador = Optional.ofNullable(grupoPesquisa.getUsuarioRegistrador())
+                .map(userMapper::toDTO)
+                .orElse(null);
 
         return new GrupoPesquisaResponse(
                 grupoPesquisa.getIdGrupoPesquisa(),
@@ -62,12 +68,10 @@ public class GrupoPesquisaMapper {
                 grupoPesquisa.getClassificacao(),
                 grupoPesquisa.getStatus(),
                 grupoPesquisa.getDataRegistro(),
-                Optional.ofNullable(grupoPesquisa.getInstituicao())
-                        .map(instituicaoMapper::toDTO)
-                        .orElse(null),
+                instituicaoDTO,
                 usuariosDTO,
-                tagsDTO,
-                grupoPesquisa.getUsuarioRegistrador()
+                areasDTO,
+                usuarioRegistrador
         );
     }
 }

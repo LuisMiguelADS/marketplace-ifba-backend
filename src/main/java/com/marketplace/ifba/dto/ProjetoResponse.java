@@ -2,6 +2,7 @@ package com.marketplace.ifba.dto;
 
 import com.marketplace.ifba.model.enums.StatusProjeto;
 
+import java.util.List;
 import java.util.UUID;
 
 public record ProjetoResponse(
@@ -12,6 +13,7 @@ public record ProjetoResponse(
         InstituicaoResponse instituicao,
         DemandaResponse demanda,
         OfertaSolucaoResponse solucaoOferta,
-        GrupoPesquisaResponse grupoPesquisa
+        GrupoPesquisaResponse grupoPesquisa,
+        List<EntregaResponse> entregas
         // ChatResponse chat
 ) {}

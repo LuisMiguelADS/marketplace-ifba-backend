@@ -20,7 +20,6 @@ public record ProjetoRequest(
         @NotNull(message = "O ID da demanda é obrigatório para um projeto.")
         UUID idDemanda,
 
-        @NotNull(message = "O ID da oferta é obrigatório para um projeto.")
         UUID idOfertaSolucao,
 
         @NotNull(message = "O ID do grupo de pesquisa é obrigatório.")

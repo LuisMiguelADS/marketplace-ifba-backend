@@ -13,6 +13,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -76,4 +77,10 @@ public class Instituicao {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_registration_id", nullable = false, updatable = false)
     private User usuarioRegistro;
+
+    @OneToMany(mappedBy = "instituicao", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<User> usuariosIntegrantes;
+
+    @OneToMany(mappedBy = "instituicaoRequested", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Solicitacao> solicitacoes;
 }

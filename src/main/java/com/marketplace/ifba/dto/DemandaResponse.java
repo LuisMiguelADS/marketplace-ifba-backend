@@ -3,6 +3,7 @@ package com.marketplace.ifba.dto;
 import com.marketplace.ifba.model.enums.StatusDemanda;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 public record DemandaResponse(
@@ -18,5 +19,6 @@ public record DemandaResponse(
         LocalDate dataPrazoFinal,
         LocalDate dataAprovado,
         UserResponse usuarioCriador,
-        OrganizacaoResponse organizacao
+        OrganizacaoResponse organizacao,
+        List<GrupoPesquisaResponse> gruposPesquisa
 ) {}

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -38,7 +39,7 @@ public class Projeto {
     private Demanda demanda;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "offer_solution_id", nullable = false, updatable = false)
+    @JoinColumn(name = "offer_solution_id", updatable = false)
     private OfertaSolucao solucaoOferta;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -48,4 +49,7 @@ public class Projeto {
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "chat_id", nullable = false, updatable = false)
     private Chat chat;
+
+    @OneToMany(mappedBy = "projeto", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Entrega> entregas;
 }

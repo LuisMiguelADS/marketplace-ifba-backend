@@ -18,5 +18,5 @@ public record GrupoPesquisaResponse(
         InstituicaoResponse instituicao,
         List<UserResponse> usuarios,
         List<AreaResponse> tags,
-        User usuarioRegistrador
+        UserResponse usuarioRegistrador
 ) {}

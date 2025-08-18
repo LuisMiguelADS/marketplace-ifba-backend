@@ -1,11 +1,13 @@
 package com.marketplace.ifba.service;
 
 import com.marketplace.ifba.exception.DemandaInvalidaException;
+import com.marketplace.ifba.exception.GrupoPesquisaInvalidoException;
 import com.marketplace.ifba.exception.OfertaSolucaoInvalidaException;
 import com.marketplace.ifba.model.Demanda;
 import com.marketplace.ifba.model.OfertaSolucao;
 import com.marketplace.ifba.model.enums.StatusOfertaSolucao;
 import com.marketplace.ifba.repository.DemandaRepository;
+import com.marketplace.ifba.repository.GrupoPesquisaRepository;
 import com.marketplace.ifba.repository.OfertaSolucaoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,10 +21,12 @@ public class OfertaSolucaoService {
 
     private final OfertaSolucaoRepository ofertaSolucaoRepository;
     private final DemandaRepository demandaRepository;
+    private final GrupoPesquisaRepository grupoPesquisaRepository;
 
-    public OfertaSolucaoService(OfertaSolucaoRepository ofertaSolucaoRepository, DemandaRepository demandaRepository) {
+    public OfertaSolucaoService(OfertaSolucaoRepository ofertaSolucaoRepository, DemandaRepository demandaRepository, GrupoPesquisaRepository grupoPesquisaRepository) {
         this.ofertaSolucaoRepository = ofertaSolucaoRepository;
         this.demandaRepository = demandaRepository;
+        this.grupoPesquisaRepository = grupoPesquisaRepository;
     }
 
     // ---------- LEITURA
@@ -44,6 +48,15 @@ public class OfertaSolucaoService {
     @Transactional(readOnly = true)
     public List<OfertaSolucao> buscarOfertasSolucaoPorStatus(StatusOfertaSolucao status) {
         return ofertaSolucaoRepository.findAll().stream().filter(ofertaSolucao -> ofertaSolucao.getStatus().equals(status)).toList();
+    }
+
+    // LISTA OFERTAS SOLUÇÃO PELO SEU GRUPO PESQUISA
+    @Transactional(readOnly = true)
+    public List<OfertaSolucao> buscarOfertasSolucaoPorGrupoPesquisa(UUID idGrupoPesquisa) {
+        if (!grupoPesquisaRepository.existsById(idGrupoPesquisa)) {
+            throw new GrupoPesquisaInvalidoException("Grupo Pesquisa não encontrada com o ID");
+        }
+        return ofertaSolucaoRepository.findAll().stream().filter(ofertaSolucao -> ofertaSolucao.getGrupoPesquisa().getIdGrupoPesquisa().equals(idGrupoPesquisa)).toList();
     }
 
     // LISTA TODAS OFERTAS SOLUÇÃO

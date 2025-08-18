@@ -3,7 +3,6 @@ package com.marketplace.ifba.controller;
 import com.marketplace.ifba.dto.AreaRequest;
 import com.marketplace.ifba.dto.AreaResponse;
 import com.marketplace.ifba.mapper.AreaMapper;
-import com.marketplace.ifba.model.Area;
 import com.marketplace.ifba.service.AreaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -24,7 +23,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/tag")
+@RequestMapping("/area")
 @Tag(name = "Tag", description = "Gerencia as operações relacionadas às tags no marketplace.")
 public class AreaController {
     private final AreaService areaService;
@@ -37,23 +36,23 @@ public class AreaController {
 
     @Operation(summary = "Retorna tag a partir do ID", description = "Procura uma tag com o ID informado")
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
     public ResponseEntity<AreaResponse> buscarTagPorId(@PathVariable UUID id) {
-        return ResponseEntity.ok(areaMapper.toDTO(areaService.buscarTagPorID(id)));
+        return ResponseEntity.ok(areaMapper.toDTO(areaService.buscarAreaPorID(id)));
     }
 
     @Operation(summary = "Retorna todas as tags", description = "Retorna todas as tags cadastradas")
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
     public ResponseEntity<List<AreaResponse>> listarTodasTags() {
-        return ResponseEntity.ok(areaService.buscarTodasTags().stream().map(areaMapper::toDTO).toList());
+        return ResponseEntity.ok(areaService.buscarTodasAreas().stream().map(areaMapper::toDTO).toList());
     }
 
     @Operation(summary = "Registra tag", description = "Realiza registro da tag se passar das regras de negócio")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<AreaResponse> criarTag(@RequestBody @Valid AreaRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(areaMapper.toDTO(areaService.registrarTag(areaMapper.toEntity(request))));
+        return ResponseEntity.status(HttpStatus.CREATED).body(areaMapper.toDTO(areaService.registrarArea(areaMapper.toEntity(request))));
     }
 
     @Operation(summary = "Atualiza tag", description = "Realiza registro da tag se passar das regras de negócio")

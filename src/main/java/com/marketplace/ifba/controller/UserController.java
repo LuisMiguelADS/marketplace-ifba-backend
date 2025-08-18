@@ -1,6 +1,6 @@
 package com.marketplace.ifba.controller;
 
-import com.marketplace.ifba.dto.AssociarUsuarioInstituicaoOrganizacao;
+import com.marketplace.ifba.dto.AssociarUsuario;
 import com.marketplace.ifba.dto.UserRequest;
 import com.marketplace.ifba.dto.UserResponse;
 import com.marketplace.ifba.mapper.UserMapper;
@@ -29,6 +29,7 @@ public class UserController {
 
     @Operation(summary = "Retorna usuário a partir do TOKEN", description = "Procura um usuário com o TOKEN informado")
     @GetMapping("/token/{token}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserResponse> buscarUsuarioPorToken(@PathVariable String token) {
         if (token == null || token.isEmpty()) {
             return ResponseEntity.badRequest().build();
@@ -52,20 +53,37 @@ public class UserController {
     }
 
     @PostMapping("/associar-instituicao")
-    public ResponseEntity<Void> associarInstituicaoUsuario(@RequestBody @Valid AssociarUsuarioInstituicaoOrganizacao request) {
-        userService.associarInstituicaoUsuario(request.idUsuario(), request.idInstituicaoOuOrganizacao());
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> associarInstituicaoUsuario(@RequestBody @Valid AssociarUsuario request) {
+        userService.associarInstituicaoUsuario(request.idUsuario(), request.idEntidade(), request.decisao());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/associar-organizacao")
-    public ResponseEntity<Void> associarOrganizacaoUsuario(@RequestBody @Valid AssociarUsuarioInstituicaoOrganizacao request) {
-        userService.associarOrganizacaoUsuario(request.idUsuario(), request.idInstituicaoOuOrganizacao());
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> associarOrganizacaoUsuario(@RequestBody @Valid AssociarUsuario request) {
+        userService.associarOrganizacaoUsuario(request.idUsuario(), request.idEntidade(), request.decisao());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/associar-grupo-pesquisa")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> associarGrupoPesquisaUsuario(@RequestBody @Valid AssociarUsuario request) {
+        userService.associarGrupoPesquisaUsuario(request.idUsuario(), request.idEntidade(), request.decisao());
         return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/solicitar-organizacao")
-    public ResponseEntity<Void> solicitarAssociacaoOrganizacao(@RequestBody @Valid AssociarUsuarioInstituicaoOrganizacao request) {
-        userService.solicitarAssociacaoOrganizacao(request.idUsuario(), request.idInstituicaoOuOrganizacao());
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> solicitarAssociacaoOrganizacao(@RequestBody @Valid AssociarUsuario request) {
+        userService.solicitarAssociacaoOrganizacao(request.idUsuario(), request.idEntidade());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/solicitar-grupo-pesquisa")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> solicitarAssociacaoGrupoPesquisa(@RequestBody @Valid AssociarUsuario request) {
+        userService.solicitarAssociacaoGrupoPesquisa(request.idUsuario(), request.idEntidade());
         return ResponseEntity.noContent().build();
     }
 

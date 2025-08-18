@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Past;
 import org.hibernate.validator.constraints.br.CPF;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.UUID;
 
 public record UserRequest(
         @NotBlank(message = "O nome é obrigatório.")
@@ -38,17 +38,7 @@ public record UserRequest(
         LocalDate dataNascimento,
 
         @NotBlank(message = "A biografia é obrigatória.")
-        String biografia
+        String biografia,
 
-//        @NotBlank(message = "A foto de perfil é obrigatória.")
-//        String fotoPerfilURL,
-//
-//        @NotBlank(message = "O endereço é obrigatório.")
-//        String endereco
-
-//        @NotBlank(message = "A instituição é obrigatória.")
-//        String instituicao,
-//
-//        @NotBlank(message = "A organização é obrigatória.")
-//        String organizacao
+        UUID idInstituicao
 ) {}

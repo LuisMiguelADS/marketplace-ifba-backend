@@ -24,6 +24,7 @@ public class User implements UserDetails {
     @Column(name = "nome_completo", nullable = false)
     private String nomeCompleto;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, updatable = false)
     private UserRole role;
 

@@ -6,10 +6,11 @@ import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Data
@@ -64,4 +65,32 @@ public class GrupoPesquisa {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "institution_id", updatable = false)
     private Instituicao instituicao;
+
+    @OneToMany(mappedBy = "grupoPesquisaRequested", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Solicitacao> solicitacoes;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "tb_research_group_demands",
+            joinColumns = @JoinColumn(name = "research_group_id"),
+            inverseJoinColumns = @JoinColumn(name = "demand_id")
+    )
+    private List<Demanda> demandas;
+
+    public void adicionarUsuario(User novoUsuario) {
+        this.usuarios.add(novoUsuario);
+    }
+
+    public void adicionarDemanda(Demanda novaDemanda) {
+        if (this.demandas == null) {
+            this.demandas = new ArrayList<>();
+        }
+        this.demandas.add(novaDemanda);
+    }
+
+    public void removerDemanda(Demanda demanda) {
+        if (this.demandas != null) {
+            this.demandas.remove(demanda);
+        }
+    }
 }

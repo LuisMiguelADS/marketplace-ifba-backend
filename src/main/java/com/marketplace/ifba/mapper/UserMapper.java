@@ -2,8 +2,10 @@ package com.marketplace.ifba.mapper;
 
 import com.marketplace.ifba.dto.*;
 import com.marketplace.ifba.model.Conexao;
+import com.marketplace.ifba.model.Instituicao;
 import com.marketplace.ifba.model.Organizacao;
 import com.marketplace.ifba.model.User;
+import com.marketplace.ifba.service.InstituicaoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,9 +17,20 @@ import java.util.Optional;
 @Component
 public class UserMapper {
 
+    private final InstituicaoService instituicaoService;
+
+    public UserMapper(InstituicaoService instituicaoService) {
+        this.instituicaoService = instituicaoService;
+    }
+
     public User toEntity(UserRequest request) {
         if (request == null) {
             return null;
+        }
+
+        Instituicao instituicao = null;
+        if (request.idInstituicao() != null) {
+            instituicao = instituicaoService.buscarInstituicaoPorId(request.idInstituicao());
         }
 
         User user = new User();
@@ -29,6 +42,7 @@ public class UserMapper {
         user.setCpf(request.cpf());
         user.setDataNascimento(request.dataNascimento());
         user.setBiografia(request.biografia());
+        user.setInstituicao(instituicao);
         return user;
     }
 
@@ -56,7 +70,8 @@ public class UserMapper {
                 user.getBiografia(),
                 conexoes,
                 (user.getOrganizacao() != null) ? user.getOrganizacao().getIdOrganizacao() : null,
-                (user.getInstituicao() != null) ? user.getInstituicao().getIdInstituicao() : null
+                (user.getInstituicao() != null) ? user.getInstituicao().getIdInstituicao() : null,
+                (user.getGrupoPesquisa() != null) ? user.getGrupoPesquisa().getIdGrupoPesquisa() : null
         );
     }
 

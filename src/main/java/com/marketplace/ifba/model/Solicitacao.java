@@ -21,8 +21,16 @@ public class Solicitacao {
     private User userApplicant;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_requested_id", updatable = false, nullable = false)
+    @JoinColumn(name = "organization_requested_id", updatable = false)
     private Organizacao organizacaoRequested;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "grupo_pesquisa_requested_id", updatable = false)
+    private GrupoPesquisa grupoPesquisaRequested;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "instituicao_requested_id", updatable = false)
+    private Instituicao instituicaoRequested;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "status", nullable = false)

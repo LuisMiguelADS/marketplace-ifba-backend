@@ -21,5 +21,6 @@ public record UserResponse(
         String biografia,
         List<LocalDateTime> conexoes,
         UUID idOrganizacao,
-        UUID idInstituicao
+        UUID idInstituicao,
+        UUID idGrupoPesquisa
 ) {}

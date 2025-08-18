@@ -10,6 +10,14 @@ import java.util.Optional;
 @Component
 public class OfertaSolucaoMapper {
 
+    private final GrupoPesquisaMapper grupoPesquisaMapper;
+    private final DemandaMapper demandaMapper;
+
+    public OfertaSolucaoMapper(GrupoPesquisaMapper grupoPesquisaMapper, DemandaMapper demandaMapper) {
+        this.grupoPesquisaMapper = grupoPesquisaMapper;
+        this.demandaMapper = demandaMapper;
+    }
+
     public OfertaSolucao toEntity(OfertaSolucaoRequest request) {
         if (request == null) {
             return null;
@@ -45,7 +53,9 @@ public class OfertaSolucaoMapper {
                 ofertaSolucao.getPreco(),
                 ofertaSolucao.getRecursosNecessarios(),
                 ofertaSolucao.getDataAprovacao(),
-                ofertaSolucao.getDataRegistro()
+                ofertaSolucao.getDataRegistro(),
+                Optional.ofNullable(ofertaSolucao.getGrupoPesquisa()).map(grupoPesquisaMapper::toDTO).orElse(null),
+                Optional.ofNullable(ofertaSolucao.getDemanda()).map(demandaMapper::toDTO).orElse(null)
         );
     }
 }

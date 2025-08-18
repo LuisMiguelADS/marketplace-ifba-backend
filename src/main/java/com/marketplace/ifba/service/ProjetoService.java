@@ -2,6 +2,7 @@ package com.marketplace.ifba.service;
 
 import com.marketplace.ifba.exception.*;
 import com.marketplace.ifba.model.*;
+import com.marketplace.ifba.model.enums.StatusEntrega;
 import com.marketplace.ifba.model.enums.StatusProjeto;
 import com.marketplace.ifba.repository.*;
 import org.springframework.stereotype.Service;
@@ -200,5 +201,60 @@ public class ProjetoService {
             throw new ProjetoInvalidoException("Projeto não encontrado para exclusão com o ID: " + idProjeto);
         }
         projetoRepository.deleteById(idProjeto);
+    }
+
+    @Transactional
+    public Entrega adicionarEntrega(UUID idProjeto, Entrega entrega, UUID idOrganizacaoSolicitante, 
+                                   UUID idGrupoPesquisaSolicitante, UUID idOrganizacaoSolicitada, 
+                                   UUID idGrupoPesquisaSolicitado) {
+        Projeto projeto = buscarProjetoPorId(idProjeto);
+
+        if ((idOrganizacaoSolicitante != null && idGrupoPesquisaSolicitante != null) ||
+            (idOrganizacaoSolicitante == null && idGrupoPesquisaSolicitante == null)) {
+            throw new ProjetoInvalidoException("Deve ser informado apenas um tipo de solicitante (Organização OU Grupo de Pesquisa)");
+        }
+        
+        if ((idOrganizacaoSolicitada != null && idGrupoPesquisaSolicitado != null) ||
+            (idOrganizacaoSolicitada == null && idGrupoPesquisaSolicitado == null)) {
+            throw new ProjetoInvalidoException("Deve ser informado apenas um tipo de solicitado (Organização OU Grupo de Pesquisa)");
+        }
+        
+        if (idOrganizacaoSolicitante != null) {
+            Organizacao organizacao = organizacaoRepository.findById(idOrganizacaoSolicitante)
+                    .orElseThrow(() -> new OrganizacaoInvalidaException("Organização solicitante não encontrada"));
+            entrega.setOrganizacaoSolicitante(organizacao);
+        } else {
+            GrupoPesquisa grupoPesquisa = grupoPesquisaRepository.findById(idGrupoPesquisaSolicitante)
+                    .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de pesquisa solicitante não encontrado"));
+            entrega.setGrupoPesquisaSolicitante(grupoPesquisa);
+        }
+        
+        if (idOrganizacaoSolicitada != null) {
+            Organizacao organizacao = organizacaoRepository.findById(idOrganizacaoSolicitada)
+                    .orElseThrow(() -> new OrganizacaoInvalidaException("Organização solicitada não encontrada"));
+            entrega.setOrganizacaoSolicitada(organizacao);
+        } else {
+            GrupoPesquisa grupoPesquisa = grupoPesquisaRepository.findById(idGrupoPesquisaSolicitado)
+                    .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de pesquisa solicitado não encontrado"));
+            entrega.setGrupoPesquisaSolicitado(grupoPesquisa);
+        }
+        
+        entrega.setStatus(StatusEntrega.SOLICITADA);
+        entrega.setProjeto(projeto);
+        
+        if (projeto.getEntregas() == null) {
+            projeto.setEntregas(new ArrayList<>());
+        }
+        projeto.getEntregas().add(entrega);
+        
+        projetoRepository.save(projeto);
+        return entrega;
+    }
+
+    // BUSCA ENTREGAS DE UM PROJETO
+    @Transactional(readOnly = true)
+    public List<Entrega> buscarEntregasPorProjeto(UUID idProjeto) {
+        Projeto projeto = buscarProjetoPorId(idProjeto);
+        return projeto.getEntregas() != null ? projeto.getEntregas() : new ArrayList<>();
     }
 }

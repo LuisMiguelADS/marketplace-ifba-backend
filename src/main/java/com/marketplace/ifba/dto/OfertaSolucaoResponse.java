@@ -17,6 +17,7 @@ public record OfertaSolucaoResponse(
         Double preco,
         String recursoNecessario,
         LocalDateTime dataAprovacao,
-        LocalDateTime dataRegistro
-) {
+        LocalDateTime dataRegistro,
+        GrupoPesquisaResponse grupoPesquisa,
+        DemandaResponse demanda) {
 }

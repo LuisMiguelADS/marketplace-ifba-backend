@@ -63,4 +63,8 @@ public class OfertaSolucao {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "demanda_requested_id", updatable = false, nullable = false)
     private Demanda demanda;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "grupo_pesquisa_id", nullable = false, updatable = false)
+    private GrupoPesquisa grupoPesquisa;
 }

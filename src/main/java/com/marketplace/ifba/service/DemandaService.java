@@ -2,10 +2,12 @@ package com.marketplace.ifba.service;
 
 import com.marketplace.ifba.exception.*;
 import com.marketplace.ifba.model.Demanda;
+import com.marketplace.ifba.model.GrupoPesquisa;
 import com.marketplace.ifba.model.Organizacao;
 import com.marketplace.ifba.model.User;
 import com.marketplace.ifba.model.enums.StatusDemanda;
 import com.marketplace.ifba.repository.DemandaRepository;
+import com.marketplace.ifba.repository.GrupoPesquisaRepository;
 import com.marketplace.ifba.repository.OrganizacaoRepository;
 import com.marketplace.ifba.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -21,12 +23,14 @@ public class DemandaService {
     private final DemandaRepository demandaRepository;
     private final UserRepository userRepository;
     private final OrganizacaoRepository organizacaoRepository;
+    private final GrupoPesquisaRepository grupoPesquisaRepository;
 
     public DemandaService(DemandaRepository demandaRepository, UserRepository userRepository,
-                          OrganizacaoRepository organizacaoRepository) {
+                          OrganizacaoRepository organizacaoRepository, GrupoPesquisaRepository grupoPesquisaRepository) {
         this.demandaRepository = demandaRepository;
         this.userRepository = userRepository;
         this.organizacaoRepository = organizacaoRepository;
+        this.grupoPesquisaRepository = grupoPesquisaRepository;
     }
 
     // ---------- LEITURA
@@ -61,6 +65,14 @@ public class DemandaService {
         }
         return demandaRepository.findAll().stream()
                 .filter(demanda -> demanda.getOrganizacao().getIdOrganizacao().equals(idOrganizacao))
+                .toList();
+    }
+
+    // LISTA DEMANDAS APROVADAS PELA ORGANIZAÇÃO
+    @Transactional(readOnly = true)
+    public List<Demanda> buscarDemandasAprovadas() {
+        return demandaRepository.findAll().stream()
+                .filter(demanda -> demanda.getStatus() == StatusDemanda.AGUARDANDO_PROPOSTA)
                 .toList();
     }
 
@@ -142,5 +154,22 @@ public class DemandaService {
             throw new DemandaInvalidaException("Demanda não encontrada para exclusão com o ID: " + idDemanda);
         }
         demandaRepository.deleteById(idDemanda);
+    }
+
+    // ENVIA DEMANDA PARA UM GRUPO DE PESQUISA ESPECÍFICO
+    @Transactional
+    public void enviarDemandaParaGrupo(UUID idDemanda, UUID idGrupoPesquisa) {
+        Demanda demanda = demandaRepository.findById(idDemanda)
+                .orElseThrow(() -> new DemandaInvalidaException("Demanda não encontrada com o ID: " + idDemanda));
+
+        GrupoPesquisa grupoPesquisa = grupoPesquisaRepository.findById(idGrupoPesquisa)
+                .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de pesquisa não encontrado com o ID: " + idGrupoPesquisa));
+
+        if (grupoPesquisa.getDemandas() != null && grupoPesquisa.getDemandas().contains(demanda)) {
+            throw new DemandaInvalidaException("Demanda já foi enviada para este grupo de pesquisa");
+        }
+
+        grupoPesquisa.adicionarDemanda(demanda);
+        grupoPesquisaRepository.save(grupoPesquisa);
     }
 }
