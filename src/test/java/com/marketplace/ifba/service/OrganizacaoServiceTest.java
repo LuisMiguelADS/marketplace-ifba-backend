@@ -51,8 +51,6 @@ class OrganizacaoServiceTest {
         organizacao.setDataRegistro(LocalDateTime.now());
     }
 
-    // ---------- LEITURA ----------
-
     @Test
     void deveBuscarOrganizacaoPorId_ComSucesso() {
         when(organizacaoRepository.findById(organizacao.getIdOrganizacao())).thenReturn(Optional.of(organizacao));
@@ -117,8 +115,6 @@ class OrganizacaoServiceTest {
         assertEquals(1, resultado.size());
         assertEquals(usuario.getIdUsuario(), resultado.get(0).getIdUsuario());
     }
-
-    // ---------- ESCRITA ----------
 
     @Test
     void deveRegistrarOrganizacao_ComSucesso() {

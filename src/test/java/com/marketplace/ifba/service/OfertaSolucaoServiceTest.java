@@ -60,8 +60,6 @@ class OfertaSolucaoServiceTest {
         ofertaSolucao.setDataRegistro(LocalDateTime.now());
     }
 
-    // ---------- LEITURA ----------
-
     @Test
     void deveBuscarOfertaSolucaoPorId_ComSucesso() {
         when(ofertaSolucaoRepository.findById(ofertaSolucao.getIdSolucao()))
@@ -122,8 +120,6 @@ class OfertaSolucaoServiceTest {
         assertThrows(GrupoPesquisaInvalidoException.class,
                 () -> ofertaSolucaoService.buscarOfertasSolucaoPorGrupoPesquisa(UUID.randomUUID()));
     }
-
-    // ---------- ESCRITA ----------
 
     @Test
     void deveRegistrarOfertaSolucao_ComSucesso() {

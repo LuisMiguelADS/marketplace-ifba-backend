@@ -26,17 +26,14 @@ class AuthorizationServiceTest {
 
     @Test
     void deveRetornarUserDetailsQuandoUsuarioExistir() {
-        // Arrange
         User user = new User();
         user.setEmail("email@teste.com");
         user.setPassword("123456");
 
         when(userRepository.findAll()).thenReturn(List.of(user));
 
-        // Act
         UserDetails result = authorizationService.loadUserByUsername("email@teste.com");
 
-        // Assert
         assertNotNull(result);
         assertEquals("email@teste.com", result.getUsername());
         assertEquals("123456", result.getPassword());
@@ -45,14 +42,13 @@ class AuthorizationServiceTest {
 
     @Test
     void deveLancarExcecaoQuandoUsuarioNaoExistir() {
-        // Arrange
+
         User user = new User();
         user.setEmail("outro@teste.com");
         user.setPassword("123");
 
         when(userRepository.findAll()).thenReturn(List.of(user));
 
-        // Act & Assert
         assertThrows(UsernameNotFoundException.class,
                 () -> authorizationService.loadUserByUsername("naoexiste@teste.com"));
         verify(userRepository).findAll();
@@ -60,10 +56,9 @@ class AuthorizationServiceTest {
 
     @Test
     void deveLancarExcecaoQuandoListaDeUsuariosVazia() {
-        // Arrange
+
         when(userRepository.findAll()).thenReturn(Collections.emptyList());
 
-        // Act & Assert
         assertThrows(UsernameNotFoundException.class,
                 () -> authorizationService.loadUserByUsername("qualquer@teste.com"));
         verify(userRepository).findAll();

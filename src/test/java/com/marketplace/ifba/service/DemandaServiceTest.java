@@ -36,8 +36,6 @@ class DemandaServiceTest {
                 grupoPesquisaRepository);
     }
 
-    // ---------- ESCRITA ----------
-
     @Test
     void deveRegistrarDemandaComSucesso() {
         UUID userId = UUID.randomUUID();
@@ -45,7 +43,6 @@ class DemandaServiceTest {
 
         User user = new User();
         user.setIdUsuario(orgId);
-        // user.setId(userId);
 
         Organizacao org = new Organizacao();
         org.setIdOrganizacao(orgId);
@@ -59,7 +56,6 @@ class DemandaServiceTest {
 
         Demanda result = demandaService.registrarDemanda(demanda, userId, orgId);
 
-        // ArgumentCaptor para validar o objeto passado para save
         ArgumentCaptor<Demanda> captor = ArgumentCaptor.forClass(Demanda.class);
         verify(demandaRepository).save(captor.capture());
         Demanda saved = captor.getValue();
@@ -78,7 +74,7 @@ class DemandaServiceTest {
 
         Demanda nova = new Demanda();
         nova.setNome("Novo");
-        nova.setDescricao("Desc");
+        nova.setDescricao("Descrição");
         nova.setCriterio("Critério");
         nova.setOrcamento(1000.0);
         nova.setDataPrazoFinal(LocalDate.now().plusDays(5));
@@ -93,7 +89,7 @@ class DemandaServiceTest {
         Demanda saved = captor.getValue();
 
         assertEquals("Novo", saved.getNome());
-        assertEquals("Desc", saved.getDescricao());
+        assertEquals("Descrição", saved.getDescricao());
         assertEquals("Critério", saved.getCriterio());
         assertEquals(1000.0, saved.getOrcamento());
     }
@@ -114,7 +110,7 @@ class DemandaServiceTest {
         Demanda saved = captor.getValue();
 
         assertEquals(StatusDemanda.FINALIZADA, saved.getStatus());
-        // assertEquals(StatusDemanda.CONCLUIDA, saved.getStatus());
+
     }
 
     @Test
@@ -183,8 +179,6 @@ class DemandaServiceTest {
         assertTrue(saved.getDemandas().contains(demanda));
     }
 
-    // ---------- LEITURA ----------
-
     @Test
     void deveBuscarDemandaPorIdQuandoExistir() {
         UUID id = UUID.randomUUID();
@@ -219,24 +213,24 @@ class DemandaServiceTest {
     @Test
     void deveBuscarDemandaPorNomeQuandoExistir() {
         Demanda demanda = new Demanda();
-        demanda.setNome("Projeto X");
+        demanda.setNome("Projeto A");
 
         when(demandaRepository.findAll()).thenReturn(List.of(demanda));
 
-        Demanda result = demandaService.buscarDemandaPorNome("Projeto X");
+        Demanda result = demandaService.buscarDemandaPorNome("Projeto A");
 
         // Verifica se findAll foi chamado
         verify(demandaRepository).findAll();
 
         assertNotNull(result);
-        assertEquals("Projeto X", result.getNome());
+        assertEquals("Projeto A", result.getNome());
     }
 
     @Test
     void deveLancarExcecaoQuandoDemandaPorNomeNaoExistir() {
         when(demandaRepository.findAll()).thenReturn(Collections.emptyList());
 
-        assertThrows(DemandaInvalidaException.class, () -> demandaService.buscarDemandaPorNome("Inexistente"));
+        assertThrows(DemandaInvalidaException.class, () -> demandaService.buscarDemandaPorNome("NaoExiste"));
 
         verify(demandaRepository).findAll();
     }

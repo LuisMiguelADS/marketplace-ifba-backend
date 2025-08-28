@@ -52,8 +52,6 @@ class InstituicaoServiceTest {
         instituicao.setUsuarioRegistro(user);
     }
 
-    // --------- LEITURA
-
     @Test
     void deveBuscarInstituicaoPorId_QuandoExistir() {
         when(instituicaoRepository.findById(instituicaoId)).thenReturn(Optional.of(instituicao));
@@ -79,7 +77,7 @@ class InstituicaoServiceTest {
     void deveLancarExcecao_QuandoInstituicaoNaoEncontradaPorNome() {
         when(instituicaoRepository.findAll()).thenReturn(Collections.emptyList());
         assertThrows(InstituicaoInvalidaException.class,
-                () -> instituicaoService.buscarInstituicaoPorNome("Inexistente"));
+                () -> instituicaoService.buscarInstituicaoPorNome("Nao Existe"));
     }
 
     @Test
@@ -88,8 +86,6 @@ class InstituicaoServiceTest {
         List<Instituicao> result = instituicaoService.buscarTodasInstituicoes();
         assertEquals(1, result.size());
     }
-
-    // --------- ESCRITA
 
     @Test
     void deveRegistrarInstituicaoComSucesso() {
@@ -138,8 +134,6 @@ class InstituicaoServiceTest {
                 () -> instituicaoService.atualizarInstituicao(instituicao, instituicaoId));
     }
 
-    // --------- APROVACAO/REPROVACAO
-
     @Test
     void deveAprovarInstituicaoComSucesso() {
         User adm = new User();
@@ -176,7 +170,7 @@ class InstituicaoServiceTest {
     void deveLancarExcecao_AoAprovarInstituicaoInvalida() {
         User adm = new User();
         adm.setIdUsuario(UUID.randomUUID());
-        instituicao.setStatus(StatusInstituicao.APROVADA); // já aprovada
+        instituicao.setStatus(StatusInstituicao.APROVADA);
 
         when(instituicaoRepository.findById(instituicaoId)).thenReturn(Optional.of(instituicao));
 
@@ -192,8 +186,6 @@ class InstituicaoServiceTest {
         assertThrows(AdmException.class,
                 () -> instituicaoService.aprovarOuReprovaInstituicao(instituicaoId, UUID.randomUUID(), true));
     }
-
-    // --------- REMOÇÃO
 
     @Test
     void deveRemoverInstituicaoComSucesso() {

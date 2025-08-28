@@ -24,7 +24,7 @@ class AreaServiceTest {
         areaService = new AreaService(areaRepository);
     }
 
-    // ---------- buscarAreaPorID ----------
+    // Buscar Area Por ID
     @Test
     void deveBuscarAreaPorIdQuandoExistir() {
         UUID id = UUID.randomUUID();
@@ -51,7 +51,7 @@ class AreaServiceTest {
         verify(areaRepository).findById(id);
     }
 
-    // ---------- buscarTodasAreas ----------
+    // Buscar todas areas
     @Test
     void deveRetornarTodasAsAreas() {
         List<Area> areas = Arrays.asList(new Area(), new Area());
@@ -73,7 +73,7 @@ class AreaServiceTest {
         verify(areaRepository).findAll();
     }
 
-    // ---------- registrarArea ----------
+    // Registrar area
     @Test
     void deveRegistrarAreaQuandoNomeForUnico() {
         Area area = new Area();
@@ -103,7 +103,7 @@ class AreaServiceTest {
         verify(areaRepository, never()).save(any());
     }
 
-    // ---------- atualizarArea ----------
+    // Atualizar Area
     @Test
     void deveAtualizarAreaQuandoExistir() {
         UUID id = UUID.randomUUID();
@@ -124,7 +124,7 @@ class AreaServiceTest {
         ArgumentCaptor<Area> captor = ArgumentCaptor.forClass(Area.class);
         verify(areaRepository).save(captor.capture());
         assertEquals("Saúde", captor.getValue().getNomeArea());
-        assertEquals(id, captor.getValue().getIdArea()); // garante que manteve o mesmo ID
+        assertEquals(id, captor.getValue().getIdArea()); // Verifica se o ID permanece o mesmo
     }
 
     @Test
@@ -139,7 +139,7 @@ class AreaServiceTest {
         verify(areaRepository, never()).save(any());
     }
 
-    // ---------- removerArea ----------
+    // Remover Area
     @Test
     void deveRemoverAreaQuandoExistir() {
         UUID id = UUID.randomUUID();

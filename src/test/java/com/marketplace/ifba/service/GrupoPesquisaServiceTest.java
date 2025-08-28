@@ -66,8 +66,6 @@ class GrupoPesquisaServiceTest {
         demanda.setGruposPesquisa(new ArrayList<>());
     }
 
-    // --------- LEITURA
-
     @Test
     void deveBuscarGrupoPesquisaPorId_QuandoExistir() {
         when(grupoPesquisaRepository.findById(grupoId)).thenReturn(Optional.of(grupoPesquisa));
@@ -93,7 +91,7 @@ class GrupoPesquisaServiceTest {
     void deveLancarExcecao_QuandoGrupoPesquisaNaoEncontradoPorNome() {
         when(grupoPesquisaRepository.findAll()).thenReturn(List.of());
         assertThrows(GrupoPesquisaInvalidoException.class,
-                () -> grupoPesquisaService.buscarGrupoPesquisaPorNome("Inexistente"));
+                () -> grupoPesquisaService.buscarGrupoPesquisaPorNome("Nao Existe"));
     }
 
     @Test
@@ -159,8 +157,6 @@ class GrupoPesquisaServiceTest {
         assertEquals(1, result.size());
     }
 
-    // --------- ESCRITA
-
     @Test
     void deveRegistrarGrupoPesquisaComSucesso() {
         GrupoPesquisa novoGrupo = new GrupoPesquisa();
@@ -195,7 +191,7 @@ class GrupoPesquisaServiceTest {
         GrupoPesquisa update = new GrupoPesquisa();
         update.setNome("Novo Nome");
         update.setAreas(new ArrayList<>());
-        update.setDescricao("Nova Desc");
+        update.setDescricao("Nova Descrição");
 
         when(grupoPesquisaRepository.findById(grupoId)).thenReturn(Optional.of(grupoPesquisa));
         when(grupoPesquisaRepository.findAll()).thenReturn(List.of(grupoPesquisa));
@@ -203,7 +199,7 @@ class GrupoPesquisaServiceTest {
 
         GrupoPesquisa result = grupoPesquisaService.atualizarGrupoPesquisa(grupoId, update);
         assertEquals("Novo Nome", result.getNome());
-        assertEquals("Nova Desc", result.getDescricao());
+        assertEquals("Nova Descrição", result.getDescricao());
     }
 
     @Test
