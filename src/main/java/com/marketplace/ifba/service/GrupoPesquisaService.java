@@ -27,10 +27,10 @@ public class GrupoPesquisaService {
     private final DemandaRepository demandaRepository;
 
     public GrupoPesquisaService(GrupoPesquisaRepository grupoPesquisaRepository,
-                                InstituicaoRepository instituicaoRepository,
-                                UserRepository userRepository,
-                                AreaRepository areaRepository,
-                                DemandaRepository demandaRepository) {
+            InstituicaoRepository instituicaoRepository,
+            UserRepository userRepository,
+            AreaRepository areaRepository,
+            DemandaRepository demandaRepository) {
         this.grupoPesquisaRepository = grupoPesquisaRepository;
         this.instituicaoRepository = instituicaoRepository;
         this.userRepository = userRepository;
@@ -50,7 +50,8 @@ public class GrupoPesquisaService {
     // BUSCA GRUPO PESQUISA PELO SEU NOME
     @Transactional(readOnly = true)
     public GrupoPesquisa buscarGrupoPesquisaPorNome(String nome) {
-        return grupoPesquisaRepository.findAll().stream().filter(grupoPesquisa -> grupoPesquisa.getNome().equals(nome)).findFirst()
+        return grupoPesquisaRepository.findAll().stream().filter(grupoPesquisa -> grupoPesquisa.getNome().equals(nome))
+                .findFirst()
                 .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de pesquisa não encontrado com o NOME"));
     }
 
@@ -93,8 +94,10 @@ public class GrupoPesquisaService {
 
     // REGISTRA GRUPO PESQUISA
     @Transactional
-    public GrupoPesquisa registrarGrupoPesquisa(GrupoPesquisa grupoPesquisa, UUID idInstituicao, UUID idUsuarioRegistrador, List<UUID> idAreas) {
-        if (grupoPesquisaRepository.findAll().stream().anyMatch(grupoPes -> grupoPes.getNome().equals(grupoPesquisa.getNome()))) {
+    public GrupoPesquisa registrarGrupoPesquisa(GrupoPesquisa grupoPesquisa, UUID idInstituicao,
+            UUID idUsuarioRegistrador, List<UUID> idAreas) {
+        if (grupoPesquisaRepository.findAll().stream()
+                .anyMatch(grupoPes -> grupoPes.getNome().equals(grupoPesquisa.getNome()))) {
             throw new GrupoPesquisaInvalidoException("Já existe um grupo de pesquisa com o NOME");
         }
 
@@ -133,10 +136,12 @@ public class GrupoPesquisaService {
     @Transactional
     public GrupoPesquisa atualizarGrupoPesquisa(UUID idGrupoPesquisa, GrupoPesquisa grupoPesquisa) {
         GrupoPesquisa grupoPesquisaSaved = grupoPesquisaRepository.findById(idGrupoPesquisa)
-                .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de pesquisa não encontrado para atualização com o ID"));
+                .orElseThrow(() -> new GrupoPesquisaInvalidoException(
+                        "Grupo de pesquisa não encontrado para atualização com o ID"));
 
         if (!grupoPesquisaSaved.getNome().equals(grupoPesquisa.getNome())) {
-            if (grupoPesquisaRepository.findAll().stream().anyMatch(grupoPes -> grupoPes.getNome().equals(grupoPesquisa.getNome()))) {
+            if (grupoPesquisaRepository.findAll().stream()
+                    .anyMatch(grupoPes -> grupoPes.getNome().equals(grupoPesquisa.getNome()))) {
                 throw new GrupoPesquisaInvalidoException("Já existe outro grupo de pesquisa com o NOME");
             }
         }
@@ -162,25 +167,42 @@ public class GrupoPesquisaService {
     @Transactional
     public void removerGrupoPesquisa(UUID idGrupoPesquisa) {
         if (!grupoPesquisaRepository.existsById(idGrupoPesquisa)) {
-            throw new GrupoPesquisaInvalidoException("Grupo de pesquisa não encontrado para exclusão com o ID: " + idGrupoPesquisa);
+            throw new GrupoPesquisaInvalidoException(
+                    "Grupo de pesquisa não encontrado para exclusão com o ID: " + idGrupoPesquisa);
         }
         grupoPesquisaRepository.deleteById(idGrupoPesquisa);
     }
 
     // BUSCA DEMANDAS RECEBIDAS POR UM GRUPO DE PESQUISA
+    // @Transactional(readOnly = true)
+    // public List<Demanda> buscarDemandasRecebidas(UUID idGrupoPesquisa) {
+    // GrupoPesquisa grupoPesquisa =
+    // grupoPesquisaRepository.findById(idGrupoPesquisa)
+    // .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de pesquisa não
+    // encontrado com o ID: " + idGrupoPesquisa));
+
+    // return grupoPesquisa.getDemandas();
+    // }
+
+    // BUSCA DEMANDAS RECEBIDAS POR UM GRUPO DE PESQUISA - GARANTE QUE NUNCA RETORNA
+    // NULL DIFERENTE DA VERSÃO ACIMA QUE PODE RETORNAR NULL E NOS TESTES QUEBRAR.
+
     @Transactional(readOnly = true)
     public List<Demanda> buscarDemandasRecebidas(UUID idGrupoPesquisa) {
         GrupoPesquisa grupoPesquisa = grupoPesquisaRepository.findById(idGrupoPesquisa)
-                .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de pesquisa não encontrado com o ID: " + idGrupoPesquisa));
+                .orElseThrow(() -> new GrupoPesquisaInvalidoException(
+                        "Grupo de pesquisa não encontrado com o ID: " + idGrupoPesquisa));
 
-        return grupoPesquisa.getDemandas();
+        // Garante que nunca retorna null
+        return grupoPesquisa.getDemandas() != null ? grupoPesquisa.getDemandas() : new ArrayList<>();
     }
 
     // REMOVE DEMANDA DE UM GRUPO DE PESQUISA
     @Transactional
     public void removerDemandaDoGrupo(UUID idGrupoPesquisa, UUID idDemanda) {
         GrupoPesquisa grupoPesquisa = grupoPesquisaRepository.findById(idGrupoPesquisa)
-                .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de pesquisa não encontrado com o ID: " + idGrupoPesquisa));
+                .orElseThrow(() -> new GrupoPesquisaInvalidoException(
+                        "Grupo de pesquisa não encontrado com o ID: " + idGrupoPesquisa));
 
         Demanda demanda = demandaRepository.findById(idDemanda)
                 .orElseThrow(() -> new DemandaInvalidaException("Demanda não encontrada com o ID: " + idDemanda));
@@ -190,11 +212,11 @@ public class GrupoPesquisaService {
         }
 
         grupoPesquisa.removerDemanda(demanda);
-        
+
         if (demanda.getGruposPesquisa() != null) {
             demanda.getGruposPesquisa().remove(grupoPesquisa);
         }
-        
+
         grupoPesquisaRepository.save(grupoPesquisa);
         demandaRepository.save(demanda);
     }

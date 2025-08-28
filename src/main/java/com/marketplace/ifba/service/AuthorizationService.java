@@ -16,8 +16,24 @@ public class AuthorizationService implements UserDetailsService {
         this.userRepository = userRepository;
     }
 
+    // @Override
+    // public UserDetails loadUserByUsername(String username) throws
+    // UsernameNotFoundException {
+    // return userRepository.findAll().stream().filter(userDetails ->
+    // userDetails.getEmail().equals(username)).findFirst().orElse(null);
+    // }
+
+    // fiz essa modificação para lançar uma exceção caso o usuário não seja
+    // encontrado,
+    // no metodo anterior retornava null, enquanto que o correto é lançar uma
+    // exceção; Reajustei para ficar ainda mais alinhado com os testes e os padrões
+    // do Spring Security
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findAll().stream().filter(userDetails -> userDetails.getEmail().equals(username)).findFirst().orElse(null);
+        return userRepository.findAll().stream()
+                .filter(userDetails -> userDetails.getEmail().equals(username))
+                .findFirst()
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
     }
 }
