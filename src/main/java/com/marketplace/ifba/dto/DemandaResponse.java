@@ -20,5 +20,6 @@ public record DemandaResponse(
         LocalDate dataAprovado,
         UserResponse usuarioCriador,
         OrganizacaoResponse organizacao,
-        List<GrupoPesquisaResponse> gruposPesquisa
+        List<GrupoPesquisaResponse> gruposPesquisa,
+        Integer qtdOfertas
 ) {}

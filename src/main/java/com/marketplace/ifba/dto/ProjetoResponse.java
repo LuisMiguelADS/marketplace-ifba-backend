@@ -14,6 +14,6 @@ public record ProjetoResponse(
         DemandaResponse demanda,
         OfertaSolucaoResponse solucaoOferta,
         GrupoPesquisaResponse grupoPesquisa,
-        List<EntregaResponse> entregas
-        // ChatResponse chat
+        List<EntregaResponse> entregas,
+        UUID idChat
 ) {}

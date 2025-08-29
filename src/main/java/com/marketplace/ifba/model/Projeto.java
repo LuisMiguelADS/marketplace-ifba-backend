@@ -40,7 +40,7 @@ public class Projeto {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "offer_solution_id", updatable = false)
-    private OfertaSolucao solucaoOferta;
+    private OfertaSolucao ofertaSolucao;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "research_group_id", nullable = false, updatable = false)

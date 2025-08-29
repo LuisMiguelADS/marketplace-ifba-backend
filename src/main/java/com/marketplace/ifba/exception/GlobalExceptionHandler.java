@@ -77,6 +77,16 @@ public class GlobalExceptionHandler {
         return buildResponse(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(ChatInvalidoException.class)
+    public ResponseEntity<Object> handleChatInvalidoException(ChatInvalidoException exception) {
+        return buildResponse(exception.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MensagemInvalidaException.class)
+    public ResponseEntity<Object> handleMensagemInvalidaException(MensagemInvalidaException exception) {
+        return buildResponse(exception.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<Object> handleEntityNotFoundException(EntityNotFoundException exception) {
         return buildResponse(exception.getMessage(), HttpStatus.NOT_FOUND);

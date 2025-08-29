@@ -9,7 +9,6 @@ import com.marketplace.ifba.service.OfertaSolucaoService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -53,10 +52,17 @@ public class OfertaSolucaoController {
     }
 
     @Operation(summary = "Retorna oferta solução a partir do Grupo Pesquisa", description = "Procura uma oferta solução salva com o Grupo Pesquisa informado")
-    @GetMapping(value = "/grupo-pesquisa/", params = "idGrupoPesquisa")
+    @GetMapping(value = "/grupo-pesquisa/{idGrupoPesquisa}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
-    public ResponseEntity<List<OfertaSolucaoResponse>> buscarOfertaSolucaoPorGrupoPesquisa(@RequestParam UUID idGrupoPesquisa) {
+    public ResponseEntity<List<OfertaSolucaoResponse>> buscarOfertaSolucaoPorGrupoPesquisa(@PathVariable UUID idGrupoPesquisa) {
         return ResponseEntity.ok(ofertaSolucaoService.buscarOfertasSolucaoPorGrupoPesquisa(idGrupoPesquisa).stream().map(ofertaSolucaoMapper::toDTO).toList());
+    }
+
+    @Operation(summary = "Retorna ofertas solução a partir da Demanda", description = "Procura ofertas solução salvas com a Demanda informada")
+    @GetMapping(value = "/demanda/{idDemanda}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
+    public ResponseEntity<List<OfertaSolucaoResponse>> buscarOfertaSolucaoPorDemanda(@PathVariable UUID idDemanda) {
+        return ResponseEntity.ok(ofertaSolucaoService.buscarOfertasSolucaoPorDemanda(idDemanda).stream().map(ofertaSolucaoMapper::toDTO).toList());
     }
 
     @Operation(summary = "Retorna todas as ofertas solução", description = "Retorna todas as ofertas solução cadastradas")
@@ -70,7 +76,7 @@ public class OfertaSolucaoController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR')")
     public ResponseEntity<OfertaSolucaoResponse> registrarOfertaSolucao(@RequestBody @Valid OfertaSolucaoRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ofertaSolucaoMapper.toDTO(ofertaSolucaoService.registrarOfertaSolucao(request.idDemanda(), ofertaSolucaoMapper.toEntity(request))));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ofertaSolucaoMapper.toDTO(ofertaSolucaoService.registrarOfertaSolucao(request.idDemanda(), request.idGrupoPesquisa(), ofertaSolucaoMapper.toEntity(request))));
     }
 
     @Operation(summary = "Atualiza oferta solução", description = "Atualiza oferta solução se passar das regras de negócio")
@@ -83,7 +89,7 @@ public class OfertaSolucaoController {
     @Operation(summary = "Aprova ou reprova oferta solução", description = "Aprova ou reprova oferta solução")
     @PatchMapping(value = "/aprovar-reprovar")
     @PreAuthorize("hasRole('ADMIN') or hasRole('EXTERNO')")
-    public ResponseEntity<OfertaSolucaoResponse> aprovarOfertaSolucao(@RequestParam AprovaOuReprovaOfertaSolucaoRequest request) {
+    public ResponseEntity<OfertaSolucaoResponse> aprovarOuReprovarOfertaSolucao(@RequestBody AprovaOuReprovaOfertaSolucaoRequest request) {
         return ResponseEntity.ok(ofertaSolucaoMapper.toDTO(ofertaSolucaoService.aprovarOuReprovarOfertaSolucao(request.idOfertaSolucao(), request.decisao())));
     }
 

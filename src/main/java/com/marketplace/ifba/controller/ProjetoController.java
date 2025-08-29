@@ -110,7 +110,6 @@ public class ProjetoController {
 
     @Operation(summary = "Adiciona entrega ao projeto", description = "Cria uma nova entrega associada ao projeto")
     @PostMapping("/entregas/{idProjeto}")
-
     @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
     public ResponseEntity<EntregaResponse> adicionarEntrega(@PathVariable UUID idProjeto, @RequestBody @Valid EntregaRequest request) {
         var entrega = projetoService.adicionarEntrega(
@@ -130,5 +129,26 @@ public class ProjetoController {
     public ResponseEntity<List<EntregaResponse>> buscarEntregasPorProjeto(@PathVariable UUID idProjeto) {
         var entregas = projetoService.buscarEntregasPorProjeto(idProjeto);
         return ResponseEntity.ok(entregas.stream().map(entregaMapper::toDTO).toList());
+    }
+
+    @Operation(summary = "Atualiza entrega", description = "Atualiza título, descrição e prazo de uma entrega")
+    @PatchMapping("/entregas")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
+    public ResponseEntity<EntregaResponse> atualizarEntrega(@RequestBody @Valid AtualizarEntregaRequest request) {
+        var entrega = projetoService.atualizarEntrega(
+                request.idEntrega(),
+                request.titulo(),
+                request.descricao(),
+                request.prazoDesejado()
+        );
+        return ResponseEntity.ok(entregaMapper.toDTO(entrega));
+    }
+
+    @Operation(summary = "Cancela entrega", description = "Altera o status da entrega para CANCELADA")
+    @PatchMapping("/entregas/cancelar/{idEntrega}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
+    public ResponseEntity<EntregaResponse> cancelarEntrega(@PathVariable UUID idEntrega) {
+        var entrega = projetoService.cancelarEntrega(idEntrega);
+        return ResponseEntity.ok(entregaMapper.toDTO(entrega));
     }
 }

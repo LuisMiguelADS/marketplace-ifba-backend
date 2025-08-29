@@ -4,6 +4,7 @@ import com.marketplace.ifba.exception.DemandaInvalidaException;
 import com.marketplace.ifba.exception.GrupoPesquisaInvalidoException;
 import com.marketplace.ifba.exception.OfertaSolucaoInvalidaException;
 import com.marketplace.ifba.model.Demanda;
+import com.marketplace.ifba.model.GrupoPesquisa;
 import com.marketplace.ifba.model.OfertaSolucao;
 import com.marketplace.ifba.model.enums.StatusOfertaSolucao;
 import com.marketplace.ifba.repository.DemandaRepository;
@@ -59,6 +60,15 @@ public class OfertaSolucaoService {
         return ofertaSolucaoRepository.findAll().stream().filter(ofertaSolucao -> ofertaSolucao.getGrupoPesquisa().getIdGrupoPesquisa().equals(idGrupoPesquisa)).toList();
     }
 
+    // LISTA OFERTAS SOLUÇÃO PELA DEMANDA
+    @Transactional(readOnly = true)
+    public List<OfertaSolucao> buscarOfertasSolucaoPorDemanda(UUID idDemanda) {
+        if (!demandaRepository.existsById(idDemanda)) {
+            throw new DemandaInvalidaException("Demanda não encontrada com o ID");
+        }
+        return ofertaSolucaoRepository.findAll().stream().filter(ofertaSolucao -> ofertaSolucao.getDemanda().getIdDemanda().equals(idDemanda)).toList();
+    }
+
     // LISTA TODAS OFERTAS SOLUÇÃO
     @Transactional(readOnly = true)
     public List<OfertaSolucao> buscarTodasOfertasSolucao() {
@@ -69,12 +79,16 @@ public class OfertaSolucaoService {
 
     // REGISTRA OFERTA SOLUÇÃO
     @Transactional
-    public OfertaSolucao registrarOfertaSolucao(UUID idDemanda, OfertaSolucao ofertaSolucao) {
+    public OfertaSolucao registrarOfertaSolucao(UUID idDemanda, UUID idGrupoPesquisa, OfertaSolucao ofertaSolucao) {
 
         Demanda demanda = demandaRepository.findById(idDemanda)
                 .orElseThrow(() -> new DemandaInvalidaException("Demanda não encontrada com ID"));
         demanda.getOfertasSolucoes().add(ofertaSolucao);
         ofertaSolucao.setDemanda(demanda);
+
+        GrupoPesquisa grupoPesquisa = grupoPesquisaRepository.findById(idGrupoPesquisa)
+                        .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo Pesquisa não encontrado com ID"));
+        ofertaSolucao.setGrupoPesquisa(grupoPesquisa);
 
         ofertaSolucao.setDataRegistro(LocalDateTime.now());
         ofertaSolucao.setStatus(StatusOfertaSolucao.AGUARDANDO_APROVACAO);

@@ -23,16 +23,19 @@ public class ProjetoService {
     private final DemandaRepository demandaRepository;
     private final OfertaSolucaoRepository ofertaSolucaoRepository;
     private final GrupoPesquisaRepository grupoPesquisaRepository;
+    private final EntregaRepository entregaRepository;
 
     public ProjetoService(ProjetoRepository projetoRepository, OrganizacaoRepository organizacaoRepository,
-            InstituicaoRepository instituicaoRepository, DemandaRepository demandaRepository,
-            OfertaSolucaoRepository ofertaSolucaoRepository, GrupoPesquisaRepository grupoPesquisaRepository) {
+                          InstituicaoRepository instituicaoRepository, DemandaRepository demandaRepository,
+                          OfertaSolucaoRepository ofertaSolucaoRepository, GrupoPesquisaRepository grupoPesquisaRepository,
+                          EntregaRepository entregaRepository) {
         this.projetoRepository = projetoRepository;
         this.organizacaoRepository = organizacaoRepository;
         this.instituicaoRepository = instituicaoRepository;
         this.demandaRepository = demandaRepository;
         this.ofertaSolucaoRepository = ofertaSolucaoRepository;
         this.grupoPesquisaRepository = grupoPesquisaRepository;
+        this.entregaRepository = entregaRepository;
     }
 
     // ---------- LEITURA
@@ -58,53 +61,6 @@ public class ProjetoService {
                 .filter(projeto -> projeto.getDemanda().getIdDemanda().equals(idDemanda))
                 .findFirst().orElseThrow(() -> new ProjetoInvalidoException("Projeto não encontrado para a Demanda!"));
     }
-
-    // Metodos comentadas para a substituição de metodos iguais porem com
-    // correspondencia aos testes, pois com os metodos atuais estavam passando erros
-    // nos testes
-    // no quesitos de por exemplo FindById retornando vazio, etc.
-
-    // BUSCA PROJETO PELO GRUPO DE PESQUISA
-    // @Transactional(readOnly = true)
-    // public List<Projeto> buscarProjetosPorGrupoPesquisa(UUID idGrupoPesquisa) {
-    // if (grupoPesquisaRepository.findById(idGrupoPesquisa).isPresent()) {
-    // throw new GrupoPesquisaInvalidoException("Grupo Pesquisa não encontrado!");
-    // }
-    // return projetoRepository.findAll().stream()
-    // .filter(projeto ->
-    // projeto.getGrupoPesquisa().getIdGrupoPesquisa().equals(idGrupoPesquisa))
-    // .collect(Collectors.toList());
-    // }
-
-    // BUSCA PROJETO PELA INSTITUIÇÃO
-    // @Transactional(readOnly = true)
-    // public List<Projeto> buscarProjetosPorInstituicao(UUID idInstituicao) {
-    // if (instituicaoRepository.findById(idInstituicao).isPresent()) {
-    // throw new InstituicaoInvalidaException("Instituição não encontrada!");
-    // }
-
-    // return projetoRepository.findAll().stream()
-    // .filter(projeto ->
-    // projeto.getInstituicao().getIdInstituicao().equals(idInstituicao))
-    // .collect(Collectors.toList());
-    // }
-
-    // BUSCA PROJETO PELA ORGANIZAÇÃO
-    // @Transactional(readOnly = true)
-    // public List<Projeto> buscarProjetosPorOrganizacao(UUID idOrganizacao) {
-    // if (organizacaoRepository.findById(idOrganizacao).isPresent()) {
-    // throw new OrganizacaoInvalidaException("Organização não encontrada!");
-    // }
-
-    // return projetoRepository.findAll().stream()
-    // .filter(projeto ->
-    // projeto.getInstituicao().getIdInstituicao().equals(idOrganizacao))
-    // .collect(Collectors.toList());
-    // }
-
-    // dessa forma os metodos foram alterados para o padrao correto e os testes
-    // passaram a funcionar corretamente, onde o metodo findById retorna o valor
-    // correto e nao vazio e busca diretamente no banco e não em memoria.
 
     // BUSCA PROJETO PELO GRUPO DE PESQUISA
     @Transactional(readOnly = true)
@@ -133,8 +89,6 @@ public class ProjetoService {
         return projetoRepository.findByOrganizacao(organizacao);
     }
 
-    // ----------------------------------------------------------------
-
     // LISTA TODOS OS PROJETOS DO SISTEMA
     @Transactional(readOnly = true)
     public List<Projeto> buscarTodosProjetos() {
@@ -145,10 +99,8 @@ public class ProjetoService {
 
     // REGISTRA PROJETO
     @Transactional
-    public Projeto registrarProjeto(Projeto projeto, UUID idOrganizacao, UUID idInstituicao, UUID idDemanda,
-            UUID idOfertaSolucao, UUID idGrupoPesquisa) {
-        if (projetoRepository.findAll().stream()
-                .anyMatch(proj -> proj.getSolucaoOferta().getIdSolucao().equals(idOfertaSolucao))) {
+    public Projeto registrarProjeto(Projeto projeto, UUID idOrganizacao, UUID idInstituicao, UUID idDemanda, UUID idOfertaSolucao, UUID idGrupoPesquisa) {
+        if (projetoRepository.findAll().stream().anyMatch(proj -> proj.getOfertaSolucao().getIdSolucao().equals(idOfertaSolucao))) {
             throw new DemandaInvalidaException("A Demanda já está associada com um projeto!");
         }
 
@@ -172,10 +124,10 @@ public class ProjetoService {
             OfertaSolucao ofertaSolucao = ofertaSolucaoRepository.findById(idOfertaSolucao)
                     .orElseThrow(() -> new OfertaSolucaoInvalidaException("Oferta Solução não encontrada!"));
             if (projetoRepository.findAll().stream()
-                    .anyMatch(proj -> proj.getSolucaoOferta().getIdSolucao().equals(idOfertaSolucao))) {
+                    .anyMatch(proj -> proj.getOfertaSolucao().getIdSolucao().equals(idOfertaSolucao))) {
                 throw new OfertaSolucaoInvalidaException("A Oferta Solução já está associada a outro projeto.");
             }
-            projeto.setSolucaoOferta(ofertaSolucao);
+            projeto.setOfertaSolucao(ofertaSolucao);
         }
 
         Chat chat = new Chat();
@@ -247,53 +199,49 @@ public class ProjetoService {
     }
 
     @Transactional
-    public Entrega adicionarEntrega(UUID idProjeto, Entrega entrega, UUID idOrganizacaoSolicitante,
-            UUID idGrupoPesquisaSolicitante, UUID idOrganizacaoSolicitada,
-            UUID idGrupoPesquisaSolicitado) {
+    public Entrega adicionarEntrega(UUID idProjeto, Entrega entrega, UUID idOrganizacaoSolicitante, 
+                                   UUID idGrupoPesquisaSolicitante, UUID idOrganizacaoSolicitada, 
+                                   UUID idGrupoPesquisaSolicitado) {
         Projeto projeto = buscarProjetoPorId(idProjeto);
 
         if ((idOrganizacaoSolicitante != null && idGrupoPesquisaSolicitante != null) ||
-                (idOrganizacaoSolicitante == null && idGrupoPesquisaSolicitante == null)) {
-            throw new ProjetoInvalidoException(
-                    "Deve ser informado apenas um tipo de solicitante (Organização OU Grupo de Pesquisa)");
+            (idOrganizacaoSolicitante == null && idGrupoPesquisaSolicitante == null)) {
+            throw new ProjetoInvalidoException("Deve ser informado apenas um tipo de solicitante (Organização OU Grupo de Pesquisa)");
         }
-
+        
         if ((idOrganizacaoSolicitada != null && idGrupoPesquisaSolicitado != null) ||
-                (idOrganizacaoSolicitada == null && idGrupoPesquisaSolicitado == null)) {
-            throw new ProjetoInvalidoException(
-                    "Deve ser informado apenas um tipo de solicitado (Organização OU Grupo de Pesquisa)");
+            (idOrganizacaoSolicitada == null && idGrupoPesquisaSolicitado == null)) {
+            throw new ProjetoInvalidoException("Deve ser informado apenas um tipo de solicitado (Organização OU Grupo de Pesquisa)");
         }
-
+        
         if (idOrganizacaoSolicitante != null) {
             Organizacao organizacao = organizacaoRepository.findById(idOrganizacaoSolicitante)
                     .orElseThrow(() -> new OrganizacaoInvalidaException("Organização solicitante não encontrada"));
             entrega.setOrganizacaoSolicitante(organizacao);
         } else {
             GrupoPesquisa grupoPesquisa = grupoPesquisaRepository.findById(idGrupoPesquisaSolicitante)
-                    .orElseThrow(
-                            () -> new GrupoPesquisaInvalidoException("Grupo de pesquisa solicitante não encontrado"));
+                    .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de pesquisa solicitante não encontrado"));
             entrega.setGrupoPesquisaSolicitante(grupoPesquisa);
         }
-
+        
         if (idOrganizacaoSolicitada != null) {
             Organizacao organizacao = organizacaoRepository.findById(idOrganizacaoSolicitada)
                     .orElseThrow(() -> new OrganizacaoInvalidaException("Organização solicitada não encontrada"));
             entrega.setOrganizacaoSolicitada(organizacao);
         } else {
             GrupoPesquisa grupoPesquisa = grupoPesquisaRepository.findById(idGrupoPesquisaSolicitado)
-                    .orElseThrow(
-                            () -> new GrupoPesquisaInvalidoException("Grupo de pesquisa solicitado não encontrado"));
+                    .orElseThrow(() -> new GrupoPesquisaInvalidoException("Grupo de pesquisa solicitado não encontrado"));
             entrega.setGrupoPesquisaSolicitado(grupoPesquisa);
         }
-
+        
         entrega.setStatus(StatusEntrega.SOLICITADA);
         entrega.setProjeto(projeto);
-
+        
         if (projeto.getEntregas() == null) {
             projeto.setEntregas(new ArrayList<>());
         }
         projeto.getEntregas().add(entrega);
-
+        
         projetoRepository.save(projeto);
         return entrega;
     }
@@ -303,5 +251,49 @@ public class ProjetoService {
     public List<Entrega> buscarEntregasPorProjeto(UUID idProjeto) {
         Projeto projeto = buscarProjetoPorId(idProjeto);
         return projeto.getEntregas() != null ? projeto.getEntregas() : new ArrayList<>();
+    }
+
+    // ATUALIZA ENTREGA
+    @Transactional
+    public Entrega atualizarEntrega(UUID idEntrega, String titulo, String descricao, LocalDateTime prazoDesejado) {
+        Entrega entrega = entregaRepository.findById(idEntrega)
+                .orElseThrow(() -> new ProjetoInvalidoException("Entrega não encontrada com o ID: " + idEntrega));
+        
+        if (StatusEntrega.CANCELADA.equals(entrega.getStatus())) {
+            throw new ProjetoInvalidoException("Não é possível atualizar uma entrega cancelada");
+        }
+        
+        if (titulo != null && !titulo.trim().isEmpty()) {
+            entrega.setTitulo(titulo);
+        }
+        
+        if (descricao != null) {
+            entrega.setDescricao(descricao);
+        }
+        
+        if (prazoDesejado != null) {
+            entrega.setPrazoDesejado(prazoDesejado);
+        }
+        
+        return entregaRepository.save(entrega);
+    }
+
+    // CANCELA ENTREGA
+    @Transactional
+    public Entrega cancelarEntrega(UUID idEntrega) {
+        Entrega entrega = entregaRepository.findById(idEntrega)
+                .orElseThrow(() -> new ProjetoInvalidoException("Entrega não encontrada com o ID: " + idEntrega));
+        
+        if (StatusEntrega.CANCELADA.equals(entrega.getStatus())) {
+            throw new ProjetoInvalidoException("A entrega já está cancelada");
+        }
+        
+        if (StatusEntrega.ENTREGUE.equals(entrega.getStatus())) {
+            throw new ProjetoInvalidoException("Não é possível cancelar uma entrega já entregue");
+        }
+        
+        entrega.setStatus(StatusEntrega.CANCELADA);
+        
+        return entregaRepository.save(entrega);
     }
 }

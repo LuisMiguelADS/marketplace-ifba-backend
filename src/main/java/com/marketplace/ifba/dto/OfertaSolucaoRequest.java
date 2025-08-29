@@ -15,7 +15,6 @@ public record OfertaSolucaoRequest(
         @Size(max = 2000, message = "A descrição não pode exceder 2000 caracteres.")
         String descricao,
 
-        @NotBlank(message = "O prazo da solução é obrigatório.")
         @Min(value = 0, message = "O prazo deve ser um valor positivo.")
         Integer prazo,
 
@@ -29,7 +28,6 @@ public record OfertaSolucaoRequest(
         @Size(max = 500, message = "A restrição não pode exceder 500 caracteres.")
         String restricao,
 
-        @NotBlank(message = "O preço da solução é obrigatório.")
         Double preco,
 
         @Size(max = 500, message = "Os recursos necessários não podem exceder 500 caracteres.")
@@ -37,6 +35,8 @@ public record OfertaSolucaoRequest(
 
         UUID idDemanda,
 
-        UUID idOfertaSolucao
+        UUID idOfertaSolucao,
+
+        UUID idGrupoPesquisa
 ) {
 }

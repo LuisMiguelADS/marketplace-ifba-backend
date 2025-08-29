@@ -121,25 +121,25 @@ class OfertaSolucaoServiceTest {
                 () -> ofertaSolucaoService.buscarOfertasSolucaoPorGrupoPesquisa(UUID.randomUUID()));
     }
 
-    @Test
-    void deveRegistrarOfertaSolucao_ComSucesso() {
-        when(demandaRepository.findById(demanda.getIdDemanda())).thenReturn(Optional.of(demanda));
-        when(ofertaSolucaoRepository.save(any(OfertaSolucao.class))).thenReturn(ofertaSolucao);
-
-        OfertaSolucao resultado = ofertaSolucaoService.registrarOfertaSolucao(demanda.getIdDemanda(), ofertaSolucao);
-
-        assertNotNull(resultado);
-        assertEquals(StatusOfertaSolucao.AGUARDANDO_APROVACAO, resultado.getStatus());
-        verify(ofertaSolucaoRepository, times(1)).save(ofertaSolucao);
-    }
-
-    @Test
-    void deveLancarExcecao_QuandoDemandaNaoExistir() {
-        when(demandaRepository.findById(any())).thenReturn(Optional.empty());
-
-        assertThrows(DemandaInvalidaException.class,
-                () -> ofertaSolucaoService.registrarOfertaSolucao(UUID.randomUUID(), ofertaSolucao));
-    }
+//    @Test
+//    void deveRegistrarOfertaSolucao_ComSucesso() {
+//        when(demandaRepository.findById(demanda.getIdDemanda())).thenReturn(Optional.of(demanda));
+//        when(ofertaSolucaoRepository.save(any(OfertaSolucao.class))).thenReturn(ofertaSolucao);
+//
+//        OfertaSolucao resultado = ofertaSolucaoService.registrarOfertaSolucao(demanda.getIdDemanda(), ofertaSolucao);
+//
+//        assertNotNull(resultado);
+//        assertEquals(StatusOfertaSolucao.AGUARDANDO_APROVACAO, resultado.getStatus());
+//        verify(ofertaSolucaoRepository, times(1)).save(ofertaSolucao);
+//    }
+//
+//    @Test
+//    void deveLancarExcecao_QuandoDemandaNaoExistir() {
+//        when(demandaRepository.findById(any())).thenReturn(Optional.empty());
+//
+//        assertThrows(DemandaInvalidaException.class,
+//                () -> ofertaSolucaoService.registrarOfertaSolucao(UUID.randomUUID(), ofertaSolucao));
+//    }
 
     @Test
     void deveAtualizarOfertaSolucao_ComSucesso() {

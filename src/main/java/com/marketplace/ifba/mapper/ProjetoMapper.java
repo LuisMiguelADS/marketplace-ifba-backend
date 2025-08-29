@@ -50,11 +50,12 @@ public class ProjetoMapper {
                 Optional.ofNullable(projeto.getOrganizacao()).map(organizacaoMapper::toDTO).orElse(null),
                 Optional.ofNullable(projeto.getInstituicao()).map(instituicaoMapper::toDTO).orElse(null),
                 Optional.ofNullable(projeto.getDemanda()).map(demandaMapper::toDTO).orElse(null),
-                Optional.ofNullable(projeto.getSolucaoOferta()).map(ofertaSolucaoMapper::toDTO).orElse(null),
+                Optional.ofNullable(projeto.getOfertaSolucao()).map(ofertaSolucaoMapper::toDTO).orElse(null),
                 Optional.ofNullable(projeto.getGrupoPesquisa()).map(grupoPesquisaMapper::toDTO).orElse(null),
                 Optional.ofNullable(projeto.getEntregas())
                         .map(entregas -> entregas.stream().map(entregaMapper::toDTO).toList())
-                        .orElse(null)
+                        .orElse(null),
+                projeto.getChat().getIdChat()        
         );
     }
 

@@ -3,8 +3,7 @@ package com.marketplace.ifba.model.enums;
 public enum StatusEntrega {
     SOLICITADA("solicitada"),
     ENTREGUE("entregue"),
-    CANCELADA("cancelada"),
-    EM_ANALISE("em_analise");
+    CANCELADA("cancelada");
 
     private String statusEntrega;
 

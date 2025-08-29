@@ -19,5 +19,6 @@ public record OfertaSolucaoResponse(
         LocalDateTime dataAprovacao,
         LocalDateTime dataRegistro,
         GrupoPesquisaResponse grupoPesquisa,
-        DemandaResponse demanda) {
+        DemandaResponse demanda
+) {
 }

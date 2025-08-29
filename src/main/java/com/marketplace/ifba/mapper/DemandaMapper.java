@@ -58,11 +58,8 @@ public class DemandaMapper {
                 demanda.getDataAprovado(),
                 Optional.ofNullable(demanda.getUsuarioRegistrador()).map(userMapper::toDTO).orElse(null),
                 Optional.ofNullable(demanda.getOrganizacao()).map(organizacaoMapper::toDTO).orElse(null),
-                Optional.ofNullable(demanda.getGruposPesquisa())
-                        .orElseGet(ArrayList::new)
-                        .stream()
-                        .map(grupoPesquisaMapper::toDTO)
-                        .collect(Collectors.toList())
+                Optional.ofNullable(demanda.getGruposPesquisa()).orElseGet(ArrayList::new).stream().map(grupoPesquisaMapper::toDTO).collect(Collectors.toList()),
+                Optional.ofNullable(demanda.getOfertasSolucoes()).orElseGet(ArrayList::new).size()
         );
     }
 }
