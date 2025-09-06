@@ -2,17 +2,20 @@ package com.marketplace.ifba.service;
 
 import com.marketplace.ifba.exception.*;
 import com.marketplace.ifba.model.*;
+import com.marketplace.ifba.model.enums.StatusDemanda;
 import com.marketplace.ifba.model.enums.StatusEntrega;
+import com.marketplace.ifba.model.enums.StatusOfertaSolucao;
 import com.marketplace.ifba.model.enums.StatusProjeto;
+import com.marketplace.ifba.model.enums.UserRole;
 import com.marketplace.ifba.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class ProjetoService {
@@ -24,11 +27,12 @@ public class ProjetoService {
     private final OfertaSolucaoRepository ofertaSolucaoRepository;
     private final GrupoPesquisaRepository grupoPesquisaRepository;
     private final EntregaRepository entregaRepository;
+    private final UserRepository userRepository;
 
     public ProjetoService(ProjetoRepository projetoRepository, OrganizacaoRepository organizacaoRepository,
                           InstituicaoRepository instituicaoRepository, DemandaRepository demandaRepository,
                           OfertaSolucaoRepository ofertaSolucaoRepository, GrupoPesquisaRepository grupoPesquisaRepository,
-                          EntregaRepository entregaRepository) {
+                          EntregaRepository entregaRepository, UserRepository userRepository) {
         this.projetoRepository = projetoRepository;
         this.organizacaoRepository = organizacaoRepository;
         this.instituicaoRepository = instituicaoRepository;
@@ -36,6 +40,7 @@ public class ProjetoService {
         this.ofertaSolucaoRepository = ofertaSolucaoRepository;
         this.grupoPesquisaRepository = grupoPesquisaRepository;
         this.entregaRepository = entregaRepository;
+        this.userRepository = userRepository;
     }
 
     // ---------- LEITURA
@@ -100,7 +105,7 @@ public class ProjetoService {
     // REGISTRA PROJETO
     @Transactional
     public Projeto registrarProjeto(Projeto projeto, UUID idOrganizacao, UUID idInstituicao, UUID idDemanda, UUID idOfertaSolucao, UUID idGrupoPesquisa) {
-        if (projetoRepository.findAll().stream().anyMatch(proj -> proj.getOfertaSolucao().getIdSolucao().equals(idOfertaSolucao))) {
+        if (projetoRepository.findAll().stream().anyMatch(proj -> proj.getDemanda().getIdDemanda().equals(idDemanda))) {
             throw new DemandaInvalidaException("A Demanda já está associada com um projeto!");
         }
 
@@ -124,9 +129,14 @@ public class ProjetoService {
             OfertaSolucao ofertaSolucao = ofertaSolucaoRepository.findById(idOfertaSolucao)
                     .orElseThrow(() -> new OfertaSolucaoInvalidaException("Oferta Solução não encontrada!"));
             if (projetoRepository.findAll().stream()
-                    .anyMatch(proj -> proj.getOfertaSolucao().getIdSolucao().equals(idOfertaSolucao))) {
+                    .anyMatch(proj -> proj.getOfertaSolucao() != null && proj.getOfertaSolucao().getIdSolucao().equals(idOfertaSolucao))) {
                 throw new OfertaSolucaoInvalidaException("A Oferta Solução já está associada a outro projeto.");
             }
+
+            ofertaSolucao.setStatus(StatusOfertaSolucao.ACEITA);
+            ofertaSolucao.setDataAprovacao(LocalDateTime.now());
+            ofertaSolucaoRepository.save(ofertaSolucao);
+
             projeto.setOfertaSolucao(ofertaSolucao);
         }
 
@@ -143,6 +153,15 @@ public class ProjetoService {
         chat.setChatUsuarios(chatUsuarios);
         projeto.setChat(chat);
 
+        if (grupoPesquisa.getDemandas().contains(demanda)) {
+            grupoPesquisa.getDemandas().remove(demanda);
+            grupoPesquisaRepository.save(grupoPesquisa);
+        }
+
+        demanda.setStatus(StatusDemanda.FINALIZADA);
+        demandaRepository.save(demanda);
+
+        projeto.setDataInicio(LocalDate.now());
         projeto.setStatus(StatusProjeto.DESENVOLVENDO);
         return projetoRepository.save(projeto);
     }
@@ -184,6 +203,10 @@ public class ProjetoService {
             throw new ProjetoInvalidoException("O projeto já está com Status desenvolvendo!");
         }
 
+        if (StatusProjeto.FINALIZADO.equals(novoStatus)) {
+            projeto.setDataFinal(LocalDate.now());
+        }
+
         projeto.setStatus(novoStatus);
 
         return projetoRepository.save(projeto);
@@ -201,8 +224,17 @@ public class ProjetoService {
     @Transactional
     public Entrega adicionarEntrega(UUID idProjeto, Entrega entrega, UUID idOrganizacaoSolicitante, 
                                    UUID idGrupoPesquisaSolicitante, UUID idOrganizacaoSolicitada, 
-                                   UUID idGrupoPesquisaSolicitado) {
+                                   UUID idGrupoPesquisaSolicitado, UUID idUsuarioSolicitante) {
         Projeto projeto = buscarProjetoPorId(idProjeto);
+
+        User usuario = userRepository.findById(idUsuarioSolicitante)
+                .orElseThrow(() -> new UsuarioInvalidoException("Usuário solicitante não encontrado"));
+
+        if (usuario.getRole() == UserRole.ALUNO) {
+            entrega.setStatus(StatusEntrega.EM_ANALISE);
+        } else {
+            entrega.setStatus(StatusEntrega.SOLICITADA);
+        }
 
         if ((idOrganizacaoSolicitante != null && idGrupoPesquisaSolicitante != null) ||
             (idOrganizacaoSolicitante == null && idGrupoPesquisaSolicitante == null)) {
@@ -234,7 +266,6 @@ public class ProjetoService {
             entrega.setGrupoPesquisaSolicitado(grupoPesquisa);
         }
         
-        entrega.setStatus(StatusEntrega.SOLICITADA);
         entrega.setProjeto(projeto);
         
         if (projeto.getEntregas() == null) {
@@ -255,7 +286,7 @@ public class ProjetoService {
 
     // ATUALIZA ENTREGA
     @Transactional
-    public Entrega atualizarEntrega(UUID idEntrega, String titulo, String descricao, LocalDateTime prazoDesejado) {
+    public Entrega atualizarEntrega(UUID idEntrega, String titulo, String descricao, LocalDate prazoDesejado) {
         Entrega entrega = entregaRepository.findById(idEntrega)
                 .orElseThrow(() -> new ProjetoInvalidoException("Entrega não encontrada com o ID: " + idEntrega));
         
@@ -293,6 +324,62 @@ public class ProjetoService {
         }
         
         entrega.setStatus(StatusEntrega.CANCELADA);
+        
+        return entregaRepository.save(entrega);
+    }
+
+    // CONCLUI ENTREGA 
+    @Transactional
+    public Entrega concluirEntrega(UUID idEntrega) {
+        Entrega entrega = entregaRepository.findById(idEntrega)
+                .orElseThrow(() -> new ProjetoInvalidoException("Entrega não encontrada com ID"));
+        
+        if (!StatusEntrega.SOLICITADA.equals(entrega.getStatus())) {
+            throw new ProjetoInvalidoException("Apenas entregas com status SOLICITADA podem ser entregues");
+        }
+        
+        entrega.setStatus(StatusEntrega.ENTREGUE);
+        
+        return entregaRepository.save(entrega);
+    }
+
+    // ACEITA ENTREGA
+    @Transactional
+    public Entrega aceitarEntrega(UUID idEntrega) {
+        Entrega entrega = entregaRepository.findById(idEntrega)
+                .orElseThrow(() -> new ProjetoInvalidoException("Entrega não encontrada com o ID: " + idEntrega));
+        
+        if (!StatusEntrega.ENTREGUE.equals(entrega.getStatus())) {
+            throw new ProjetoInvalidoException("Apenas entregas com status ENTREGUE podem ser aceitas");
+        }
+        
+        entrega.setStatus(StatusEntrega.ACEITA);
+        
+        return entregaRepository.save(entrega);
+    }
+
+    // APROVA ENTREGA
+    @Transactional
+    public Entrega aprovarEntrega(UUID idEntrega, UUID idUsuarioAprovador) {
+        Entrega entrega = entregaRepository.findById(idEntrega)
+                .orElseThrow(() -> new ProjetoInvalidoException("Entrega não encontrada com o ID: " + idEntrega));
+        
+        User usuarioAprovador = userRepository.findById(idUsuarioAprovador)
+                .orElseThrow(() -> new UsuarioInvalidoException("Usuário aprovador não encontrado"));
+        
+        if (usuarioAprovador.getRole() != UserRole.ADMIN && usuarioAprovador.getRole() != UserRole.PROFESSOR) {
+            throw new UsuarioInvalidoException("Apenas usuários ADMIN e PROFESSOR podem aprovar entregas");
+        }
+        
+        if (!StatusEntrega.EM_ANALISE.equals(entrega.getStatus())) {
+            throw new ProjetoInvalidoException("Apenas entregas com status EM_ANALISE podem ser aprovadas");
+        }
+
+        if (entrega.getGrupoPesquisaSolicitante().getIdGrupoPesquisa() != usuarioAprovador.getGrupoPesquisa().getIdGrupoPesquisa()) {
+            throw new UsuarioInvalidoException("O usuário aprovador não pertence ao grupo de pesquisa da entrega!");
+        }
+        
+        entrega.setStatus(StatusEntrega.SOLICITADA);
         
         return entregaRepository.save(entrega);
     }

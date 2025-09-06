@@ -46,6 +46,8 @@ public class ProjetoMapper {
         return new ProjetoResponse(
                 projeto.getIdProjeto(),
                 projeto.getNome(),
+                projeto.getDataInicio(),
+                projeto.getDataFinal(),
                 projeto.getStatus(),
                 Optional.ofNullable(projeto.getOrganizacao()).map(organizacaoMapper::toDTO).orElse(null),
                 Optional.ofNullable(projeto.getInstituicao()).map(instituicaoMapper::toDTO).orElse(null),

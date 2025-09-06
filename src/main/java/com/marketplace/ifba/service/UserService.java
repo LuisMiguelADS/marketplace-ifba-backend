@@ -6,6 +6,7 @@ import com.marketplace.ifba.model.enums.StatusSolicitacao;
 import com.marketplace.ifba.repository.GrupoPesquisaRepository;
 import com.marketplace.ifba.repository.InstituicaoRepository;
 import com.marketplace.ifba.repository.OrganizacaoRepository;
+import com.marketplace.ifba.repository.SolicitacaoRepository;
 import com.marketplace.ifba.repository.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,8 +30,9 @@ public class UserService {
     private final OrganizacaoRepository organizacaoRepository;
     private final InstituicaoRepository instituicaoRepository;
     private final GrupoPesquisaRepository grupoPesquisaRepository;
+    private final SolicitacaoRepository solicitacaoRepository;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenService tokenService, AuthenticationManager authenticationManager, OrganizacaoRepository organizacaoRepository, InstituicaoRepository instituicaoRepository, GrupoPesquisaRepository grupoPesquisaRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, TokenService tokenService, AuthenticationManager authenticationManager, OrganizacaoRepository organizacaoRepository, InstituicaoRepository instituicaoRepository, GrupoPesquisaRepository grupoPesquisaRepository, SolicitacaoRepository solicitacaoRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.tokenService = tokenService;
@@ -38,6 +40,7 @@ public class UserService {
         this.organizacaoRepository = organizacaoRepository;
         this.instituicaoRepository = instituicaoRepository;
         this.grupoPesquisaRepository = grupoPesquisaRepository;
+        this.solicitacaoRepository = solicitacaoRepository;
     }
 
     // ---------- LEITURA
@@ -56,7 +59,7 @@ public class UserService {
     // BUSCA USUÁRIO PELO SEU ID
     public User buscarUsuarioPorID(UUID idUsuario) {
         return userRepository.findById(idUsuario)
-                .orElseThrow(() -> new UsuarioInvalidoException("Usuário não encontrada com o ID: " + idUsuario));
+                .orElseThrow(() -> new UsuarioInvalidoException("Usuário não encontrada com ID"));
     }
 
     // BUSCA USUÁRIO PELO SEU EMAIL
@@ -223,9 +226,10 @@ public class UserService {
         solicitacao.setUserApplicant(usuario);
         solicitacao.setStatus(StatusSolicitacao.ATIVA);
 
-        grupoPesquisa.setSolicitacoes(new ArrayList<>());
-        grupoPesquisa.getSolicitacoes().add(solicitacao);
-        grupoPesquisaRepository.save(grupoPesquisa);
+        if (grupoPesquisa.getSolicitacoes() == null) {
+            grupoPesquisa.setSolicitacoes(new ArrayList<>());
+        }
+        solicitacaoRepository.save(solicitacao);
     }
 
     // RESGISTRA LOGIN DO USUÁRIO

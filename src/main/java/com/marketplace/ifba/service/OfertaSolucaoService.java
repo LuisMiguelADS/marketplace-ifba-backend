@@ -3,6 +3,7 @@ package com.marketplace.ifba.service;
 import com.marketplace.ifba.exception.DemandaInvalidaException;
 import com.marketplace.ifba.exception.GrupoPesquisaInvalidoException;
 import com.marketplace.ifba.exception.OfertaSolucaoInvalidaException;
+import com.marketplace.ifba.exception.OrganizacaoInvalidaException;
 import com.marketplace.ifba.model.Demanda;
 import com.marketplace.ifba.model.GrupoPesquisa;
 import com.marketplace.ifba.model.OfertaSolucao;
@@ -10,6 +11,7 @@ import com.marketplace.ifba.model.enums.StatusOfertaSolucao;
 import com.marketplace.ifba.repository.DemandaRepository;
 import com.marketplace.ifba.repository.GrupoPesquisaRepository;
 import com.marketplace.ifba.repository.OfertaSolucaoRepository;
+import com.marketplace.ifba.repository.OrganizacaoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,11 +25,13 @@ public class OfertaSolucaoService {
     private final OfertaSolucaoRepository ofertaSolucaoRepository;
     private final DemandaRepository demandaRepository;
     private final GrupoPesquisaRepository grupoPesquisaRepository;
+    private final OrganizacaoRepository organizacaoRepository;
 
-    public OfertaSolucaoService(OfertaSolucaoRepository ofertaSolucaoRepository, DemandaRepository demandaRepository, GrupoPesquisaRepository grupoPesquisaRepository) {
+    public OfertaSolucaoService(OfertaSolucaoRepository ofertaSolucaoRepository, DemandaRepository demandaRepository, GrupoPesquisaRepository grupoPesquisaRepository, OrganizacaoRepository organizacaoRepository) {
         this.ofertaSolucaoRepository = ofertaSolucaoRepository;
         this.demandaRepository = demandaRepository;
         this.grupoPesquisaRepository = grupoPesquisaRepository;
+        this.organizacaoRepository = organizacaoRepository;
     }
 
     // ---------- LEITURA
@@ -73,6 +77,18 @@ public class OfertaSolucaoService {
     @Transactional(readOnly = true)
     public List<OfertaSolucao> buscarTodasOfertasSolucao() {
         return ofertaSolucaoRepository.findAll();
+    }
+
+    // LISTA OFERTAS SOLUÇÃO APROVADAS POR ORGANIZAÇÃO
+    @Transactional(readOnly = true)
+    public List<OfertaSolucao> buscarOfertasSolucaoAprovadasPorOrganizacao(UUID idOrganizacao) {
+        if (!organizacaoRepository.existsById(idOrganizacao)) {
+            throw new OrganizacaoInvalidaException("Organização não encontrada com ID");
+        }
+        return ofertaSolucaoRepository.findAll().stream()
+                .filter(ofertaSolucao -> StatusOfertaSolucao.APROVADA.equals(ofertaSolucao.getStatus()))
+                .filter(ofertaSolucao -> ofertaSolucao.getDemanda().getOrganizacao().getIdOrganizacao().equals(idOrganizacao))
+                .toList();
     }
 
     // ---------- ESCRITA

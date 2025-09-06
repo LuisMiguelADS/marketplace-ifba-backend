@@ -109,46 +109,64 @@ public class ProjetoController {
     }
 
     @Operation(summary = "Adiciona entrega ao projeto", description = "Cria uma nova entrega associada ao projeto")
-    @PostMapping("/entregas/{idProjeto}")
+    @PostMapping("/entregas")
     @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
-    public ResponseEntity<EntregaResponse> adicionarEntrega(@PathVariable UUID idProjeto, @RequestBody @Valid EntregaRequest request) {
-        var entrega = projetoService.adicionarEntrega(
-                idProjeto,
+    public ResponseEntity<EntregaResponse> adicionarEntrega(@RequestBody @Valid EntregaRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(entregaMapper.toDTO(projetoService.adicionarEntrega(
+                request.idProjeto(),
                 entregaMapper.toEntity(request),
                 request.idOrganizacaoSolicitante(),
                 request.idGrupoPesquisaSolicitante(),
                 request.idOrganizacaoSolicitada(),
-                request.idGrupoPesquisaSolicitado()
-        );
-        return ResponseEntity.status(HttpStatus.CREATED).body(entregaMapper.toDTO(entrega));
+                request.idGrupoPesquisaSolicitado(),
+                request.idUsuarioSolicitante()
+        )));
     }
 
     @Operation(summary = "Lista entregas do projeto", description = "Retorna todas as entregas associadas ao projeto")
     @GetMapping("/entregas/{idProjeto}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
     public ResponseEntity<List<EntregaResponse>> buscarEntregasPorProjeto(@PathVariable UUID idProjeto) {
-        var entregas = projetoService.buscarEntregasPorProjeto(idProjeto);
-        return ResponseEntity.ok(entregas.stream().map(entregaMapper::toDTO).toList());
+        return ResponseEntity.ok(projetoService.buscarEntregasPorProjeto(idProjeto).stream().map(entregaMapper::toDTO).toList());
     }
 
     @Operation(summary = "Atualiza entrega", description = "Atualiza título, descrição e prazo de uma entrega")
     @PatchMapping("/entregas")
     @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
     public ResponseEntity<EntregaResponse> atualizarEntrega(@RequestBody @Valid AtualizarEntregaRequest request) {
-        var entrega = projetoService.atualizarEntrega(
+        return ResponseEntity.ok(entregaMapper.toDTO(projetoService.atualizarEntrega(
                 request.idEntrega(),
                 request.titulo(),
                 request.descricao(),
                 request.prazoDesejado()
-        );
-        return ResponseEntity.ok(entregaMapper.toDTO(entrega));
+        )));
     }
 
     @Operation(summary = "Cancela entrega", description = "Altera o status da entrega para CANCELADA")
     @PatchMapping("/entregas/cancelar/{idEntrega}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
     public ResponseEntity<EntregaResponse> cancelarEntrega(@PathVariable UUID idEntrega) {
-        var entrega = projetoService.cancelarEntrega(idEntrega);
-        return ResponseEntity.ok(entregaMapper.toDTO(entrega));
+        return ResponseEntity.ok(entregaMapper.toDTO(projetoService.cancelarEntrega(idEntrega)));
+    }
+
+    @Operation(summary = "Conclui entrega", description = "Altera o status da entrega de SOLICITADA para EM_ANALISE")
+    @PatchMapping("/entregas/concluir/{idEntrega}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
+    public ResponseEntity<EntregaResponse> concluirEntrega(@PathVariable UUID idEntrega) {
+        return ResponseEntity.ok(entregaMapper.toDTO(projetoService.concluirEntrega(idEntrega)));
+    }
+
+    @Operation(summary = "Aceita entrega", description = "Altera o status da entrega de ENTREGUE para ACEITA")
+    @PatchMapping("/entregas/aceitar/{idEntrega}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
+    public ResponseEntity<EntregaResponse> aceitarEntrega(@PathVariable UUID idEntrega) {
+        return ResponseEntity.ok(entregaMapper.toDTO(projetoService.aceitarEntrega(idEntrega)));
+    }
+
+    @Operation(summary = "Aprova entrega", description = "Altera o status da entrega de EM_ANALISE para SOLICITADA")
+    @PatchMapping("/entregas/aprovar")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('PROFESSOR')")
+    public ResponseEntity<EntregaResponse> aprovarEntrega(@RequestBody @Valid AprovarEntregaRequest request) {
+        return ResponseEntity.ok(entregaMapper.toDTO(projetoService.aprovarEntrega(request.idEntrega(), request.idUsuarioAprovador())));
     }
 }

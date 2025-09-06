@@ -48,15 +48,6 @@ public class DemandaService {
         return demandaRepository.findAll().stream().filter(dem -> dem.getNome().equals(nome)).findFirst().orElseThrow(() -> new DemandaInvalidaException("Demanda não encontrada com o nome: " + nome));
     }
 
-    // REALIZA A ADIÇÃO DE VISUALIZAÇÕES
-    @Transactional
-    public void incrementarVizualizacao(UUID idDemanda) {
-        Demanda demanda = demandaRepository.findById(idDemanda)
-                .orElseThrow(() -> new DemandaInvalidaException("Demanda não encontrada com o ID: " + idDemanda));
-        demanda.setVisualizacoes(demanda.getVisualizacoes() + 1);
-        demandaRepository.save(demanda);
-    }
-
     // LISTA DEMANDAS PELA ORGANIZAÇÃO
     @Transactional(readOnly = true)
     public List<Demanda> buscarDemandasPorOrganizacao(UUID idOrganizacao) {
@@ -115,6 +106,16 @@ public class DemandaService {
         demandaSaved.setDataPrazoFinal(demanda.getDataPrazoFinal());
 
         return demandaRepository.save(demandaSaved);
+    }
+
+    // REALIZA A ADIÇÃO DE VISUALIZAÇÕES
+    @Transactional
+    public void incrementarVizualizacao(UUID idDemanda) {
+        Demanda demanda = demandaRepository.findById(idDemanda)
+                .orElseThrow(() -> new DemandaInvalidaException("Demanda não encontrada com o ID: " + idDemanda));
+
+        demanda.setVisualizacoes(demanda.getVisualizacoes() + 1);
+        demandaRepository.save(demanda);
     }
 
     // ATUALIZA STATUS DA DEMANDA

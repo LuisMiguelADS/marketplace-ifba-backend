@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +22,12 @@ public class Projeto {
     @Size(max = 255)
     @Column(name = "name", nullable = false)
     private String nome;
+
+    @Column(name = "start_date")
+    private LocalDate dataInicio;
+
+    @Column(name = "end_date")
+    private LocalDate dataFinal;
 
     @Enumerated(EnumType.ORDINAL)
     @Column(name = "status", nullable = false)

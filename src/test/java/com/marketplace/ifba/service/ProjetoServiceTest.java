@@ -5,6 +5,7 @@ import com.marketplace.ifba.model.*;
 import com.marketplace.ifba.model.enums.StatusEntrega;
 import com.marketplace.ifba.model.enums.StatusProjeto;
 import com.marketplace.ifba.repository.*;
+import com.marketplace.ifba.model.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -31,6 +32,10 @@ class ProjetoServiceTest {
         private OfertaSolucaoRepository ofertaSolucaoRepository;
         @Mock
         private GrupoPesquisaRepository grupoPesquisaRepository;
+        @Mock
+        private EntregaRepository entregaRepository;
+        @Mock
+        private UserRepository userRepository;
 
         @InjectMocks
         private ProjetoService projetoService;
@@ -172,15 +177,22 @@ class ProjetoServiceTest {
                 Entrega entrega = new Entrega();
                 UUID idOrgSolicitante = projeto.getOrganizacao().getIdOrganizacao();
                 UUID idGrupoPesqSolicitado = projeto.getGrupoPesquisa().getIdGrupoPesquisa();
+                UUID idUsuarioSolicitante = UUID.randomUUID();
+
+                User usuarioSolicitante = new User();
+                usuarioSolicitante.setIdUsuario(idUsuarioSolicitante);
 
                 when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
                 when(organizacaoRepository.findById(idOrgSolicitante))
                                 .thenReturn(Optional.of(projeto.getOrganizacao()));
                 when(grupoPesquisaRepository.findById(idGrupoPesqSolicitado))
                                 .thenReturn(Optional.of(projeto.getGrupoPesquisa()));
+                when(userRepository.findById(idUsuarioSolicitante))
+                                .thenReturn(Optional.of(usuarioSolicitante));
+                when(entregaRepository.save(any(Entrega.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
                 Entrega result = projetoService.adicionarEntrega(
-                                projetoId, entrega, idOrgSolicitante, null, null, idGrupoPesqSolicitado);
+                                projetoId, entrega, idOrgSolicitante, null, null, idGrupoPesqSolicitado, idUsuarioSolicitante);
 
                 assertNotNull(result.getProjeto());
                 assertEquals(StatusEntrega.SOLICITADA, result.getStatus());
@@ -384,39 +396,56 @@ class ProjetoServiceTest {
         @Test
         void deveLancarExcecaoQuandoSolicitanteInvalidoNaEntrega() {
                 Entrega entrega = new Entrega();
+                UUID idUsuarioSolicitante = UUID.randomUUID();
+                User usuarioSolicitante = new User();
+                usuarioSolicitante.setIdUsuario(idUsuarioSolicitante);
+                
                 when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
+                when(userRepository.findById(idUsuarioSolicitante)).thenReturn(Optional.of(usuarioSolicitante));
 
                 assertThrows(ProjetoInvalidoException.class,
                                 () -> projetoService.adicionarEntrega(projetoId, entrega,
                                                 projeto.getOrganizacao().getIdOrganizacao(),
                                                 projeto.getGrupoPesquisa().getIdGrupoPesquisa(),
-                                                null, UUID.randomUUID()));
+                                                null, UUID.randomUUID(), idUsuarioSolicitante));
         }
 
         @Test
         void deveLancarExcecaoQuandoSolicitadoInvalidoNaEntrega() {
                 Entrega entrega = new Entrega();
+                UUID idUsuarioSolicitante = UUID.randomUUID();
+                User usuarioSolicitante = new User();
+                usuarioSolicitante.setIdUsuario(idUsuarioSolicitante);
+                
                 when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
+                when(userRepository.findById(idUsuarioSolicitante)).thenReturn(Optional.of(usuarioSolicitante));
 
                 assertThrows(ProjetoInvalidoException.class,
                                 () -> projetoService.adicionarEntrega(projetoId, entrega,
                                                 projeto.getOrganizacao().getIdOrganizacao(),
                                                 null,
                                                 projeto.getOrganizacao().getIdOrganizacao(),
-                                                projeto.getGrupoPesquisa().getIdGrupoPesquisa()));
+                                                projeto.getGrupoPesquisa().getIdGrupoPesquisa(),
+                                                idUsuarioSolicitante));
         }
 
         @Test
         void deveLancarExcecaoQuandoOrganizacaoSolicitanteNaoEncontrada() {
                 Entrega entrega = new Entrega();
                 UUID idOrgSolic = UUID.randomUUID();
+                UUID idUsuarioSolicitante = UUID.randomUUID();
+                User usuarioSolicitante = new User();
+                usuarioSolicitante.setIdUsuario(idUsuarioSolicitante);
+                
                 when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
+                when(userRepository.findById(idUsuarioSolicitante)).thenReturn(Optional.of(usuarioSolicitante));
                 when(organizacaoRepository.findById(idOrgSolic)).thenReturn(Optional.empty());
 
                 assertThrows(OrganizacaoInvalidaException.class,
                                 () -> projetoService.adicionarEntrega(projetoId, entrega,
                                                 idOrgSolic, null, null,
-                                                projeto.getGrupoPesquisa().getIdGrupoPesquisa()));
+                                                projeto.getGrupoPesquisa().getIdGrupoPesquisa(),
+                                                idUsuarioSolicitante));
         }
 
         @Test

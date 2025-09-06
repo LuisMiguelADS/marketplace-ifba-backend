@@ -35,7 +35,6 @@ public class DemandaController {
     @GetMapping("/{idDemanda}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
     public ResponseEntity<DemandaResponse> buscarDemandaPorId(@PathVariable UUID idDemanda) {
-        demandaService.incrementarVizualizacao(idDemanda);
         return ResponseEntity.ok(demandaMapper.toDTO(demandaService.buscarDemandaPorId(idDemanda)));
     }
 
@@ -108,6 +107,14 @@ public class DemandaController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('EXTERNO')")
     public ResponseEntity<Void> enviarDemandaParaGrupo(@RequestBody @Valid EnviarDemandaParaGrupoRequest request) {
         demandaService.enviarDemandaParaGrupo(request.idDemanda(), request.idGrupoPesquisa());
+        return ResponseEntity.ok().build();
+    }
+
+    @Operation(summary = "Adiciona visualização à demanda", description = "Incrementa o contador de visualizações de uma demanda específica")
+    @PostMapping("/visualizacao/{idDemanda}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
+    public ResponseEntity<Void> adicionarVisualizacao(@PathVariable UUID idDemanda) {
+        demandaService.incrementarVizualizacao(idDemanda);
         return ResponseEntity.ok().build();
     }
 }

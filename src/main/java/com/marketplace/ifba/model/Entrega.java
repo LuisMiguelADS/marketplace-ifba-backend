@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import com.marketplace.ifba.model.enums.StatusEntrega;
@@ -28,10 +28,10 @@ public class Entrega {
     private String descricao;
 
     @Column(name = "prazo_desejado")
-    private LocalDateTime prazoDesejado;
+    private LocalDate prazoDesejado;
 
     @Column(name = "data_criacao", nullable = false, updatable = false)
-    private LocalDateTime dataCriacao;
+    private LocalDate dataCriacao;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organizacao_solicitante_id")
@@ -59,6 +59,6 @@ public class Entrega {
 
     @PrePersist
     protected void onCreate() {
-        dataCriacao = LocalDateTime.now();
+        dataCriacao = LocalDate.now();
     }
 }

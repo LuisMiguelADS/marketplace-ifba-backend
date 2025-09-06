@@ -72,6 +72,13 @@ public class OfertaSolucaoController {
         return ResponseEntity.ok(ofertaSolucaoService.buscarTodasOfertasSolucao().stream().map(ofertaSolucaoMapper::toDTO).toList());
     }
 
+    @Operation(summary = "Retorna ofertas solução aprovadas por organização", description = "Retorna todas as ofertas solução com status APROVADA de uma organização específica")
+    @GetMapping("/aprovadas/{idOrganizacao}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR') or hasRole('EXTERNO')")
+    public ResponseEntity<List<OfertaSolucaoResponse>> buscarOfertasSolucaoAprovadasPorOrganizacao(@PathVariable UUID idOrganizacao) {
+        return ResponseEntity.ok(ofertaSolucaoService.buscarOfertasSolucaoAprovadasPorOrganizacao(idOrganizacao).stream().map(ofertaSolucaoMapper::toDTO).toList());
+    }
+
     @Operation(summary = "Registra oferta solução", description = "Realiza registro da oferta solução se passar das regras de negócio")
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('ALUNO') or hasRole('PROFESSOR')")
