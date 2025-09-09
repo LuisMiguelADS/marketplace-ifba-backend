@@ -1,0 +1,25 @@
+name: Realiza deploy da aplicação
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checa código
+        uses: actions/checkout@v3
+
+      - name: Adiciona setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Build do projeto
+        run: mvn clean install
+      - name: Login Docker Hub
+        run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
+      - name: Build da 'image' do projeto
+        run: docker build -t luismiguel777/marketplace_ifba .
+      - name: Subindo 'image' para o Docker Hub
+        run: docker push luismiguel777/marketplace_ifba
