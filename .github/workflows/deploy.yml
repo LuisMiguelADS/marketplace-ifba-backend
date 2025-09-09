@@ -33,4 +33,4 @@ jobs:
       - name: Antes de executar o container remove o antigo
         run: sudo docker rm -f marketplace_ifba
       - name: Criar/Executar container com a 'image'
-        run: docker run -d -p 8080:8080 -e DATABASE_USERNAME=${{secrets.DATABASE_USERNAME}} -e DATABASE_PASSWORD='${{secrets.DATABASE_PASSWORD}}' -e DATABASE_URL=${{secrets.DATABASE_URL}} --name marketplace_ifba luismiguel777/marketplace_ifba:latest
+        run: sudo docker run -d -p 8080:8080 -e DATABASE_USERNAME=${{secrets.DATABASE_USERNAME}} -e DATABASE_PASSWORD='${{secrets.DATABASE_PASSWORD}}' -e DATABASE_URL=${{secrets.DATABASE_URL}} --name marketplace_ifba luismiguel777/marketplace_ifba:latest
