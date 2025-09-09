@@ -23,3 +23,12 @@ jobs:
         run: docker build -t luismiguel777/marketplace_ifba .
       - name: Subindo 'image' para o Docker Hub
         run: docker push luismiguel777/marketplace_ifba
+
+  deploy:
+    needs: build
+    runs-on: self-hosted
+    steps:
+      - name: Colocando 'image' no Docker Hub e adicionando no EC2
+        run: docker pull luismiguel777/marketplace_ifba:latest
+      - name: Executar container com a 'image'
+        run: docker run -d -p 8080/8080 -e DATABASE_USERNAME=${{secrets.DATABASE_USERNAME}} -e DATABASE_PASSWORD='${{secrets.DATABASE_PASSWORD}}' -e DATABASE_URL=${{secrets.DATABASE_URL}} --name deploy marketplace_ifba luismiguel777/marketplace_ifba:latest
