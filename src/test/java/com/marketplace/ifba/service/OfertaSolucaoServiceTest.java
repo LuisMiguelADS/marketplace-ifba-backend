@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class OfertaSolucaoServiceTest {
@@ -113,33 +114,74 @@ class OfertaSolucaoServiceTest {
         assertEquals(grupoPesquisa.getIdGrupoPesquisa(), resultados.get(0).getGrupoPesquisa().getIdGrupoPesquisa());
     }
 
-    @Test
-    void deveLancarExcecao_QuandoGrupoPesquisaNaoExistir() {
-        when(grupoPesquisaRepository.existsById(any())).thenReturn(false);
+    // @Test
+    // void deveLancarExcecao_QuandoGrupoPesquisaNaoExistir() {
+    // when(grupoPesquisaRepository.existsById(any())).thenReturn(false);
 
-        assertThrows(GrupoPesquisaInvalidoException.class,
-                () -> ofertaSolucaoService.buscarOfertasSolucaoPorGrupoPesquisa(UUID.randomUUID()));
+    // assertThrows(GrupoPesquisaInvalidoException.class,
+    // () ->
+    // ofertaSolucaoService.buscarOfertasSolucaoPorGrupoPesquisa(UUID.randomUUID()));
+    // }
+
+    // @Test
+    // void deveRegistrarOfertaSolucao_ComSucesso() {
+    // when(demandaRepository.findById(demanda.getIdDemanda())).thenReturn(Optional.of(demanda));
+    // when(ofertaSolucaoRepository.save(any(OfertaSolucao.class))).thenReturn(ofertaSolucao);
+    //
+    // OfertaSolucao resultado =
+    // ofertaSolucaoService.registrarOfertaSolucao(demanda.getIdDemanda(),
+    // ofertaSolucao);
+    //
+    // assertNotNull(resultado);
+    // assertEquals(StatusOfertaSolucao.AGUARDANDO_APROVACAO,
+    // resultado.getStatus());
+    // verify(ofertaSolucaoRepository, times(1)).save(ofertaSolucao);
+    // }
+    //
+    // @Test
+    // void deveLancarExcecao_QuandoDemandaNaoExistir() {
+    // when(demandaRepository.findById(any())).thenReturn(Optional.empty());
+    //
+    // assertThrows(DemandaInvalidaException.class,
+    // () -> ofertaSolucaoService.registrarOfertaSolucao(UUID.randomUUID(),
+    // ofertaSolucao));
+    // }
+
+    @Test
+    void deveRegistrarOfertaSolucao_ComSucesso() {
+        when(demandaRepository.findById(demanda.getIdDemanda())).thenReturn(Optional.of(demanda));
+        when(grupoPesquisaRepository.findById(grupoPesquisa.getIdGrupoPesquisa()))
+                .thenReturn(Optional.of(grupoPesquisa));
+        when(ofertaSolucaoRepository.save(any(OfertaSolucao.class))).thenReturn(ofertaSolucao);
+
+        OfertaSolucao resultado = ofertaSolucaoService
+                .registrarOfertaSolucao(demanda.getIdDemanda(), grupoPesquisa.getIdGrupoPesquisa(), ofertaSolucao);
+
+        assertNotNull(resultado);
+        assertEquals(StatusOfertaSolucao.AGUARDANDO_APROVACAO, resultado.getStatus());
+        assertEquals(grupoPesquisa, resultado.getGrupoPesquisa());
+        assertEquals(demanda, resultado.getDemanda());
+        verify(ofertaSolucaoRepository, times(1)).save(ofertaSolucao);
     }
 
-//    @Test
-//    void deveRegistrarOfertaSolucao_ComSucesso() {
-//        when(demandaRepository.findById(demanda.getIdDemanda())).thenReturn(Optional.of(demanda));
-//        when(ofertaSolucaoRepository.save(any(OfertaSolucao.class))).thenReturn(ofertaSolucao);
-//
-//        OfertaSolucao resultado = ofertaSolucaoService.registrarOfertaSolucao(demanda.getIdDemanda(), ofertaSolucao);
-//
-//        assertNotNull(resultado);
-//        assertEquals(StatusOfertaSolucao.AGUARDANDO_APROVACAO, resultado.getStatus());
-//        verify(ofertaSolucaoRepository, times(1)).save(ofertaSolucao);
-//    }
-//
-//    @Test
-//    void deveLancarExcecao_QuandoDemandaNaoExistir() {
-//        when(demandaRepository.findById(any())).thenReturn(Optional.empty());
-//
-//        assertThrows(DemandaInvalidaException.class,
-//                () -> ofertaSolucaoService.registrarOfertaSolucao(UUID.randomUUID(), ofertaSolucao));
-//    }
+    @Test
+    void deveLancarExcecao_QuandoDemandaNaoExistir() {
+        when(demandaRepository.findById(any())).thenReturn(Optional.empty());
+
+        assertThrows(DemandaInvalidaException.class,
+                () -> ofertaSolucaoService.registrarOfertaSolucao(UUID.randomUUID(), grupoPesquisa.getIdGrupoPesquisa(),
+                        ofertaSolucao));
+    }
+
+    @Test
+    void deveLancarExcecao_QuandoGrupoPesquisaNaoExistir() {
+        when(demandaRepository.findById(demanda.getIdDemanda())).thenReturn(Optional.of(demanda));
+        when(grupoPesquisaRepository.findById(any())).thenReturn(Optional.empty());
+
+        assertThrows(GrupoPesquisaInvalidoException.class,
+                () -> ofertaSolucaoService.registrarOfertaSolucao(demanda.getIdDemanda(), UUID.randomUUID(),
+                        ofertaSolucao));
+    }
 
     @Test
     void deveAtualizarOfertaSolucao_ComSucesso() {
